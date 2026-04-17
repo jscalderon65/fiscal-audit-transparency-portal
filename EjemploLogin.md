@@ -5,28 +5,27 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 
 export const LoginScreen = () => {
-  const navigate = useNavigate();
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [credentials, setCredentials] = useState({ document: "", unit: "" });
+const navigate = useNavigate();
+const [isLoggingIn, setIsLoggingIn] = useState(false);
+const [credentials, setCredentials] = useState({ document: "", unit: "" });
 
-  const handleLogin = (e) => {
-    if (e) e.preventDefault();
-    setIsLoggingIn(true);
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 1500);
-  };
+const handleLogin = (e) => {
+if (e) e.preventDefault();
+setIsLoggingIn(true);
+setTimeout(() => {
+navigate("/dashboard");
+}, 1500);
+};
 
-  return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{
+return (
+<div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+<div
+className="absolute inset-0 opacity-10 pointer-events-none"
+style={{
           backgroundImage: "radial-gradient(#10b981 1px, transparent 1px)",
           backgroundSize: "32px 32px",
-        }}
-      ></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none"></div>
+        }} ></div>
+<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none"></div>
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -130,7 +129,8 @@ export const LoginScreen = () => {
         </p>
       </motion.div>
     </div>
-  );
+
+);
 };
 
 export default LoginScreen;

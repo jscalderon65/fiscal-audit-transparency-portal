@@ -1,0 +1,58 @@
+import React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
+
+export interface ICardProps extends HTMLMotionProps<"div"> {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  hoverEffect?: boolean;
+}
+
+export const Card: React.FC<ICardProps> = ({
+  children,
+  className = "",
+  delay = 0,
+  hoverEffect = false,
+  ...props
+}) => {
+  const baseClasses =
+    "bg-white rounded-2xl p-6 shadow-sm border border-slate-200 relative overflow-hidden group";
+
+  const springTransition = {
+    type: "spring" as const,
+    stiffness: 260,
+    damping: 20,
+    delay: delay,
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={springTransition}
+      whileHover={
+        hoverEffect
+          ? {
+              y: -8,
+              scale: 1.02,
+              boxShadow:
+                "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              borderColor: "rgb(110, 231, 183)",
+            }
+          : {}
+      }
+      whileTap={hoverEffect ? { scale: 0.98 } : {}}
+      className={`${baseClasses} ${className}`}
+      {...props}
+    >
+      {hoverEffect && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none bg-linear-to-br from-emerald-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          initial={false}
+        />
+      )}
+
+      <div className="relative z-10">{children}</div>
+    </motion.div>
+  );
+};

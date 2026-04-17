@@ -146,8 +146,6 @@ export const TransparencyDashboard = () => {
           title="Métricas Financieras"
           subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
           metrics={metrics}
-          showSensitiveData={showSensitiveData}
-          onToggleSensitive={() => setShowSensitiveData((v) => !v)}
         />
 
         {/* Monthly Reports Grid */}

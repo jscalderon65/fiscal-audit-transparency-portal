@@ -1,7 +1,6 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import LoginScreen from './pages/Login';
-import TransparencyDashboard from './pages/Dashboard';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import TransparencyDashboard from "./pages/Dashboard";
 
 const App = () => {
   return (
