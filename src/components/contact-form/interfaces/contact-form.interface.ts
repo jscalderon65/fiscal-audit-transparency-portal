@@ -12,8 +12,3 @@ export interface IContactFormData {
   unit: string;
   message: string;
 }
-
-export interface IContactFormProps {
-  info: IContactFormInfo;
-  onSubmit: (data: IContactFormData) => void;
-}

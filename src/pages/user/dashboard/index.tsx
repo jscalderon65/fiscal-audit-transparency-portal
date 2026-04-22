@@ -1,32 +1,17 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from "react";
-import { motion } from "framer-motion";
 import {
   Building2,
   Wallet,
   PiggyBank,
   HardHat,
-  FileCheck,
-  Download,
-  Send,
   ShieldCheck,
-  User,
-  Mail,
-  Home,
-  CalendarDays,
-  ArrowRight,
-  Eye,
-  EyeOff,
 } from "lucide-react";
-import { Footer } from "../../components/footer";
-import { ContactForm } from "../../components/contact-form";
-import { ReportsSection } from "../../components/reports";
-import { MetricsSection } from "../../components/metrics";
-import { Banner } from "../../components/banner";
+import { Footer } from "../../../components/footer";
+import { ContactForm } from "../../../components/contact-form";
+import { ReportsSection } from "../../../components/reports";
+import { MetricsSection } from "../../../components/metrics";
+import { Banner } from "../../../components/banner";
 
-export const TransparencyDashboard = () => {
-  const [showSensitiveData, setShowSensitiveData] = useState(false);
-
+export const UserDashboard = () => {
   const metrics = [
     {
       title: "Excedente Acumulado",
@@ -111,8 +96,8 @@ export const TransparencyDashboard = () => {
     },
   ];
 
-  const handleDownloadReport = (report) => {
-    alert(`Descargando PDF del reporte: ${report.title}`);
+  const handleDownloadReport = () => {
+    alert("Descargando PDF del reporte.");
   };
 
   const handleViewHistory = () => {
@@ -174,4 +159,4 @@ export const TransparencyDashboard = () => {
   );
 };
 
-export default TransparencyDashboard;
+export default UserDashboard;

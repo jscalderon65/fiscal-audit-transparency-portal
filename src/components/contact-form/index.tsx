@@ -1,12 +1,9 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, User, Home, Mail, FileCheck, ShieldCheck } from "lucide-react";
-import {
-  IContactFormProps,
-  IContactFormData,
-} from "./interfaces/contact-form.interface";
+import { IContactFormData } from "./interfaces/contact-form.interface";
 
-export const ContactForm: React.FC<IContactFormProps> = () => {
+export const ContactForm: React.FC = () => {
   const contactInfo = {
     title: "Línea Directa con Revisoría",
     description:

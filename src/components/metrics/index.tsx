@@ -6,8 +6,6 @@ export interface IMetricsSectionProps {
   title: string;
   subtitle: string;
   metrics: IMetric[];
-  showSensitiveData: boolean;
-  onToggleSensitive: () => void;
 }
 
 export const MetricsSection: React.FC<IMetricsSectionProps> = ({
