@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Icon as LucideIcon } from "lucide-react";
 import { PALETTE } from "../constants/theme";
 
@@ -25,6 +25,8 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const base = "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all";
 
+  const [hovered, setHovered] = useState(false);
+
   const styles: React.CSSProperties = (() => {
     switch (variant) {
       case "secondary":
@@ -39,6 +41,14 @@ const Button: React.FC<ButtonProps> = ({
     }
   })();
 
+  // hover styles per variant (use palette tokens)
+  const hoverStyles: Record<string, React.CSSProperties> = {
+    primary: { backgroundColor: PALETTE.primary.dark },
+    secondary: { backgroundColor: PALETTE.secondary.dark },
+    outline: { backgroundColor: PALETTE.primary.DEFAULT, color: PALETTE.text.inverted, border: `1px solid ${PALETTE.primary.DEFAULT}` },
+    ghost: { backgroundColor: PALETTE.neutral[100] },
+  };
+
   const spinner = (
     <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="10" stroke={PALETTE.text.inverted} strokeWidth="3" strokeOpacity="0.25" />
@@ -52,15 +62,23 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled || loading}
       className={`${base} py-2 px-4 ${className}`}
-      style={{ ...styles, borderRadius: 12 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        ...styles,
+        ...(hovered && !disabled ? hoverStyles[variant] || {} : {}),
+        borderRadius: 12,
+        cursor: disabled ? "not-allowed" : "pointer",
+        opacity: disabled ? 0.65 : 1,
+      }}
     >
       {loading ? (
         <span className="flex items-center gap-2">{spinner}{children && <span>{children}</span>}</span>
       ) : (
         <>
-          {LeftIcon && <LeftIcon className="w-4 h-4" />}
+          {LeftIcon && <LeftIcon className="w-4 h-4" style={{ color: styles.color }} />}
           <span>{children}</span>
-          {RightIcon && <RightIcon className="w-4 h-4" />}
+          {RightIcon && <RightIcon className="w-4 h-4" style={{ color: styles.color }} />}
         </>
       )}
     </button>
