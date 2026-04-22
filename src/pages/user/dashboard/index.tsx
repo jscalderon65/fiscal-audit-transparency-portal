@@ -44,7 +44,7 @@ export const UserDashboard = () => {
       id: 1,
       month: "Marzo 2026",
       title: "Dictamen Revisoría Fiscal - Marzo 2026",
-      status: "Publicado",
+      status: "Auditado",
       topics: "Revisión extractos, Cartera y Anticipos de Obra",
     },
     {

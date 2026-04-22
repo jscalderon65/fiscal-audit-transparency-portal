@@ -64,7 +64,7 @@ export const ContactForm: React.FC = () => {
           ></div>
           <h2
             className="text-3xl md:text-4xl font-bold mb-4 tracking-tight"
-            style={{ color: PALETTE.text.default }}
+            style={{ color: PALETTE.text.inverted }}
           >
             {contactInfo.title}
           </h2>

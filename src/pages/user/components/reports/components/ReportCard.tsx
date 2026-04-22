@@ -17,7 +17,6 @@ const ReportCard: React.FC<ReportCardProps> = ({
   return (
     <motion.div
       key={report.id}
-      initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
       className="rounded-2xl p-6 shadow-sm transition-all group flex flex-col justify-between"

@@ -7,12 +7,15 @@ import AdministrationLoginPage from "./pages/administration/login";
 import AdministrationDashboard from "./pages/administration/dashboard";
 
 import Profile from "./pages/Profile";
+import Showcase from "./pages/design-system";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Profile />} />
+
+        <Route path="/desig-system" element={<Showcase />} />
 
         <Route path="/user/:buildingSlug">
           <Route path="login" element={<UserLoginPage />} />
