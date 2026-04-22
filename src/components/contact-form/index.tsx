@@ -85,7 +85,7 @@ export const ContactForm: React.FC = () => {
                 }}
               >
                 <feature.icon
-                  className="w-6 h-6 flex-shrink-0"
+                  className="w-6 h-6 shrink-0"
                   style={{ color: PALETTE.primary.DEFAULT }}
                 />
                 <p className="text-sm font-medium">{feature.text}</p>
@@ -95,7 +95,10 @@ export const ContactForm: React.FC = () => {
         </div>
 
         {/* Form Section */}
-        <div className="p-8 md:p-12 md:col-span-3" style={{ backgroundColor: PALETTE.background.surface }}>
+        <div
+          className="p-8 md:p-12 md:col-span-3"
+          style={{ backgroundColor: PALETTE.background.surface }}
+        >
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -140,11 +143,11 @@ export const ContactForm: React.FC = () => {
                   type="text"
                   required
                   className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium"
-                   style={{
-                     backgroundColor: PALETTE.neutral[50],
-                     border: `1px solid ${PALETTE.neutral[200]}`,
-                     color: PALETTE.text.default,
-                   }}
+                  style={{
+                    backgroundColor: PALETTE.neutral[50],
+                    border: `1px solid ${PALETTE.neutral[200]}`,
+                    color: PALETTE.text.default,
+                  }}
                   placeholder="Ej. Torre 3, Apto 502"
                   value={formData.unit}
                   onChange={(e) =>
@@ -155,9 +158,16 @@ export const ContactForm: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-                <label className="text-sm font-bold flex items-center gap-2" style={{ color: PALETTE.neutral[700] }}>
-                  <Mail className="w-4 h-4" style={{ color: PALETTE.neutral[400] }} /> Solicitud o Denuncia
-                </label>
+              <label
+                className="text-sm font-bold flex items-center gap-2"
+                style={{ color: PALETTE.neutral[700] }}
+              >
+                <Mail
+                  className="w-4 h-4"
+                  style={{ color: PALETTE.neutral[400] }}
+                />{" "}
+                Solicitud o Denuncia
+              </label>
               <textarea
                 required
                 rows={5}
