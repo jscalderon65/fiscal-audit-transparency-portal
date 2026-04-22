@@ -18,36 +18,24 @@ export const UserDashboard = () => {
       value: "$ 35.450.000",
       subtitle: "Cierre Fiscal 2025",
       icon: Wallet,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-      border: "border-emerald-100",
     },
     {
       title: "Recaudo Cuota Extra.",
       value: "$ 487.575.200",
       subtitle: "Fondo Obra Ascensores",
       icon: HardHat,
-      color: "text-slate-700",
-      bg: "bg-slate-100",
-      border: "border-slate-200",
     },
     {
       title: "Estado de Cartera",
       value: "$ 28.350.000",
       subtitle: "Cartera vencida > 60 días",
       icon: Building2,
-      color: "text-rose-600",
-      bg: "bg-rose-50",
-      border: "border-rose-100",
     },
     {
       title: "Fondo de Imprevistos",
       value: "$ 42.150.000",
       subtitle: "Cuenta de ahorros (Ley 675)",
       icon: PiggyBank,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
-      border: "border-indigo-100",
     },
   ];
 
@@ -139,7 +127,6 @@ export const UserDashboard = () => {
           subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
           reports={reports}
           onDownload={handleDownloadReport}
-          onViewHistory={handleViewHistory}
         />
 
         {/* Buzón de Transparencia */}

@@ -1,6 +1,7 @@
 import React from "react";
 import { Building2 } from "lucide-react";
 import { IFooterProps } from "./interfaces/footer.interface";
+import { PALETTE } from "../../constants/theme";
 
 export const Footer: React.FC<IFooterProps> = ({
   year,
@@ -9,12 +10,12 @@ export const Footer: React.FC<IFooterProps> = ({
   managerName,
 }) => {
   return (
-    <footer className="bg-slate-950 py-10 text-center border-t border-slate-900 px-4">
+    <footer style={{ backgroundColor: PALETTE.neutral[950], paddingTop: 40, paddingBottom: 40, textAlign: 'center', borderTop: `1px solid ${PALETTE.neutral[900]}`, paddingLeft: 16, paddingRight: 16 }}>
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-        <Building2 className="w-8 h-8 text-slate-700" />
-        <p className="text-slate-400 text-sm md:text-base font-medium">
+        <Building2 className="w-8 h-8" style={{ color: PALETTE.neutral[700] }} />
+        <p className="text-sm md:text-base font-medium" style={{ color: PALETTE.neutral[400] }}>
           &copy; {year} {portalName} - {residentialName}.<br />
-          <span className="text-slate-500 mt-2 block font-normal">
+          <span style={{ color: PALETTE.neutral[500], marginTop: 8, display: 'block', fontWeight: 400 }}>
             Diseñado bajo los principios de Arquitectura Limpia para la gestión
             de <strong>{managerName}</strong>.
           </span>

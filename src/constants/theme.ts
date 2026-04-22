@@ -99,6 +99,77 @@ export const LITERAL_WHITE_BG = '#ffffff'; // used in radial-gradient
 export const INDEX_CSS_BG = '#f8fafc'; // found in src/index.css (matches slate-50)
 
 // Convenience export: grouped map
+// Semantic palette: group colors by role so the design system can swap them easily
+// Also include explicit alpha/overlay tokens so components never compute opacities.
+export const PALETTE = {
+  primary: {
+    // primary color = emerald series (call to action)
+    light: EMERALD_300,
+    DEFAULT: EMERALD_500,
+    dark: EMERALD_700,
+    // useful accents / gradients
+    gradientStart: EMERALD_400,
+    gradientEnd: EMERALD_600,
+    // explicit access to common shades
+    shade50: EMERALD_50,
+    shade200: EMERALD_200,
+    shade700: EMERALD_700,
+    // explicit alpha tokens (8-digit hex appended)
+    alpha50: EMERALD_50 + '80', // 50% of EMERALD_50
+    alpha60_from_200: EMERALD_200 + '99', // 60% approx for EMERALD_200
+    darkAlpha40: EMERALD_900 + '66', // 40% of EMERALD_900
+  },
+  secondary: {
+    // used for highlights / accents
+    DEFAULT: NAVY_BLUE,
+    dark: BLUE_800,
+  },
+  neutral: {
+    50: SLATE_50,
+    100: SLATE_100,
+    200: SLATE_200,
+    300: SLATE_300,
+    400: SLATE_400,
+    500: SLATE_500,
+    600: SLATE_600,
+    700: SLATE_700,
+    800: SLATE_800,
+    900: SLATE_900,
+    950: SLATE_950,
+  },
+  success: {
+    DEFAULT: EMERALD_500,
+    dark: EMERALD_700,
+  },
+  danger: {
+    DEFAULT: RED_600,
+    dark: RED_700,
+  },
+  background: {
+    page: SLATE_50,
+    surface: WHITE,
+  },
+  text: {
+    default: SLATE_900,
+    muted: SLATE_500,
+    inverted: WHITE,
+    subtle: SLATE_300,
+  },
+  // overlay and helper tokens (explicitly defined instead of computed)
+  overlays: {
+    neutral800_50: SLATE_800 + '80', // 50% alpha
+    neutral800_80: SLATE_800 + 'cc', // 80% alpha
+    neutral700_50: SLATE_700 + '80',
+    neutral900_40: SLATE_900 + '66',
+    primary900_40: EMERALD_900 + '66',
+    primary200_60: EMERALD_200 + '99',
+    primary50_50: EMERALD_50 + '80',
+    // gradient helper
+    infoGradient: `linear-gradient(135deg, ${EMERALD_400}, ${EMERALD_600})`,
+  },
+  // utility helpers
+};
+
 export const THEME = {
   WHITE,
   BLACK,
@@ -177,6 +248,7 @@ export const THEME = {
   EMERALD_GREEN,
   LITERAL_WHITE_BG,
   INDEX_CSS_BG,
+  PALETTE,
 };
 
 export default THEME;

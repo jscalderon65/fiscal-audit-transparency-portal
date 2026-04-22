@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, User, Home, Mail, FileCheck, ShieldCheck } from "lucide-react";
 import { IContactFormData } from "./interfaces/contact-form.interface";
+import { PALETTE } from "../../constants/theme";
 
 export const ContactForm: React.FC = () => {
   const contactInfo = {
@@ -44,25 +45,50 @@ export const ContactForm: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800"
+      className="rounded-3xl overflow-hidden shadow-2xl"
+      style={{
+        backgroundColor: PALETTE.neutral[900],
+        border: `1px solid ${PALETTE.neutral[800]}`,
+      }}
     >
       <div className="grid md:grid-cols-5 h-full">
         {/* Info Section */}
-        <div className="p-8 md:p-12 md:col-span-2 text-white flex flex-col justify-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-900/40 to-slate-900/40 -z-10"></div>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+        <div
+          className="p-8 md:p-12 md:col-span-2 flex flex-col justify-center relative overflow-hidden"
+          style={{ color: PALETTE.text.inverted }}
+        >
+          <div
+            className="absolute top-0 left-0 w-full h-full -z-10"
+            style={{
+              backgroundColor: PALETTE.overlays.primary900_40,
+            }}
+          ></div>
+          <h2
+            className="text-3xl md:text-4xl font-bold mb-4 tracking-tight"
+            style={{ color: PALETTE.text.default }}
+          >
             {contactInfo.title}
           </h2>
-          <p className="text-slate-300 mb-8 text-lg leading-relaxed font-light">
+          <p
+            className="mb-8 text-lg leading-relaxed font-light"
+            style={{ color: PALETTE.text.subtle }}
+          >
             {contactInfo.description}
           </p>
-          <div className="space-y-5 text-slate-300">
+          <div className="space-y-5" style={{ color: PALETTE.text.subtle }}>
             {contactInfo.features.map((feature, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50"
+                className="flex items-center gap-4 p-4 rounded-xl"
+                style={{
+                  backgroundColor: PALETTE.overlays.neutral800_50,
+                  border: `1px solid ${PALETTE.overlays.neutral700_50}`,
+                }}
               >
-                <feature.icon className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+                <feature.icon
+                  className="w-6 h-6 flex-shrink-0"
+                  style={{ color: PALETTE.primary.DEFAULT }}
+                />
                 <p className="text-sm font-medium">{feature.text}</p>
               </div>
             ))}
@@ -70,18 +96,29 @@ export const ContactForm: React.FC = () => {
         </div>
 
         {/* Form Section */}
-        <div className="p-8 md:p-12 md:col-span-3 bg-white">
+        <div className="p-8 md:p-12 md:col-span-3" style={{ backgroundColor: PALETTE.background.surface }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                  <User className="w-4 h-4 text-slate-400" /> Residente o
-                  Propietario
+                <label
+                  className="text-sm font-bold flex items-center gap-2"
+                  style={{ color: PALETTE.neutral[700] }}
+                >
+                  <User
+                    className="w-4 h-4"
+                    style={{ color: PALETTE.neutral[400] }}
+                  />{" "}
+                  Residente o Propietario
                 </label>
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium"
+                  style={{
+                    backgroundColor: PALETTE.neutral[50],
+                    border: `1px solid ${PALETTE.neutral[200]}`,
+                    color: PALETTE.text.default,
+                  }}
                   placeholder="Ej. Carlos Mendoza"
                   value={formData.name}
                   onChange={(e) =>
@@ -90,13 +127,25 @@ export const ContactForm: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                  <Home className="w-4 h-4 text-slate-400" /> Interior / Apto
+                <label
+                  className="text-sm font-bold flex items-center gap-2"
+                  style={{ color: PALETTE.neutral[700] }}
+                >
+                  <Home
+                    className="w-4 h-4"
+                    style={{ color: PALETTE.neutral[400] }}
+                  />{" "}
+                  Interior / Apto
                 </label>
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all font-medium text-slate-900"
+                  className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium"
+                   style={{
+                     backgroundColor: PALETTE.neutral[50],
+                     border: `1px solid ${PALETTE.neutral[200]}`,
+                     color: PALETTE.text.default,
+                   }}
                   placeholder="Ej. Torre 3, Apto 502"
                   value={formData.unit}
                   onChange={(e) =>
@@ -107,13 +156,18 @@ export const ContactForm: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-slate-400" /> Solicitud o Denuncia
-              </label>
+                <label className="text-sm font-bold flex items-center gap-2" style={{ color: PALETTE.neutral[700] }}>
+                  <Mail className="w-4 h-4" style={{ color: PALETTE.neutral[400] }} /> Solicitud o Denuncia
+                </label>
               <textarea
                 required
                 rows={5}
-                className="w-full px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none font-medium text-slate-900"
+                className="w-full px-4 py-3.5 rounded-xl resize-none font-medium"
+                style={{
+                  backgroundColor: PALETTE.neutral[50],
+                  border: `1px solid ${PALETTE.neutral[200]}`,
+                  color: PALETTE.text.default,
+                }}
                 placeholder="Describa su solicitud sobre los estados financieros de forma clara..."
                 value={formData.message}
                 onChange={(e) =>
@@ -124,7 +178,11 @@ export const ContactForm: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2 text-lg"
+              className="w-full text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 text-lg"
+              style={{
+                backgroundColor: PALETTE.primary.DEFAULT,
+                boxShadow: `0 10px 20px -10px ${PALETTE.primary.alpha60_from_200}`,
+              }}
             >
               <Send className="w-5 h-5" />
               Radicar Mensaje a Revisoría
