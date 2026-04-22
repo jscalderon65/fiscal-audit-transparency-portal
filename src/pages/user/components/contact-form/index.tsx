@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, User, Home, Mail, FileCheck, ShieldCheck } from "lucide-react";
 import { IContactFormData } from "./interfaces/contact-form.interface";
-import { PALETTE } from "../../constants/theme";
+import { PALETTE } from "../../../../constants/theme";
 
 export const ContactForm: React.FC = () => {
   const contactInfo = {

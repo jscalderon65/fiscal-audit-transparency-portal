@@ -5,11 +5,11 @@ import {
   HardHat,
   ShieldCheck,
 } from "lucide-react";
-import { Footer } from "../../../components/footer";
-import { ContactForm } from "../../../components/contact-form";
-import { ReportsSection } from "../../../components/reports";
-import { MetricsSection } from "../../../components/metrics";
-import { Banner } from "../../../components/banner";
+import { Footer } from "../components/footer";
+import { ContactForm } from "../components/contact-form";
+import { ReportsSection } from "../components/reports";
+import { MetricsSection } from "../components/metrics";
+import { Banner } from "../components/banner";
 
 export const UserDashboard = () => {
   const metrics = [

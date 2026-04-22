@@ -1,13 +1,6 @@
-import { motion } from "framer-motion";
-import {
-  FileCheck,
-  ArrowRight,
-  CalendarDays,
-  ShieldCheck,
-  Download,
-} from "lucide-react";
+import { FileCheck } from "lucide-react";
 import { IReportData } from "./interfaces/reports-section.interface";
-import { PALETTE } from "../../constants/theme";
+import { PALETTE } from "../../../../constants/theme";
 import ReportCard from "./components/ReportCard";
 
 // Props interface moved here per architecture rule: props interfaces must live in the component file
@@ -45,7 +38,12 @@ export const ReportsSection: React.FC<IReportsSectionProps> = ({
       </div>
       <div className="grid md:grid-cols-2 gap-5">
         {reports.map((report, index) => (
-          <ReportCard key={String(report.id)} report={report} index={index} onDownload={onDownload} />
+          <ReportCard
+            key={String(report.id)}
+            report={report}
+            index={index}
+            onDownload={onDownload}
+          />
         ))}
       </div>
     </section>

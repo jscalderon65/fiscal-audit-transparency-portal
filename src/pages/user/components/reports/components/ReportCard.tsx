@@ -1,14 +1,7 @@
 import { motion } from "framer-motion";
 import { CalendarDays, ShieldCheck, Download } from "lucide-react";
-import { PALETTE } from "../../../constants/theme";
-
-export interface IReportData {
-  id: number | string;
-  month: string;
-  title: string;
-  status: string;
-  topics: string;
-}
+import { PALETTE } from "../../../../../constants/theme";
+import { IReportData } from "../interfaces/reports-section.interface";
 
 export interface ReportCardProps {
   report: IReportData;
@@ -16,7 +9,11 @@ export interface ReportCardProps {
   onDownload?: (report: IReportData) => void;
 }
 
-const ReportCard: React.FC<ReportCardProps> = ({ report, index = 0, onDownload }) => {
+const ReportCard: React.FC<ReportCardProps> = ({
+  report,
+  index = 0,
+  onDownload,
+}) => {
   return (
     <motion.div
       key={report.id}
@@ -53,11 +50,20 @@ const ReportCard: React.FC<ReportCardProps> = ({ report, index = 0, onDownload }
             {report.status}
           </span>
         </div>
-        <h3 className="font-bold text-xl mb-3 leading-snug transition-colors" style={{ color: PALETTE.text.default }}>
+        <h3
+          className="font-bold text-xl mb-3 leading-snug transition-colors"
+          style={{ color: PALETTE.text.default }}
+        >
           {report.title}
         </h3>
-        <p className="text-sm leading-relaxed mb-6" style={{ color: PALETTE.neutral[600] }}>
-          <strong style={{ color: PALETTE.text.default }}>Enfoque de auditoría:</strong> {report.topics}.
+        <p
+          className="text-sm leading-relaxed mb-6"
+          style={{ color: PALETTE.neutral[600] }}
+        >
+          <strong style={{ color: PALETTE.text.default }}>
+            Enfoque de auditoría:
+          </strong>{" "}
+          {report.topics}.
         </p>
       </div>
       <button

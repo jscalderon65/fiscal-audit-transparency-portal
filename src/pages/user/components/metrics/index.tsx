@@ -1,6 +1,6 @@
 import MetricCard, { IMetric } from "./components/MetricCard";
 import { Wallet } from "lucide-react";
-import { PALETTE } from "../../constants/theme";
+import { PALETTE } from "../../../../constants/theme";
 
 export interface IMetricsSectionProps {
   title: string;

@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { Card } from "./Card";
-import { PALETTE } from "../../../constants/theme";
+import { PALETTE } from "../../../../../constants/theme";
 
 export interface IMetric {
   title: string;
@@ -32,10 +32,16 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
           <div className="flex gap-3">
             {Icon && (
               <div className="mt-1">
-                <Icon className={`w-6 h-6`} style={{ color: PALETTE.primary.DEFAULT }} />
+                <Icon
+                  className={`w-6 h-6`}
+                  style={{ color: PALETTE.primary.DEFAULT }}
+                />
               </div>
             )}
-            <span className="font-bold text-lg leading-tight" style={{ color: PALETTE.text.default }}>
+            <span
+              className="font-bold text-lg leading-tight"
+              style={{ color: PALETTE.text.default }}
+            >
               {title}
             </span>
           </div>
@@ -43,10 +49,16 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
       </div>
 
       <div className="mt-auto">
-        <div className="text-2xl font-extrabold tracking-tight" style={{ color: PALETTE.text.default }}>
+        <div
+          className="text-2xl font-extrabold tracking-tight"
+          style={{ color: PALETTE.text.default }}
+        >
           {value}
         </div>
-        <div className="text-sm font-medium mt-1" style={{ color: PALETTE.text.muted }}>
+        <div
+          className="text-sm font-medium mt-1"
+          style={{ color: PALETTE.text.muted }}
+        >
           {subtitle}
         </div>
       </div>

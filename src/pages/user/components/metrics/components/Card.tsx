@@ -1,5 +1,5 @@
 import { motion, HTMLMotionProps } from "framer-motion";
-import { PALETTE } from "../../../constants/theme";
+import { PALETTE } from "../../../../../constants/theme";
 
 export interface ICardProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
@@ -15,7 +15,8 @@ export const Card: React.FC<ICardProps> = ({
   hoverEffect = false,
   ...props
 }) => {
-  const baseClasses = "rounded-2xl p-6 shadow-sm relative overflow-hidden group";
+  const baseClasses =
+    "rounded-2xl p-6 shadow-sm relative overflow-hidden group";
 
   const springTransition = {
     type: "spring" as const,
@@ -42,14 +43,19 @@ export const Card: React.FC<ICardProps> = ({
       }
       whileTap={hoverEffect ? { scale: 0.98 } : {}}
       className={`${baseClasses} ${className}`}
-      style={{ backgroundColor: PALETTE.background.surface, border: `1px solid ${PALETTE.neutral[200]}` }}
+      style={{
+        backgroundColor: PALETTE.background.surface,
+        border: `1px solid ${PALETTE.neutral[200]}`,
+      }}
       {...props}
     >
       {hoverEffect && (
-          <motion.div
+        <motion.div
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           initial={false}
-          style={{ background: `linear-gradient(135deg, ${PALETTE.primary.alpha50}, transparent)` }}
+          style={{
+            background: `linear-gradient(135deg, ${PALETTE.primary.alpha50}, transparent)`,
+          }}
         />
       )}
 
