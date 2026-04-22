@@ -1,7 +1,14 @@
 import React from "react";
 import { Building2 } from "lucide-react";
-import { IFooterProps } from "./interfaces/footer.interface";
 import { PALETTE } from "../../constants/theme";
+
+// Props interface moved here per architecture rule: props interfaces must live in the component file
+export interface IFooterProps {
+  year: number | string;
+  portalName: string;
+  residentialName: string;
+  managerName: string;
+}
 
 export const Footer: React.FC<IFooterProps> = ({
   year,

@@ -1,7 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { IBannerProps } from './interfaces/banner.interface';
+import { IBannerInfo, IBannerProfile } from './interfaces/banner.interface';
 import { PALETTE } from '../../constants/theme';
+
+// Props interface moved here per architecture rule: props interfaces must live in the component file
+export interface IBannerProps {
+  info: IBannerInfo;
+  profile: IBannerProfile;
+}
 
 export const Banner: React.FC<IBannerProps> = ({ info, profile }) => {
   return (

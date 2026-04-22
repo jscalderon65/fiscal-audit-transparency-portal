@@ -6,10 +6,3 @@ export interface IReportData {
   topics: string;
 }
 
-export interface IReportsSectionProps {
-  title: string;
-  subtitle: string;
-  reports: IReportData[];
-  onDownload?: (report: IReportData) => void;
-  onViewHistory?: () => void;
-}

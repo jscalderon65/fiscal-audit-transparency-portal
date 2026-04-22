@@ -11,8 +11,3 @@ export interface IBannerProfile {
   role: string;
   description: string;
 }
-
-export interface IBannerProps {
-  info: IBannerInfo;
-  profile: IBannerProfile;
-}

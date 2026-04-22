@@ -88,10 +88,6 @@ export const UserDashboard = () => {
     alert("Descargando PDF del reporte.");
   };
 
-  const handleViewHistory = () => {
-    alert("Ver histórico completo de dictámenes.");
-  };
-
   const bannerInfo = {
     title: "Quintas de Santa Rita",
     subtitle: "Transparencia, Orden y Confianza.",

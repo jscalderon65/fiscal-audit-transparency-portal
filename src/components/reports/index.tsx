@@ -7,8 +7,17 @@ import {
   ShieldCheck,
   Download,
 } from "lucide-react";
-import { IReportsSectionProps } from "./interfaces/reports-section.interface";
+import { IReportData } from "./interfaces/reports-section.interface";
 import { PALETTE } from "../../constants/theme";
+
+// Props interface moved here per architecture rule: props interfaces must live in the component file
+export interface IReportsSectionProps {
+  title: string;
+  subtitle: string;
+  reports: IReportData[];
+  onDownload?: (report: IReportData) => void;
+  onViewHistory?: () => void;
+}
 
 export const ReportsSection: React.FC<IReportsSectionProps> = ({
   title,
