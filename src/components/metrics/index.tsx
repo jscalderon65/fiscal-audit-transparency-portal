@@ -1,4 +1,3 @@
-import React from "react";
 import MetricCard, { IMetric } from "./components/MetricCard";
 import { Wallet } from "lucide-react";
 import { PALETTE } from "../../constants/theme";

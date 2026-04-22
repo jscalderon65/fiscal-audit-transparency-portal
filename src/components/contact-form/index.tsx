@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Send, User, Home, Mail, FileCheck, ShieldCheck } from "lucide-react";
 import { IContactFormData } from "./interfaces/contact-form.interface";
@@ -28,7 +28,6 @@ export const ContactForm: React.FC = () => {
   });
 
   const handleContactSubmit = (formData: IContactFormData) => {
-    console.log("Datos del formulario:", formData);
     alert(
       "Mensaje radicado con éxito en el despacho de la Revisoría Fiscal. Su número de radicado es el #4092. Gracias por su participación.",
     );
