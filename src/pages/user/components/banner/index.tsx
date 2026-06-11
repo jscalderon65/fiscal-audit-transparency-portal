@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { IBannerInfo, IBannerProfile } from "./interfaces/banner.interface";
 import { PALETTE } from "../../../../constants/theme";
 
-// Props interface moved here per architecture rule: props interfaces must live in the component file
 export interface IBannerProps {
   info: IBannerInfo;
   profile: IBannerProfile;

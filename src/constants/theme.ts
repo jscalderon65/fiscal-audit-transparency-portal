@@ -1,11 +1,6 @@
-// Centralized color constants discovered in the project (hex values)
-// Includes literal hexes found in code and the Tailwind color values
-
-// Whites / Blacks
 export const WHITE = '#ffffff';
 export const BLACK = '#000000';
 
-// Slate (Tailwind defaults)
 export const SLATE_50 = '#f8fafc';
 export const SLATE_100 = '#f1f5f9';
 export const SLATE_200 = '#e2e8f0';
@@ -18,7 +13,6 @@ export const SLATE_800 = '#1e293b';
 export const SLATE_900 = '#0f172a';
 export const SLATE_950 = '#020617';
 
-// Gray (Tailwind defaults)
 export const GRAY_50 = '#f9fafb';
 export const GRAY_100 = '#f3f4f6';
 export const GRAY_200 = '#e5e7eb';
@@ -30,7 +24,6 @@ export const GRAY_700 = '#374151';
 export const GRAY_800 = '#1f2937';
 export const GRAY_900 = '#111827';
 
-// Blue (Tailwind defaults)
 export const BLUE_50 = '#eff6ff';
 export const BLUE_100 = '#dbeafe';
 export const BLUE_200 = '#bfdbfe';
@@ -42,7 +35,6 @@ export const BLUE_700 = '#1d4ed8';
 export const BLUE_800 = '#1e40af';
 export const BLUE_900 = '#1e3a8a';
 
-// Indigo
 export const INDIGO_50 = '#eef2ff';
 export const INDIGO_100 = '#e0e7ff';
 export const INDIGO_200 = '#c7d2fe';
@@ -54,7 +46,6 @@ export const INDIGO_700 = '#4338ca';
 export const INDIGO_800 = '#3730a3';
 export const INDIGO_900 = '#312e81';
 
-// Emerald (Tailwind defaults)
 export const EMERALD_50 = '#ecfdf5';
 export const EMERALD_100 = '#d1fae5';
 export const EMERALD_200 = '#a7f3d0';
@@ -66,7 +57,6 @@ export const EMERALD_700 = '#047857';
 export const EMERALD_800 = '#065f46';
 export const EMERALD_900 = '#064e3b';
 
-// Rose
 export const ROSE_50 = '#fff1f2';
 export const ROSE_100 = '#ffe4e6';
 export const ROSE_200 = '#fecdd3';
@@ -78,7 +68,6 @@ export const ROSE_700 = '#be123c';
 export const ROSE_800 = '#9f1239';
 export const ROSE_900 = '#881337';
 
-// Red
 export const RED_50 = '#fef2f2';
 export const RED_100 = '#fee2e2';
 export const RED_200 = '#fecaca';
@@ -90,37 +79,27 @@ export const RED_700 = '#b91c1c';
 export const RED_800 = '#991b1b';
 export const RED_900 = '#7f1d1d';
 
-// Custom colors added in tailwind.config.js
-export const NAVY_BLUE = '#1e3a8a'; // tailwind.config.js: navy.blue
-export const EMERALD_GREEN = '#10b981'; // tailwind.config.js: emerald.green
+export const NAVY_BLUE = '#1e3a8a';
+export const EMERALD_GREEN = '#10b981';
 
-// Literal hex values found in the codebase
-export const LITERAL_WHITE_BG = '#ffffff'; // used in radial-gradient
-export const INDEX_CSS_BG = '#f8fafc'; // found in src/index.css (matches slate-50)
+export const LITERAL_WHITE_BG = '#ffffff';
+export const INDEX_CSS_BG = '#f8fafc';
 
-// Convenience export: grouped map
-// Semantic palette: group colors by role so the design system can swap them easily
-// Also include explicit alpha/overlay tokens so components never compute opacities.
 export const PALETTE = {
   primary: {
-    // primary color = emerald series (call to action)
     light: EMERALD_300,
     DEFAULT: EMERALD_500,
     dark: EMERALD_700,
-    // useful accents / gradients
     gradientStart: EMERALD_400,
     gradientEnd: EMERALD_600,
-    // explicit access to common shades
     shade50: EMERALD_50,
     shade200: EMERALD_200,
     shade700: EMERALD_700,
-    // explicit alpha tokens (8-digit hex appended)
-    alpha50: EMERALD_50 + '80', // 50% of EMERALD_50
-    alpha60_from_200: EMERALD_200 + '99', // 60% approx for EMERALD_200
-    darkAlpha40: EMERALD_900 + '66', // 40% of EMERALD_900
+    alpha50: EMERALD_50 + '80',
+    alpha60_from_200: EMERALD_200 + '99',
+    darkAlpha40: EMERALD_900 + '66',
   },
   secondary: {
-    // used for highlights / accents
     DEFAULT: NAVY_BLUE,
     dark: BLUE_800,
   },
@@ -155,19 +134,16 @@ export const PALETTE = {
     inverted: WHITE,
     subtle: SLATE_300,
   },
-  // overlay and helper tokens (explicitly defined instead of computed)
   overlays: {
-    neutral800_50: SLATE_800 + '80', // 50% alpha
-    neutral800_80: SLATE_800 + 'cc', // 80% alpha
+    neutral800_50: SLATE_800 + '80',
+    neutral800_80: SLATE_800 + 'cc',
     neutral700_50: SLATE_700 + '80',
     neutral900_40: SLATE_900 + '66',
     primary900_40: EMERALD_900 + '66',
     primary200_60: EMERALD_200 + '99',
     primary50_50: EMERALD_50 + '80',
-    // gradient helper
     infoGradient: `linear-gradient(135deg, ${EMERALD_400}, ${EMERALD_600})`,
   },
-  // utility helpers
 };
 
 export const THEME = {

@@ -9,7 +9,7 @@ export interface ButtonProps {
   rightIcon?: React.ComponentType<any> | null;
   children?: React.ReactNode;
   disabled?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
 }
 
@@ -41,7 +41,6 @@ const Button: React.FC<ButtonProps> = ({
     }
   })();
 
-  // hover styles per variant (use palette tokens)
   const hoverStyles: Record<string, React.CSSProperties> = {
     primary: { backgroundColor: PALETTE.primary.dark },
     secondary: { backgroundColor: PALETTE.secondary.dark },

@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Building2,
   Wallet,
@@ -10,8 +12,35 @@ import { ContactForm } from "../components/contact-form";
 import { ReportsSection } from "../components/reports";
 import { MetricsSection } from "../components/metrics";
 import { Banner } from "../components/banner";
+import type { Building } from "../../../db/types/building";
+
+interface Session {
+  cedula: string;
+  building: Building;
+}
 
 export const UserDashboard = () => {
+  const { buildingSlug } = useParams<{ buildingSlug: string }>();
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("session");
+    if (!raw) {
+      navigate(`/user/${buildingSlug}/login`, { replace: true });
+      return;
+    }
+    const parsed: Session = JSON.parse(raw);
+    if (parsed.building.slug !== buildingSlug) {
+      navigate(`/user/${buildingSlug}/login`, { replace: true });
+      return;
+    }
+    setSession(parsed);
+  }, [buildingSlug, navigate]);
+
+  if (!session) return null;
+
+  const building = session.building;
   const metrics = [
     {
       title: "Excedente Acumulado",
@@ -89,7 +118,7 @@ export const UserDashboard = () => {
   };
 
   const bannerInfo = {
-    title: "Quintas de Santa Rita",
+    title: building.name,
     subtitle: "Transparencia, Orden y Confianza.",
     badge: "Portal Oficial Validado",
     badgeIcon: ShieldCheck,
@@ -99,25 +128,20 @@ export const UserDashboard = () => {
     initials: "BB",
     name: "Bertha Zaray Bravo",
     role: "Revisora Fiscal Senior",
-    description:
-      "Supervisando rigurosamente la gestión financiera de la copropiedad.",
+    description: "Supervisando rigurosamente la gestión financiera de la copropiedad.",
   };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-200">
-      {/* Hero Section */}
       <Banner info={bannerInfo} profile={bannerProfile} />
 
-      {/* Transparency Dashboard */}
       <main className="max-w-6xl mx-auto px-4 md:px-8 py-16 space-y-24">
-        {/* Metric Section */}
         <MetricsSection
           title="Métricas Financieras"
           subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
           metrics={metrics}
         />
 
-        {/* Monthly Reports Grid */}
         <ReportsSection
           title="Archivo de Dictámenes (2025 - 2026)"
           subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
@@ -125,18 +149,15 @@ export const UserDashboard = () => {
           onDownload={handleDownloadReport}
         />
 
-        {/* Buzón de Transparencia */}
         <section className="pb-16">
           <ContactForm />
         </section>
       </main>
 
-      {/* FOOTER */}
       <Footer
         year={new Date().getFullYear()}
         portalName="Portal de Transparencia"
-        residentialName="Conjunto Residencial Quintas de Santa Rita"
-        managerName="Bertha Zaray Bravo"
+        residentialName={building.name}
       />
     </div>
   );
