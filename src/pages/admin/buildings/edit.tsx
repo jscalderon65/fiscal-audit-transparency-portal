@@ -199,59 +199,6 @@ export default function EditBuilding() {
               </div>
             </div>
 
-            {/* Mock fields — preview de cómo se vería con más campos */}
-            <div className="border-t border-slate-200 pt-6 mt-2">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                Vista previa — campos adicionales
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="Carrera 45 # 23-12"
-                    disabled
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm outline-none cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    Ciudad
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="Bogotá D.C."
-                    disabled
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm outline-none cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    NIT
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="901.123.456-7"
-                    disabled
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm outline-none cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    Teléfono
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="601 345 67 89"
-                    disabled
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm outline-none cursor-not-allowed"
-                  />
-                </div>
-              </div>
-            </div>
-
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button
                 variant="primary"
