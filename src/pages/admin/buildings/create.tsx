@@ -114,10 +114,10 @@ export default function CreateBuilding() {
 
       <div className="mt-8 space-y-6">
         <div>
-          <label className="block text-base md:text-lg font-bold text-slate-900">
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
             Nombre del edificio *
           </label>
-          <div className="mt-2 relative">
+          <div className="relative">
             <input
               type="text"
               value={name}
