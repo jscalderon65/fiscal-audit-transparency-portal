@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, getDocs, collection, addDoc, query, where } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, getDocs, collection, addDoc, query, where } from "firebase/firestore";
 import { db } from "../config";
 import type { Building } from "../types/building";
 
@@ -33,6 +33,10 @@ export async function createBuilding(building: Omit<Building, "id">): Promise<st
 
 export async function updateBuilding(id: string, data: Partial<Building>): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), data);
+}
+
+export async function deleteBuilding(id: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTION, id));
 }
 
 export async function listBuildings(): Promise<Building[]> {

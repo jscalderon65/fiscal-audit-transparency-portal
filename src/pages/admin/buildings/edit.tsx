@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AlertCircle, ArrowLeft, Users, Building2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Users, Building2, Trash2 } from "lucide-react";
 import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import {
   getBuildingById,
   updateBuilding,
+  deleteBuilding,
 } from "../../../db/repositories/building.repository";
 import {
   getUsersByBuildingSlug,
@@ -94,6 +95,21 @@ export default function EditBuilding() {
       const nuevos = newUsers.filter((u) => !existentes.has(u.cedula));
       return [...prev, ...nuevos];
     });
+  }
+
+  async function handleDelete() {
+    if (!id) return;
+    const confirmed = window.confirm(
+      "¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán."
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteBuilding(id);
+      navigate(ROUTES.PANEL_BUILDINGS);
+    } catch {
+      setShowError(true);
+    }
   }
 
   if (loading) {
@@ -251,6 +267,25 @@ export default function EditBuilding() {
                 onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
               >
                 Cancelar
+              </Button>
+            </div>
+
+            {/* Delete section */}
+            <div className="border-t border-slate-200 pt-6 mt-10">
+              <h3 className="text-base font-bold text-slate-900">
+                Eliminar edificio
+              </h3>
+              <p className="text-sm text-slate-500 mt-1 mb-4">
+                Al eliminar este edificio se perderá el acceso de todos sus
+                residentes y la información asociada.
+              </p>
+              <Button
+                variant="outline"
+                leftIcon={Trash2}
+                onClick={handleDelete}
+                className="border-danger text-danger hover:bg-danger hover:text-white"
+              >
+                Eliminar este edificio
               </Button>
             </div>
           </div>
