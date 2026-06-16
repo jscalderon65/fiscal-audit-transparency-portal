@@ -4,7 +4,6 @@ import Card from "../../ui/Card";
 import Button from "../../ui/Button";
 import { H1, Text, Small } from "../../ui/Typography";
 import { useAuth } from "../../contexts/AuthContext";
-import { PALETTE } from "../../constants/theme";
 import { ROUTES } from "../../constants/routes";
 import { useState } from "react";
 
@@ -48,23 +47,15 @@ export default function AdminLogin() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: PALETTE.background.page }}
-    >
+    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
       <Card className="max-w-md w-full p-8">
         <div className="text-center">
-          <div
-            className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
-            style={{
-              backgroundColor: PALETTE.neutral[900],
-            }}
-          >
-            <ShieldCheck className="w-8 h-8" style={{ color: PALETTE.primary.DEFAULT }} />
+          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-slate-900">
+            <ShieldCheck className="w-8 h-8 text-primary" />
           </div>
 
           <H1>Panel de Administración</H1>
-          <Text className="mt-2" style={{ color: PALETTE.text.muted }}>
+          <Text className="mt-2 text-slate-500">
             Accede con tu cuenta de Google autorizada
           </Text>
         </div>
@@ -73,26 +64,28 @@ export default function AdminLogin() {
           <button
             onClick={handleLogin}
             disabled={isLoggingIn}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all border"
-            style={{
-              backgroundColor: "#ffffff",
-              borderColor: PALETTE.neutral[300],
-              color: PALETTE.text.default,
-              cursor: isLoggingIn ? "not-allowed" : "pointer",
-              opacity: isLoggingIn ? 0.65 : 1,
-            }}
-            onMouseEnter={(event) => {
-              event.currentTarget.style.backgroundColor = PALETTE.neutral[100];
-            }}
-            onMouseLeave={(event) => {
-              event.currentTarget.style.backgroundColor = "#ffffff";
-            }}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all border bg-white border-slate-300 text-slate-900 hover:bg-slate-100 disabled:opacity-65 disabled:cursor-not-allowed"
           >
             {isLoggingIn ? (
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <svg
+                  className="animate-spin h-5 w-5"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
                 </svg>
                 Iniciando sesión...
               </span>
@@ -106,19 +99,13 @@ export default function AdminLogin() {
         </div>
 
         {error && (
-          <div
-            className="mt-4 p-3 rounded-lg text-sm text-center"
-            style={{
-              backgroundColor: PALETTE.danger.DEFAULT + "15",
-              color: PALETTE.danger.DEFAULT,
-            }}
-          >
+          <div className="mt-4 p-3 rounded-lg text-sm text-center bg-danger/10 text-danger">
             {error}
           </div>
         )}
 
         <div className="mt-6 text-center">
-          <Small style={{ color: PALETTE.text.muted }}>
+          <Small className="text-slate-500">
             Solo administradores autorizados
           </Small>
         </div>

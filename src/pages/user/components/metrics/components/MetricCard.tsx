@@ -1,6 +1,5 @@
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Card } from "./Card";
-import { PALETTE } from "../../../../../constants/theme";
 
 export interface IMetric {
   title: string;
@@ -20,28 +19,18 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
   return (
     <Card
       delay={index * 0.05}
-      className={`flex flex-col h-full p-4`}
+      className="flex flex-col h-full p-4 border border-slate-200 bg-white"
       hoverEffect={true}
-      style={{
-        border: `1px solid ${PALETTE.neutral[200]}`,
-        backgroundColor: PALETTE.background.surface,
-      }}
     >
       <div className="flex-1">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex gap-3">
             {Icon && (
               <div className="mt-1">
-                <Icon
-                  className={`w-6 h-6`}
-                  style={{ color: PALETTE.primary.DEFAULT }}
-                />
+                <Icon className="w-6 h-6 text-primary" />
               </div>
             )}
-            <span
-              className="font-bold text-lg leading-tight"
-              style={{ color: PALETTE.text.default }}
-            >
+            <span className="font-bold text-lg leading-tight text-slate-900">
               {title}
             </span>
           </div>
@@ -49,16 +38,10 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
       </div>
 
       <div className="mt-auto">
-        <div
-          className="text-2xl font-extrabold tracking-tight"
-          style={{ color: PALETTE.text.default }}
-        >
+        <div className="text-2xl font-extrabold tracking-tight text-slate-900">
           {value}
         </div>
-        <div
-          className="text-sm font-medium mt-1"
-          style={{ color: PALETTE.text.muted }}
-        >
+        <div className="text-sm font-medium mt-1 text-slate-500">
           {subtitle}
         </div>
       </div>

@@ -7,7 +7,7 @@ import {
   HardHat,
   ShieldCheck,
 } from "lucide-react";
-import { Footer } from "../components/footer";
+import Footer from "../../../ui/Footer";
 import { ContactForm } from "../components/contact-form";
 import { ReportsSection } from "../components/reports";
 import { MetricsSection } from "../components/metrics";
@@ -132,7 +132,7 @@ export const UserDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-200">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-primary-200">
       <Banner info={bannerInfo} profile={bannerProfile} />
 
       <main className="max-w-6xl mx-auto px-4 md:px-8 py-16 space-y-24">

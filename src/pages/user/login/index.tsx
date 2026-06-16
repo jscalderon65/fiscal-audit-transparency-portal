@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Building2, ShieldCheck, Home, ArrowLeft } from "lucide-react";
 import Card from "../../../ui/Card";
 import Button from "../../../ui/Button";
-import { PALETTE } from "../../../constants/theme";
 import { ROUTES } from "../../../constants/routes";
 import { getUserByCedula } from "../../../db/repositories/user.repository";
 import { getBuildingBySlug } from "../../../db/repositories/building.repository";
@@ -60,10 +59,13 @@ export default function UserLoginPage() {
         return;
       }
 
-      localStorage.setItem("session", JSON.stringify({
-        cedula: value,
-        building: buildingData,
-      }));
+      localStorage.setItem(
+        "session",
+        JSON.stringify({
+          cedula: value,
+          building: buildingData,
+        })
+      );
 
       navigate(`/user/${buildingSlug}/dashboard`);
     } catch {
@@ -74,20 +76,9 @@ export default function UserLoginPage() {
 
   if (buildingLoading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ backgroundColor: PALETTE.neutral[900] }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-4 bg-slate-900">
         <div className="text-center">
-          <div
-            className="mx-auto w-8 h-8 rounded-full border-2 border-transparent animate-spin"
-            style={{
-              borderTopColor: PALETTE.primary.DEFAULT,
-              borderRightColor: PALETTE.primary.DEFAULT + "40",
-              borderBottomColor: PALETTE.primary.DEFAULT + "20",
-              borderLeftColor: PALETTE.primary.DEFAULT + "10",
-            }}
-          />
+          <div className="mx-auto w-8 h-8 rounded-full border-2 border-transparent animate-spin border-t-primary border-r-primary/25 border-b-primary/10 border-l-primary/5" />
         </div>
       </div>
     );
@@ -95,17 +86,12 @@ export default function UserLoginPage() {
 
   if (!building) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{ backgroundColor: PALETTE.background.page }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
         <Card className="max-w-md w-full text-center p-12">
-          <h1 className="text-6xl font-extrabold mb-4" style={{ color: PALETTE.neutral[300] }}>
+          <h1 className="text-6xl font-extrabold mb-4 text-slate-300">
             404
           </h1>
-          <p className="mb-8" style={{ color: PALETTE.text.muted }}>
-            Página no encontrada
-          </p>
+          <p className="mb-8 text-slate-500">Página no encontrada</p>
           <Button variant="primary" onClick={() => navigate("/")}>
             Volver al inicio
           </Button>
@@ -115,59 +101,40 @@ export default function UserLoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
-      style={{ backgroundColor: PALETTE.neutral[900] }}
-    >
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
       {/* Fondo decorativo */}
       <div
         className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(${PALETTE.primary.DEFAULT} 1px, transparent 1px)`,
+          backgroundImage: "radial-gradient(var(--color-primary) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       />
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
-        style={{
-          backgroundColor: PALETTE.primary.DEFAULT + "15",
-          filter: "blur(80px)",
-        }}
-      />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none bg-primary/10 blur-[80px]" />
 
       <Card className="max-w-md w-full relative z-10">
         <div className="text-center">
-          <div
-            className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-md"
-            style={{
-              backgroundColor: PALETTE.neutral[900],
-              border: `1px solid ${PALETTE.primary.DEFAULT}4D`,
-            }}
-          >
-            <Building2 className="w-8 h-8" style={{ color: PALETTE.primary.DEFAULT }} />
+          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-md bg-slate-900 border border-primary/30">
+            <Building2 className="w-8 h-8 text-primary" />
           </div>
 
-          <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: PALETTE.text.default }}>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
             {building.name}
           </h1>
-          <p className="mt-2 font-medium" style={{ color: PALETTE.text.muted }}>
+          <p className="mt-2 font-medium text-slate-500">
             Portal de Transparencia
           </p>
-          <p className="mt-4 text-sm" style={{ color: PALETTE.neutral[500] }}>
-            Bienvenido, residente. Consulte aquí los dictámenes de revisoría fiscal y las métricas financieras de su conjunto.
+          <p className="mt-4 text-sm text-slate-500">
+            Bienvenido, residente. Consulte aquí los dictámenes de revisoría
+            fiscal y las métricas financieras de su conjunto.
           </p>
         </div>
 
-        <div
-          className="mt-6 rounded-xl p-4 flex items-start gap-3"
-          style={{
-            backgroundColor: PALETTE.primary.DEFAULT + "10",
-            border: `1px solid ${PALETTE.primary.DEFAULT}20`,
-          }}
-        >
-          <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" style={{ color: PALETTE.primary.DEFAULT }} />
-          <p className="text-sm leading-relaxed font-medium" style={{ color: PALETTE.primary.dark }}>
-            Acceso restringido. Ingrese con su número de cédula registrado en la administración.
+        <div className="mt-6 rounded-xl p-4 flex items-start gap-3 bg-primary/5 border border-primary/10">
+          <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5 text-primary" />
+          <p className="text-sm leading-relaxed font-medium text-primary-dark">
+            Acceso restringido. Ingrese con su número de cédula registrado en la
+            administración.
           </p>
         </div>
 
@@ -179,44 +146,30 @@ export default function UserLoginPage() {
               onChange={(event) => setCedula(event.target.value)}
               placeholder="Número de cédula"
               inputMode="numeric"
-              className="w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all"
-              style={{
-                borderColor: error ? PALETTE.danger.DEFAULT : PALETTE.neutral[300],
-                color: PALETTE.text.default,
-                backgroundColor: PALETTE.background.surface,
-              }}
-              onFocus={(event) => {
-                event.currentTarget.style.borderColor = error
-                  ? PALETTE.danger.DEFAULT
-                  : PALETTE.primary.DEFAULT;
-              }}
-              onBlur={(event) => {
-                event.currentTarget.style.borderColor = error
-                  ? PALETTE.danger.DEFAULT
-                  : PALETTE.neutral[300];
-              }}
+              className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-slate-900 focus:border-primary ${
+                error ? "border-danger" : "border-slate-300"
+              }`}
             />
           </div>
 
           {error && (
-            <div
-              className="p-3 rounded-lg text-sm flex items-center gap-2"
-              style={{
-                backgroundColor: PALETTE.danger.DEFAULT + "15",
-                color: PALETTE.danger.DEFAULT,
-              }}
-            >
+            <div className="p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
               <ShieldCheck className="w-4 h-4 shrink-0" />
               {error}
             </div>
           )}
 
-          <Button variant="primary" loading={loading} onClick={handleSubmit} className="w-full">
+          <Button
+            variant="primary"
+            loading={loading}
+            onClick={handleSubmit}
+            className="w-full"
+          >
             Ingresar al Portal Seguro
           </Button>
         </form>
 
-        <p className="text-center text-xs mt-6" style={{ color: PALETTE.neutral[400] }}>
+        <p className="text-center text-xs mt-6 text-slate-400">
           Protegido bajo la Ley 1581 de Habeas Data.
         </p>
       </Card>

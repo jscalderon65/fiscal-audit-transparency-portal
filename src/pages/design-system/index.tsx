@@ -4,28 +4,14 @@ import Input from "../../ui/Input";
 import Typography from "../../ui/Typography";
 import Badge from "../../ui/Badge";
 import Card from "../../ui/Card";
-import { PALETTE } from "../../constants/theme";
 import { Send, User } from "lucide-react";
 
 const Showcase: React.FC = () => {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: PALETTE.background.page,
-        padding: 40,
-      }}
-    >
-      <div
-        style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gap: 24 }}
-      >
+    <div className="min-h-screen bg-slate-50 p-10">
+      <div className="max-w-[1100px] mx-auto grid gap-6">
         <section>
-          <h2
-            style={{ color: PALETTE.text.default }}
-            className="text-2xl font-bold mb-4"
-          >
-            Botones
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Botones</h2>
           <div className="flex gap-4">
             <Button variant="primary">Primary</Button>
             <Button variant="secondary">Secondary</Button>
@@ -41,24 +27,18 @@ const Showcase: React.FC = () => {
         </section>
 
         <section>
-          <h2
-            style={{ color: PALETTE.text.default }}
-            className="text-2xl font-bold mb-4"
-          >
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
             Formularios
           </h2>
-          <div style={{ maxWidth: 600 }}>
+          <div className="max-w-[600px]">
             <Input label="Nombre" placeholder="Ej. Carlos" />
-            <div style={{ height: 12 }} />
+            <div className="h-3" />
             <Input label="Usuario" placeholder="usuario" leftIcon={User} />
           </div>
         </section>
 
         <section>
-          <h2
-            style={{ color: PALETTE.text.default }}
-            className="text-2xl font-bold mb-4"
-          >
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
             Tipografía
           </h2>
           <Typography.H1>H1 - Título</Typography.H1>
@@ -70,23 +50,15 @@ const Showcase: React.FC = () => {
         </section>
 
         <section>
-          <h2
-            style={{ color: PALETTE.text.default }}
-            className="text-2xl font-bold mb-4"
-          >
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">
             Cards & Badges
           </h2>
           <div className="grid grid-cols-2 gap-4">
             <Card hover>
               <div className="flex justify-between items-center">
                 <div>
-                  <h3
-                    style={{ color: PALETTE.text.default }}
-                    className="font-bold"
-                  >
-                    Card title
-                  </h3>
-                  <p style={{ color: PALETTE.text.muted }}>
+                  <h3 className="font-bold text-slate-900">Card title</h3>
+                  <p className="text-slate-500">
                     Descripción breve de la card.
                   </p>
                 </div>
@@ -95,12 +67,7 @@ const Showcase: React.FC = () => {
             </Card>
             <Card>
               <div>
-                <h3
-                  style={{ color: PALETTE.text.default }}
-                  className="font-bold"
-                >
-                  Otra card
-                </h3>
+                <h3 className="font-bold text-slate-900">Otra card</h3>
                 <Badge variant="pending">Pendiente</Badge>
               </div>
             </Card>

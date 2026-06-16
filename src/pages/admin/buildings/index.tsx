@@ -1,67 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Plus, Copy, Check, Pencil } from "lucide-react";
-import Card from "../../../ui/Card";
+import { Building2, Plus, Copy, Check } from "lucide-react";
 import Button from "../../../ui/Button";
-import { H1, Text, Small } from "../../../ui/Typography";
-import { PALETTE } from "../../../constants/theme";
+import { Text, Small } from "../../../ui/Typography";
 import { ROUTES } from "../../../constants/routes";
 import { listBuildings } from "../../../db/repositories/building.repository";
 import type { Building } from "../../../db/types/building";
 
 function SkeletonRow() {
   return (
-    <div className="py-5 border-b animate-pulse" style={{ borderColor: PALETTE.neutral[200] }}>
-      <div className="h-5 w-48 rounded" style={{ backgroundColor: PALETTE.neutral[200] }} />
-      <div className="mt-2 h-4 w-72 rounded" style={{ backgroundColor: PALETTE.neutral[100] }} />
-      <div className="mt-3 h-4 w-24 rounded" style={{ backgroundColor: PALETTE.neutral[100] }} />
+    <div className="py-5 border-b border-slate-200 animate-pulse">
+      <div className="h-5 w-48 rounded bg-slate-200" />
+      <div className="mt-2 h-4 w-72 rounded bg-slate-100" />
+      <div className="mt-3 h-4 w-24 rounded bg-slate-100" />
     </div>
   );
 }
 
-function CopyButton({ url }: { url: string }) {
-  const [copied, setCopied] = useState(false);
-
-  async function handleCopy(event: React.MouseEvent) {
-    event.stopPropagation();
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
-      style={{
-        backgroundColor: copied ? PALETTE.success.DEFAULT : "transparent",
-        color: copied ? "#ffffff" : PALETTE.primary.DEFAULT,
-        border: copied ? "none" : `1.5px solid ${PALETTE.primary.DEFAULT}`,
-      }}
-      onMouseEnter={(event) => {
-        if (!copied) {
-          event.currentTarget.style.backgroundColor = PALETTE.primary.DEFAULT + "10";
-        }
-      }}
-      onMouseLeave={(event) => {
-        if (!copied) {
-          event.currentTarget.style.backgroundColor = "transparent";
-        }
-      }}
-    >
-          {copied ? (
-            <><Check className="w-3.5 h-3.5" />Link copiado</>
-          ) : (
-            <><Copy className="w-3.5 h-3.5" />Copiar link de acceso</>
-          )}
-    </button>
-  );
-}
-
 export default function BuildingsList() {
+  const navigate = useNavigate();
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     listBuildings()
@@ -69,13 +29,50 @@ export default function BuildingsList() {
       .finally(() => setLoading(false));
   }, []);
 
+  async function copyLink(slug: string, id: string) {
+    const link = `${window.location.origin}/user/${slug}/login`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Fallback para navegadores sin clipboard API
+      const textarea = document.createElement("textarea");
+      textarea.value = link;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        <div className="mb-8">
+          <div className="h-8 w-56 rounded bg-slate-200 animate-pulse" />
+          <div className="mt-2 h-5 w-80 rounded bg-slate-100 animate-pulse" />
+        </div>
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonRow key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-16">
-      <div className="flex items-center justify-between mb-10">
+    <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="flex items-start justify-between mb-8">
         <div>
-          <H1>Edificios</H1>
-          <Text style={{ color: PALETTE.text.muted }}>
-            Conjuntos residenciales registrados
+          <h1 className="text-3xl font-extrabold text-slate-900">
+            Edificios
+          </h1>
+          <Text className="text-slate-500 mt-1">
+            Administra los conjuntos residenciales registrados en el portal.
           </Text>
         </div>
         <Button
@@ -83,81 +80,87 @@ export default function BuildingsList() {
           leftIcon={Plus}
           onClick={() => navigate(ROUTES.PANEL_BUILDINGS_CREATE)}
         >
-          Crear
+          Crear edificio
         </Button>
       </div>
 
-      {loading ? (
-        <Card className="p-6">
-          <SkeletonRow />
-          <SkeletonRow />
-          <SkeletonRow />
-        </Card>
-      ) : buildings.length === 0 ? (
-        <Card className="p-16 text-center">
-          <Building2
-            className="mx-auto w-12 h-12 mb-4"
-            style={{ color: PALETTE.text.muted }}
-          />
-          <Text style={{ color: PALETTE.text.muted }}>
-            No hay edificios registrados
+      {buildings.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <Building2 className="w-12 h-12 mx-auto text-slate-300" />
+          <Text className="text-slate-500 mt-4">
+            No hay edificios registrados todavía.
           </Text>
           <Button
             variant="primary"
             leftIcon={Plus}
-            onClick={() => navigate(ROUTES.PANEL_BUILDINGS_CREATE)}
             className="mt-6"
+            onClick={() => navigate(ROUTES.PANEL_BUILDINGS_CREATE)}
           >
-            Crear primer edificio
+            Crear el primer edificio
           </Button>
-        </Card>
+        </div>
       ) : (
-        <Card className="p-0 overflow-hidden">
-          {[...buildings]
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .map((building, index) => (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          {buildings.map((building, index) => (
             <div
               key={building.id}
-              className="flex items-center justify-between px-6 py-4"
+              className="flex items-center justify-between p-5"
               style={{
-                borderBottom: index < buildings.length - 1 ? `1px solid ${PALETTE.neutral[100]}` : "none",
+                borderBottom:
+                  index < buildings.length - 1
+                    ? "1px solid #f1f5f9"
+                    : "none",
               }}
             >
-              <div className="flex items-center gap-3">
-                <Building2 className="w-5 h-5 shrink-0" style={{ color: PALETTE.primary.DEFAULT }} />
+              <div className="flex items-center gap-4">
+                <Building2 className="w-5 h-5 shrink-0 text-primary" />
                 <div>
-                  <div className="font-bold text-base" style={{ color: PALETTE.text.default }}>
+                  <div className="font-bold text-base text-slate-900">
                     {building.name}
                   </div>
-                  <Small style={{ color: PALETTE.neutral[400] }}>
-                    Creado: {new Date(building.createdAt).toLocaleDateString()}
+                  <Small className="text-slate-400">
+                    Creado el{" "}
+                    {building.createdAt instanceof Date
+                      ? building.createdAt.toLocaleDateString("es-CO", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "—"}
                   </Small>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <CopyButton url={`${window.location.origin}/user/${building.slug}/login`} />
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => navigate(ROUTES.PANEL_BUILDINGS_EDIT.replace(":id", building.id))}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                  onClick={() => copyLink(building.slug, building.id)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors border-2"
                   style={{
-                    backgroundColor: PALETTE.neutral[100],
-                    color: PALETTE.text.muted,
-                  }}
-                  onMouseEnter={(event) => {
-                    event.currentTarget.style.backgroundColor = PALETTE.neutral[200];
-                  }}
-                  onMouseLeave={(event) => {
-                    event.currentTarget.style.backgroundColor = PALETTE.neutral[100];
+                    backgroundColor: copiedId === building.id ? "var(--color-primary)" : "transparent",
+                    color: copiedId === building.id ? "#fff" : "var(--color-primary)",
+                    borderColor: copiedId === building.id ? "transparent" : "var(--color-primary)",
                   }}
                 >
-                  <Pencil className="w-3.5 h-3.5" />
-                  Editar edificio
+                  {copiedId === building.id ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                  {copiedId === building.id ? "Copiado" : "Copiar link de acceso"}
                 </button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    navigate(ROUTES.PANEL_BUILDINGS_EDIT.replace(":id", building.id))
+                  }
+                >
+                  Editar edificio
+                </Button>
               </div>
             </div>
           ))}
-        </Card>
+        </div>
       )}
     </div>
   );

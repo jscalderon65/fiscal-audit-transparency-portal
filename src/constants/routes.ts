@@ -1,13 +1,10 @@
 export const ROUTES = {
   HOME: "/",
 
-  DESIGN_SYSTEM: "/desig-system",
+  DESIGN_SYSTEM: "/design-system",
 
   USER_LOGIN: "/user/:buildingSlug/login",
   USER_DASHBOARD: "/user/:buildingSlug/dashboard",
-
-  ADMIN_LOGIN: "/administration/login",
-  ADMIN_DASHBOARD: "/administration/dashboard",
 
   PANEL_LOGIN: "/admin/login",
   PANEL_BUILDINGS: "/admin/buildings",

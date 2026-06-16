@@ -2,7 +2,6 @@ import { H1, H2, Text, Small } from "../../ui/Typography";
 import Button from "../../ui/Button";
 import Card from "../../ui/Card";
 import Badge from "../../ui/Badge";
-import { PALETTE } from "../../constants/theme";
 import {
   GraduationCap,
   Briefcase,
@@ -16,12 +15,7 @@ const Profile: React.FC = () => {
   return (
     <div className="w-full">
       {/* Hero Inmersivo */}
-      <header
-        className="w-full"
-        style={{
-          backgroundColor: PALETTE.neutral[900],
-        }}
-      >
+      <header className="w-full bg-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-20 md:py-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -29,11 +23,7 @@ const Profile: React.FC = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div
-                style={{
-                  color: PALETTE.text.inverted,
-                }}
-              >
+              <div className="text-white">
                 <H1>Bertha Zaray Bravo Ruiz</H1>
                 <H2 className="mt-4">
                   Contadora Pública y Especialista en Alta Gerencia.
@@ -57,12 +47,7 @@ const Profile: React.FC = () => {
                 <div className="relative">
                   <Card>
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold"
-                        style={{
-                          background: PALETTE.overlays.infoGradient,
-                        }}
-                      >
+                      <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-primary-light to-primary-dark">
                         BZ
                       </div>
                       <div>
@@ -92,7 +77,7 @@ const Profile: React.FC = () => {
       </header>
 
       {/* Cuerpo principal */}
-      <main style={{ backgroundColor: PALETTE.background.page }}>
+      <main className="bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 py-16 space-y-12">
           {/* Credenciales */}
           <section>
@@ -201,41 +186,23 @@ const Profile: React.FC = () => {
               </Card>
             </div>
           </section>
-        </div>
-      </main>
 
-      {/* Footer */}
-      <footer
-        style={{
-          backgroundColor: PALETTE.neutral[950],
-          color: PALETTE.text.inverted,
-        }}
-      >
-        <div className="max-w-6xl mx-auto px-4 py-12 text-center">
-          <div className="mb-6">
-            <div
-              className="text-xl font-bold"
-              style={{ color: PALETTE.text.inverted }}
-            >
+          {/* CTA */}
+          <section className="bg-slate-950 rounded-2xl p-8 md:p-12 text-center">
+            <div className="text-white text-xl font-bold mb-3">
               ¿Necesita auditoría para su copropiedad?
             </div>
-            <div className="mt-3">
-              <Text style={{ color: PALETTE.text.inverted }}>
-                Contacte a la Revisoría para una evaluación profesional y
-                confidencial.
-              </Text>
+            <Text className="text-white">
+              Contacte a la Revisoría para una evaluación profesional y
+              confidencial.
+            </Text>
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <Button variant="primary">Solicitar Cotización</Button>
+              <Button variant="outline">Contactar</Button>
             </div>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <Button variant="primary">Solicitar Cotización</Button>
-            <Button variant="outline">Contactar</Button>
-          </div>
-          <div className="mt-8 text-sm" style={{ color: PALETTE.neutral[400] }}>
-            © {new Date().getFullYear()} Revisoría Fiscal - Todos los derechos
-            reservados
-          </div>
+          </section>
         </div>
-      </footer>
+      </main>
     </div>
   );
 };

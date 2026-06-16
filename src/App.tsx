@@ -1,16 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ROUTES } from "./constants/routes";
+import Layout from "./ui/Layout";
 
 import UserLoginPage from "./pages/user/login";
 import UserDashboard from "./pages/user/dashboard";
-
-import AdministrationLoginPage from "./pages/administration/login";
-import AdministrationDashboard from "./pages/administration/dashboard";
-
-import Profile from "./pages/Profile";
+import Profile from "./pages/profile";
 import Showcase from "./pages/design-system";
-
 import AdminLogin from "./pages/admin/login";
 import AdminLayout from "./pages/admin/AdminLayout";
 import BuildingsList from "./pages/admin/buildings";
@@ -33,16 +29,17 @@ const App = () => {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path={ROUTES.HOME} element={<Profile />} />
+          {/* Public routes with global footer */}
+          <Route element={<Layout />}>
+            <Route path={ROUTES.HOME} element={<Profile />} />
+            <Route path={ROUTES.DESIGN_SYSTEM} element={<Showcase />} />
+            <Route path={ROUTES.USER_LOGIN} element={<UserLoginPage />} />
+          </Route>
 
-          <Route path={ROUTES.DESIGN_SYSTEM} element={<Showcase />} />
-
-          <Route path={ROUTES.USER_LOGIN} element={<UserLoginPage />} />
+          {/* User dashboard — standalone (no shared layout) */}
           <Route path={ROUTES.USER_DASHBOARD} element={<UserDashboard />} />
 
-          <Route path={ROUTES.ADMIN_LOGIN} element={<AdministrationLoginPage />} />
-          <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdministrationDashboard />} />
-
+          {/* Admin panel routes */}
           <Route path={ROUTES.PANEL_LOGIN} element={<AdminLogin />} />
           <Route path={ROUTES.PANEL_BUILDINGS} element={<AdminRoute><BuildingsList /></AdminRoute>} />
           <Route path={ROUTES.PANEL_BUILDINGS_CREATE} element={<AdminRoute><CreateBuilding /></AdminRoute>} />

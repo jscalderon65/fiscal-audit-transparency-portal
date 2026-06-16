@@ -1,27 +1,22 @@
 import React from "react";
-import { PALETTE } from "../constants/theme";
 
 export interface BadgeProps {
   variant?: "success" | "error" | "pending" | "default";
   children?: React.ReactNode;
 }
 
-const Badge: React.FC<BadgeProps> = ({ variant = "default", children }) => {
-  const style: React.CSSProperties = (() => {
-    switch (variant) {
-      case "success":
-        return { backgroundColor: PALETTE.success.DEFAULT, color: PALETTE.text.inverted };
-      case "error":
-        return { backgroundColor: PALETTE.danger.DEFAULT, color: PALETTE.text.inverted };
-      case "pending":
-        return { backgroundColor: PALETTE.primary.shade50, color: PALETTE.primary.shade700 };
-      default:
-        return { backgroundColor: PALETTE.neutral[100], color: PALETTE.text.default };
-    }
-  })();
+const variantStyles: Record<string, string> = {
+  success: "bg-primary text-white",
+  error: "bg-danger text-white",
+  pending: "bg-primary-50 text-primary-dark",
+  default: "bg-slate-100 text-slate-900",
+};
 
+const Badge: React.FC<BadgeProps> = ({ variant = "default", children }) => {
   return (
-    <span style={{ padding: '6px 10px', borderRadius: 9999, fontWeight: 600, fontSize: 12, display: 'inline-block', ...style }}>
+    <span
+      className={`px-[10px] py-[6px] rounded-full font-semibold text-xs inline-block ${variantStyles[variant]}`}
+    >
       {children}
     </span>
   );
