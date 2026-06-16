@@ -12,7 +12,7 @@ import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import { slugify } from "../../../helpers/slug";
-import { parseUserDocuments } from "../../../helpers/parseDocuments";
+import { parseUserDocuments, formatCurrency } from "../../../helpers/parseDocuments";
 import { createBuilding, generateCode } from "../../../db/repositories/building.repository";
 import { importUsers } from "../../../db/repositories/user.repository";
 import { createMetric } from "../../../db/repositories/metric.repository";
@@ -267,7 +267,7 @@ export default function CreateBuilding() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">Valor</label>
-                    <input type="text" value={metric.value} onChange={(e) => updateMetric(index, "value", e.target.value)} placeholder="Ej: $ 35.450.000" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                    <input type="text" value={metric.value} onChange={(e) => updateMetric(index, "value", formatCurrency(e.target.value))} placeholder="$ *" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">Subtítulo</label>

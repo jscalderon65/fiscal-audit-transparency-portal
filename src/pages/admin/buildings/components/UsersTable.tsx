@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Trash2, Upload, Plus, FileText } from "lucide-react";
+import { Trash2, Upload, Plus, FileText, AlertCircle } from "lucide-react";
 import Button from "../../../../ui/Button";
 import { Small } from "../../../../ui/Typography";
 import { parseUserDocuments } from "../../../../helpers/parseDocuments";
@@ -20,6 +20,7 @@ export default function UsersTable({
 }: UsersTableProps) {
   const [newUserDocumentNumber, setNewUserDocumentNumber] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState("");
   const [csvStatus, setCsvStatus] = useState<{
     type: "ok" | "warn";
     message: string;
@@ -30,6 +31,11 @@ export default function UsersTable({
   async function handleAdd() {
     const val = newUserDocumentNumber.trim();
     if (!/^\d+$/.test(val)) return;
+    if (users.some((user) => user.userDocumentNumber === val)) {
+      setAddError("Esta cédula ya está registrada en este edificio");
+      return;
+    }
+    setAddError("");
     setAdding(true);
     try {
       await onAdd(val);
@@ -93,6 +99,7 @@ export default function UsersTable({
             onChange={(e) => {
               const val = e.target.value.replace(/\D/g, "");
               setNewUserDocumentNumber(val);
+              if (addError) setAddError("");
             }}
             placeholder="Número de cédula"
             inputMode="numeric"
@@ -109,6 +116,12 @@ export default function UsersTable({
             Agregar
           </Button>
         </div>
+        {addError && (
+          <p className="mt-2 text-sm text-danger flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5" />
+            {addError}
+          </p>
+        )}
 
         {/* CSV import */}
         <div className="mt-3 flex items-center gap-3">

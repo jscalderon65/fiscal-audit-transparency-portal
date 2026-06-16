@@ -11,6 +11,7 @@ import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import Toast from "../../../ui/Toast";
 import { ROUTES } from "../../../constants/routes";
+import { formatCurrency, validateMonth } from "../../../helpers/parseDocuments";
 import {
   getBuildingById, updateBuilding, deleteBuilding,
 } from "../../../db/repositories/building.repository";
@@ -173,6 +174,8 @@ export default function EditBuilding() {
   }
 
   async function handleAddReport() {
+    const monthError = validateMonth(newReport.month);
+    if (monthError) { setReportError(monthError); return; }
     const validationError = validateReport();
     if (validationError) { setReportError(validationError); return; }
     setReportError("");
@@ -189,10 +192,20 @@ export default function EditBuilding() {
       let pdfUrl: string | undefined;
       if (newReport.file) {
         try {
-          pdfUrl = await uploadReportPdf(building.code!, reportId, newReport.file);
+          const uploadWithTimeout = (promise: Promise<string>, ms: number) =>
+            Promise.race([
+              promise,
+              new Promise<string>((_, reject) =>
+                setTimeout(() => reject(new Error("Tiempo de espera agotado. Verifica la configuración de Storage.")), ms)
+              ),
+            ]);
+          pdfUrl = await uploadWithTimeout(uploadReportPdf(building.code!, reportId, newReport.file), 30000);
           await updateReportRepo(reportId, { pdfUrl });
-        } catch {
-          setToast({ message: "Error al subir el PDF. Verifica la configuración de Storage.", type: "error" });
+        } catch (uploadError) {
+          setToast({
+            message: uploadError instanceof Error ? uploadError.message : "Error al subir el PDF",
+            type: "error",
+          });
         }
       }
       setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl, createdAt: new Date() }]);
@@ -331,7 +344,7 @@ export default function EditBuilding() {
                 <div>
                   <input type="text" value={newMetric.title} onChange={(e) => { setNewMetric((prev) => ({ ...prev, title: e.target.value })); setMetricError(""); }} placeholder="Título * (mín. 3 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 </div>
-                <input type="text" value={newMetric.value} onChange={(e) => { setNewMetric((prev) => ({ ...prev, value: e.target.value })); setMetricError(""); }} placeholder="Valor *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.value} onChange={(e) => { setNewMetric((prev) => ({ ...prev, value: formatCurrency(e.target.value) })); setMetricError(""); }} placeholder="$ *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value })); setMetricError(""); }} placeholder="Subtítulo *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
               </div>
 
@@ -359,7 +372,9 @@ export default function EditBuilding() {
                 })}
               </div>
 
-              <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
+              <div className="flex justify-center">
+                <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
+              </div>
             </div>
           </div>
         )}
@@ -429,7 +444,9 @@ export default function EditBuilding() {
                   <p className="text-xs text-slate-400 mt-1">Máximo 10MB. Opcional.</p>
                 </div>
               </div>
-              <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
+              <div className="flex justify-center">
+                <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
+              </div>
             </div>
           </div>
         )}
