@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Users, Building2 } from "lucide-react";
-import { Small, Text } from "../../../ui/Typography";
+import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import {
@@ -159,7 +159,9 @@ export default function EditBuilding() {
         {activeTab === "info" ? (
           <div className="space-y-6">
             <div>
-              <Small className="text-slate-500">Nombre del edificio *</Small>
+              <label className="block text-base md:text-lg font-bold text-slate-900">
+                Nombre del edificio *
+              </label>
               <div className="mt-2 relative">
                 <input
                   type="text"

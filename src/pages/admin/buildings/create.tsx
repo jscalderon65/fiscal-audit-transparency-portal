@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertCircle, ArrowLeft, Upload, FileText } from "lucide-react";
-import { Small, Text } from "../../../ui/Typography";
+import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import { slugify } from "../../../helpers/slug";
@@ -114,7 +114,9 @@ export default function CreateBuilding() {
 
       <div className="mt-8 space-y-6">
         <div>
-          <Small className="text-slate-500">Nombre del edificio *</Small>
+          <label className="block text-base md:text-lg font-bold text-slate-900">
+            Nombre del edificio *
+          </label>
           <div className="mt-2 relative">
             <input
               type="text"
