@@ -279,14 +279,16 @@ export default function EditBuilding() {
                 Al eliminar este edificio se perderá el acceso de todos sus
                 residentes y la información asociada.
               </p>
-              <Button
-                variant="outline"
-                leftIcon={Trash2}
-                onClick={handleDelete}
-                className="border-danger text-danger hover:bg-danger hover:text-white"
-              >
-                Eliminar este edificio
-              </Button>
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  leftIcon={Trash2}
+                  onClick={handleDelete}
+                  className="border-danger text-danger hover:bg-danger hover:text-white"
+                >
+                  Eliminar este edificio
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
