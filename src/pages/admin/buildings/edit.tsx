@@ -65,8 +65,7 @@ export default function EditBuilding() {
     setSaving(true);
     try {
       await updateBuilding(id, { name });
-      setHasChanges(false);
-      setBuilding((prev) => (prev ? { ...prev, name } : prev));
+      navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio actualizado correctamente" } });
     } catch {
       setShowError(true);
     }
@@ -106,7 +105,7 @@ export default function EditBuilding() {
     setDeleting(true);
     try {
       await deleteBuilding(id);
-      navigate(ROUTES.PANEL_BUILDINGS);
+      navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio eliminado" } });
     } catch {
       setShowError(true);
     }

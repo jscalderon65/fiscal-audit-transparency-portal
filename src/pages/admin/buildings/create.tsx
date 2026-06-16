@@ -93,7 +93,7 @@ export default function CreateBuilding() {
         );
       }
 
-      navigate(ROUTES.PANEL_BUILDINGS);
+      navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio creado correctamente" } });
     } catch {
       setShowError(true);
     }

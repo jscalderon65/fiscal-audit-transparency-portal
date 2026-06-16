@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Building2, Plus, Copy, Check } from "lucide-react";
 import Button from "../../../ui/Button";
+import Toast from "../../../ui/Toast";
 import { Text, Small } from "../../../ui/Typography";
 import { ROUTES } from "../../../constants/routes";
 import { listBuildings } from "../../../db/repositories/building.repository";
@@ -19,9 +20,18 @@ function SkeletonRow() {
 
 export default function BuildingsList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (location.state?.toast) {
+      setToast(location.state.toast);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     listBuildings()
@@ -62,7 +72,7 @@ export default function BuildingsList() {
         </div>
       </div>
     );
-  }
+}
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -154,6 +164,10 @@ export default function BuildingsList() {
             </div>
           ))}
         </div>
+      )}
+
+      {toast && (
+        <Toast message={toast} onClose={() => setToast(null)} />
       )}
     </div>
   );
