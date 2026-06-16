@@ -38,7 +38,13 @@ export const UserDashboard = () => {
     setSession(parsed);
   }, [buildingSlug, navigate]);
 
-  if (!session) return null;
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   const building = session.building;
   const metrics = [
