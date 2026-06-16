@@ -9,7 +9,14 @@ import {
   getBuildingById,
   updateBuilding,
 } from "../../../db/repositories/building.repository";
+import {
+  getUsersByBuildingSlug,
+  createUser,
+  deleteUser,
+  importUsers,
+} from "../../../db/repositories/user.repository";
 import type { Building } from "../../../db/types/building";
+import UsersTable from "./components/UsersTable";
 
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +28,10 @@ export default function EditBuilding() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [users, setUsers] = useState<{ cedula: string }[]>([]);
+  const [slug, setSlug] = useState("");
+
+  const link = `${window.location.origin}/user/${slug}/login`;
 
   useEffect(() => {
     if (!id) return;
@@ -29,16 +40,20 @@ export default function EditBuilding() {
         if (data) {
           setBuilding(data);
           setName(data.name);
+          setSlug(data.slug);
         }
       })
       .finally(() => setLoading(false));
   }, [id]);
 
-  const slug = slugify(name);
-  const link = `${window.location.origin}/user/${slug}/login`;
+  useEffect(() => {
+    if (!building?.slug) return;
+    getUsersByBuildingSlug(building.slug).then(setUsers);
+  }, [building?.slug]);
 
   function handleNameChange(value: string) {
     setName(value);
+    setSlug(slugify(value));
     setHasChanges(value !== building?.name);
     if (showError) setShowError(false);
   }
@@ -67,11 +82,33 @@ export default function EditBuilding() {
     setSaving(true);
     try {
       await updateBuilding(id, { name, slug });
-      navigate(ROUTES.PANEL_BUILDINGS);
+      setHasChanges(false);
     } catch {
       setShowError(true);
     }
     setSaving(false);
+  }
+
+  async function handleAddUser(cedula: string) {
+    if (!building?.slug) return;
+    await createUser({ cedula, buildingSlug: building.slug });
+    setUsers((prev) => [...prev, { cedula }]);
+  }
+
+  async function handleDeleteUser(cedula: string) {
+    await deleteUser(cedula);
+    setUsers((prev) => prev.filter((u) => u.cedula !== cedula));
+  }
+
+  async function handleImportCsv(cedulas: string[]) {
+    if (!building?.slug) return;
+    const newUsers = cedulas.map((c) => ({ cedula: c, buildingSlug: building.slug }));
+    await importUsers(newUsers);
+    setUsers((prev) => {
+      const existentes = new Set(prev.map((u) => u.cedula));
+      const nuevos = newUsers.filter((u) => !existentes.has(u.cedula));
+      return [...prev, ...nuevos];
+    });
   }
 
   if (loading) {
@@ -188,6 +225,17 @@ export default function EditBuilding() {
             Cancelar
           </Button>
         </div>
+      </div>
+
+      {/* Users table */}
+      <div className="mt-10">
+        <UsersTable
+          users={users}
+          buildingSlug={building.slug}
+          onAdd={handleAddUser}
+          onDelete={handleDeleteUser}
+          onImport={handleImportCsv}
+        />
       </div>
     </div>
   );
