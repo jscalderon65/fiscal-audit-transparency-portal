@@ -122,7 +122,7 @@ export default function EditBuilding() {
   }
 
   const tabClass = (tab: Tab) =>
-    `flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+    `flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
       activeTab === tab
         ? "border-primary text-primary"
         : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -144,7 +144,7 @@ export default function EditBuilding() {
       <Text className="text-slate-500">{building.name}</Text>
 
       {/* Tabs */}
-      <div className="mt-8 border-b border-slate-200 flex gap-6 overflow-x-auto">
+      <div className="mt-8 border-b border-slate-200 flex">
         <button onClick={() => setActiveTab("info")} className={tabClass("info")}>
           <Building2 className="w-4 h-4" />
           Información
