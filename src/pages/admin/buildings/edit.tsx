@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AlertCircle, ArrowLeft, Users, Building2, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Users, Building2, Trash2, Plus, X, Upload, Wallet } from "lucide-react";
 import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
@@ -15,11 +15,28 @@ import {
   deleteUser,
   importUsers,
 } from "../../../db/repositories/user.repository";
+import {
+  getMetricsByBuildingCode,
+  createMetric,
+  updateMetric as updateMetricRepo,
+  deleteMetric,
+} from "../../../db/repositories/metric.repository";
+import {
+  getReportsByBuildingCode,
+  createReport as createReportRepo,
+  updateReport as updateReportRepo,
+  deleteReport,
+  uploadReportPdf,
+} from "../../../db/repositories/report.repository";
 import type { Building } from "../../../db/types/building";
+import type { BuildingMetric } from "../../../db/types/metric";
+import type { BuildingReport } from "../../../db/types/report";
 import Modal from "../../../ui/Modal";
 import UsersTable from "./components/UsersTable";
 
-type Tab = "info" | "users";
+type Tab = "info" | "users" | "metrics" | "reports";
+
+const METRIC_ICONS = ["Wallet", "PiggyBank", "HardHat", "Building2"] as const;
 
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
@@ -32,22 +49,27 @@ export default function EditBuilding() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<{ userDocumentNumber: string }[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("info");
+  const [metrics, setMetrics] = useState<BuildingMetric[]>([]);
+  const [reports, setReports] = useState<BuildingReport[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // New metric form state
+  const [newMetric, setNewMetric] = useState<BuildingMetric>({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
+  const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
 
   useEffect(() => {
     if (!id) return;
-    getBuildingById(id)
-      .then((data) => {
-        if (data) {
-          setBuilding(data);
-          setName(data.name);
-        }
-      })
-      .finally(() => setLoading(false));
+    getBuildingById(id).then((data) => {
+      if (data) { setBuilding(data); setName(data.name); }
+    }).finally(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
     if (!building?.code) return;
     getUsersByBuildingCode(building.code).then(setUsers);
+    getMetricsByBuildingCode(building.code).then(setMetrics);
+    getReportsByBuildingCode(building.code).then(setReports);
   }, [building?.code]);
 
   function handleNameChange(value: string) {
@@ -57,18 +79,12 @@ export default function EditBuilding() {
   }
 
   async function handleSave() {
-    if (name.trim().length < 3 || !id) {
-      setShowError(true);
-      return;
-    }
-
+    if (name.trim().length < 3 || !id) { setShowError(true); return; }
     setSaving(true);
     try {
       await updateBuilding(id, { name });
       navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio actualizado correctamente" } });
-    } catch {
-      setShowError(true);
-    }
+    } catch { setShowError(true); }
     setSaving(false);
   }
 
@@ -80,35 +96,62 @@ export default function EditBuilding() {
 
   async function handleDeleteUser(userDocumentNumber: string) {
     await deleteUser(userDocumentNumber);
-    setUsers((prev) => prev.filter((user) => user.userDocumentNumber !== userDocumentNumber));
+    setUsers((prev) => prev.filter((u) => u.userDocumentNumber !== userDocumentNumber));
   }
 
   async function handleImportCsv(documents: string[]) {
     if (!building?.code) return;
-    const newUsers = documents.map((document) => ({
-      userDocumentNumber: document,
-      buildingCode: building.code,
-    }));
+    const newUsers = documents.map((d) => ({ userDocumentNumber: d, buildingCode: building.code }));
     await importUsers(newUsers);
     setUsers((prev) => {
-      const existing = new Set(prev.map((user) => user.userDocumentNumber));
-      const incomingUsers = newUsers.filter((user) => !existing.has(user.userDocumentNumber));
-      return [...prev, ...incomingUsers];
+      const existing = new Set(prev.map((u) => u.userDocumentNumber));
+      return [...prev, ...newUsers.filter((u) => !existing.has(u.userDocumentNumber))];
     });
   }
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  async function handleAddMetric() {
+    if (!building?.code || !newMetric.title || !newMetric.value) return;
+    const metricId = await createMetric({ ...newMetric, buildingCode: building.code });
+    setMetrics((prev) => [...prev, { ...newMetric, id: metricId }]);
+    setNewMetric({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
+  }
 
-  async function handleDelete() {
+  async function handleDeleteMetric(metricId: string) {
+    await deleteMetric(metricId);
+    setMetrics((prev) => prev.filter((m) => m.id !== metricId));
+  }
+
+  async function handleAddReport() {
+    if (!building?.code || !newReport.month || !newReport.title) return;
+    const reportId = await createReportRepo({
+      month: newReport.month,
+      title: newReport.title,
+      status: "Auditado",
+      topics: newReport.topics,
+      createdAt: new Date(),
+      buildingCode: building.code,
+    });
+    let pdfUrl: string | undefined;
+    if (newReport.file) {
+      pdfUrl = await uploadReportPdf(building.code, reportId, newReport.file);
+      await updateReportRepo(reportId, { pdfUrl });
+    }
+    setReports((prev) => [...prev, { id: reportId, month: newReport.month, title: newReport.title, status: "Auditado", topics: newReport.topics, pdfUrl, createdAt: new Date() }]);
+    setNewReport({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+  }
+
+  async function handleDeleteReport(reportId: string) {
+    await deleteReport(reportId);
+    setReports((prev) => prev.filter((r) => r.id !== reportId));
+  }
+
+  async function handleDeleteBuilding() {
     if (!id) return;
     setDeleting(true);
     try {
       await deleteBuilding(id);
       navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio eliminado" } });
-    } catch {
-      setShowError(true);
-    }
+    } catch { setShowError(true); }
     setDeleting(false);
   }
 
@@ -125,139 +168,120 @@ export default function EditBuilding() {
   if (!building) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-10">
-        <button
-          onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
-          className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver a edificios
-        </button>
+        <button onClick={() => navigate(ROUTES.PANEL_BUILDINGS)} className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors"><ArrowLeft className="w-4 h-4" /> Volver a edificios</button>
         <Text className="text-slate-500">Edificio no encontrado</Text>
       </div>
     );
   }
 
   const tabClass = (tab: Tab) =>
-    `flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
-      activeTab === tab
-        ? "border-primary text-primary"
-        : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+    `flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+      activeTab === tab ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
     }`;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
-      <button
-        onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
-        className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Volver a edificios
-      </button>
-
-      <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
-        Editar edificio
-      </h1>
+    <div className="max-w-4xl mx-auto px-4 py-10">
+      <button onClick={() => navigate(ROUTES.PANEL_BUILDINGS)} className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors"><ArrowLeft className="w-4 h-4" /> Volver a edificios</button>
+      <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Editar edificio</h1>
 
       {/* Tabs */}
-      <div className="mt-8 border-b border-slate-200 flex">
-        <button onClick={() => setActiveTab("info")} className={tabClass("info")}>
-          <Building2 className="w-4 h-4" />
-          Información
-        </button>
-        <button onClick={() => setActiveTab("users")} className={tabClass("users")}>
-          <Users className="w-4 h-4" />
-          Usuarios
-        </button>
+      <div className="mt-8 border-b border-slate-200 flex overflow-x-auto">
+        <button onClick={() => setActiveTab("info")} className={tabClass("info")}><Building2 className="w-4 h-4" /> Información</button>
+        <button onClick={() => setActiveTab("users")} className={tabClass("users")}><Users className="w-4 h-4" /> Usuarios</button>
+        <button onClick={() => setActiveTab("metrics")} className={tabClass("metrics")}><Wallet className="w-4 h-4" /> Métricas</button>
+        <button onClick={() => setActiveTab("reports")} className={tabClass("reports")}><Upload className="w-4 h-4" /> Dictámenes</button>
       </div>
 
       {/* Tab content */}
       <div className="mt-6">
-        {activeTab === "info" ? (
-          <div className="space-y-6">
+        {activeTab === "info" && (
+          <div className="space-y-6 max-w-2xl">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Nombre del edificio *
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="Ej: Conjunto Residencial Los Alamos"
-                className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${
-                  showError ? "border-danger" : "border-slate-300"
-                }`}
-                />
-                {showError && (
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 text-danger" />
-                    <span className="text-sm text-danger">
-                      El nombre debe tener al menos 3 caracteres
-                    </span>
-                  </div>
-                )}
-              </div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nombre del edificio *</label>
+              <input type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ej: Conjunto Residencial Los Alamos" className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${showError ? "border-danger" : "border-slate-300"}`} />
+              {showError && <div className="mt-2 flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 text-danger" /><span className="text-sm text-danger">El nombre debe tener al menos 3 caracteres</span></div>}
             </div>
-
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <Button
-                variant="primary"
-                loading={saving}
-                onClick={handleSave}
-                disabled={!hasChanges || name.trim().length < 3}
-              >
-                Guardar cambios
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
-              >
-                Cancelar
-              </Button>
+              <Button variant="primary" loading={saving} onClick={handleSave} disabled={!hasChanges || name.trim().length < 3}>Guardar cambios</Button>
+              <Button variant="ghost" onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}>Cancelar</Button>
             </div>
 
-            {/* Delete section */}
             <div className="border-t border-slate-200 pt-6 mt-10">
-              <h3 className="text-base font-bold text-slate-900">
-                Eliminar edificio
-              </h3>
-              <p className="text-sm text-slate-500 mt-1 mb-4">
-                Al eliminar este edificio se perderá el acceso de todos sus
-                residentes y la información asociada.
-              </p>
+              <h3 className="text-base font-bold text-slate-900">Eliminar edificio</h3>
+              <p className="text-sm text-slate-500 mt-1 mb-4">Al eliminar este edificio se perderá el acceso de todos sus residentes y la información asociada.</p>
               <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteModal(true)}
-                  className="inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all py-2 px-4 bg-transparent border-2 border-danger text-danger hover:bg-danger hover:text-white"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Eliminar este edificio
+                <button type="button" onClick={() => setShowDeleteModal(true)} className="inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all py-2 px-4 bg-transparent border-2 border-danger text-danger hover:bg-danger hover:text-white">
+                  <Trash2 className="w-4 h-4" /> Eliminar este edificio
                 </button>
               </div>
             </div>
           </div>
-        ) : (
-          <UsersTable
-            users={users}
-            buildingCode={building.code}
-            onAdd={handleAddUser}
-            onDelete={handleDeleteUser}
-            onImport={handleImportCsv}
-          />
+        )}
+
+        {activeTab === "users" && (
+          <UsersTable users={users} buildingCode={building.code} onAdd={handleAddUser} onDelete={handleDeleteUser} onImport={handleImportCsv} />
+        )}
+
+        {activeTab === "metrics" && (
+          <div className="space-y-4 max-w-2xl">
+            {metrics.map((metric) => (
+              <div key={metric.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-slate-900 truncate">{metric.title}</div>
+                  <div className="text-sm text-slate-500 truncate">{metric.value} — {metric.subtitle}</div>
+                </div>
+                <button onClick={() => metric.id && handleDeleteMetric(metric.id)} className="ml-3 text-slate-400 hover:text-danger transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            ))}
+            {metrics.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>}
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Agregar métrica</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <input type="text" value={newMetric.title} onChange={(e) => setNewMetric((prev) => ({ ...prev, title: e.target.value }))} placeholder="Título" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.value} onChange={(e) => setNewMetric((prev) => ({ ...prev, value: e.target.value }))} placeholder="Valor" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.subtitle} onChange={(e) => setNewMetric((prev) => ({ ...prev, subtitle: e.target.value }))} placeholder="Subtítulo" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <select value={newMetric.icon} onChange={(e) => setNewMetric((prev) => ({ ...prev, icon: e.target.value }))} className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900">
+                  {METRIC_ICONS.map((icon) => <option key={icon} value={icon}>{icon}</option>)}
+                </select>
+              </div>
+              <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "reports" && (
+          <div className="space-y-4 max-w-2xl">
+            {reports.map((report) => (
+              <div key={report.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-slate-900 truncate">{report.month} — {report.title}</div>
+                  <div className="text-sm text-slate-500 truncate">{report.topics}</div>
+                </div>
+                <button onClick={() => report.id && handleDeleteReport(report.id)} className="ml-3 text-slate-400 hover:text-danger transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            ))}
+            {reports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay dictámenes registrados.</p>}
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Agregar dictamen</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <input type="text" value={newReport.month} onChange={(e) => setNewReport((prev) => ({ ...prev, month: e.target.value }))} placeholder="Mes (Ej: Marzo 2026)" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newReport.title} onChange={(e) => setNewReport((prev) => ({ ...prev, title: e.target.value }))} placeholder="Título" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <div className="sm:col-span-2">
+                  <input type="text" value={newReport.topics} onChange={(e) => setNewReport((prev) => ({ ...prev, topics: e.target.value }))} placeholder="Temas abordados" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                </div>
+                <div>
+                  <input type="file" accept=".pdf" onChange={(e) => setNewReport((prev) => ({ ...prev, file: e.target.files?.[0] }))} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
+                </div>
+              </div>
+              <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} disabled={!newReport.month || !newReport.title}>Agregar</Button>
+            </div>
+          </div>
         )}
       </div>
 
-      <Modal
-        open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title="Eliminar edificio"
-        message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán."
-        confirmLabel="Sí, eliminar"
-        variant="danger"
-        loading={deleting}
-        onConfirm={handleDelete}
-      />
+      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Eliminar edificio" message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán." confirmLabel="Sí, eliminar" variant="danger" loading={deleting} onConfirm={handleDeleteBuilding} />
     </div>
   );
 }

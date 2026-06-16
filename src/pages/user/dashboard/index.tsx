@@ -13,6 +13,14 @@ import { ReportsSection } from "../components/reports";
 import { MetricsSection } from "../components/metrics";
 import { Banner } from "../components/banner";
 import type { Building } from "../../../db/types/building";
+import type { BuildingMetric } from "../../../db/types/metric";
+import type { BuildingReport } from "../../../db/types/report";
+import { getMetricsByBuildingCode } from "../../../db/repositories/metric.repository";
+import { getReportsByBuildingCode } from "../../../db/repositories/report.repository";
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Wallet, PiggyBank, HardHat, Building2,
+};
 
 interface Session {
   userDocumentNumber: string;
@@ -23,6 +31,9 @@ export const UserDashboard = () => {
   const { buildingCode } = useParams<{ buildingCode: string }>();
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
+  const [metrics, setMetrics] = useState<BuildingMetric[]>([]);
+  const [reports, setReports] = useState<BuildingReport[]>([]);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
 
   useEffect(() => {
     const raw = localStorage.getItem("session");
@@ -38,6 +49,17 @@ export const UserDashboard = () => {
     setSession(parsed);
   }, [buildingCode, navigate]);
 
+  useEffect(() => {
+    if (!buildingCode) return;
+    Promise.all([
+      getMetricsByBuildingCode(buildingCode),
+      getReportsByBuildingCode(buildingCode),
+    ]).then(([fetchedMetrics, fetchedReports]) => {
+      setMetrics(fetchedMetrics);
+      setReports(fetchedReports);
+    }).finally(() => setDashboardLoading(false));
+  }, [buildingCode]);
+
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -46,78 +68,37 @@ export const UserDashboard = () => {
     );
   }
 
-  const building = session.building;
-  const metrics = [
-    {
-      title: "Excedente Acumulado",
-      value: "$ 35.450.000",
-      subtitle: "Cierre Fiscal 2025",
-      icon: Wallet,
-    },
-    {
-      title: "Recaudo Cuota Extra.",
-      value: "$ 487.575.200",
-      subtitle: "Fondo Obra Ascensores",
-      icon: HardHat,
-    },
-    {
-      title: "Estado de Cartera",
-      value: "$ 28.350.000",
-      subtitle: "Cartera vencida > 60 días",
-      icon: Building2,
-    },
-    {
-      title: "Fondo de Imprevistos",
-      value: "$ 42.150.000",
-      subtitle: "Cuenta de ahorros (Ley 675)",
-      icon: PiggyBank,
-    },
-  ];
+  if (dashboardLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-20">
+          <div className="animate-pulse space-y-6">
+            <div className="h-40 bg-slate-200 rounded-2xl" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-32 bg-slate-200 rounded-2xl" />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const reports = [
-    {
-      id: 1,
-      month: "Marzo 2026",
-      title: "Dictamen Revisoría Fiscal - Marzo 2026",
-      status: "Auditado",
-      topics: "Revisión extractos, Cartera y Anticipos de Obra",
-    },
-    {
-      id: 2,
-      month: "Febrero 2026",
-      title: "Dictamen Revisoría Fiscal - Febrero 2026",
-      status: "Auditado",
-      topics: "Preparación Asamblea Ordinaria, Cierre 2025",
-    },
-    {
-      id: 3,
-      month: "Enero 2026",
-      title: "Dictamen Revisoría Fiscal - Enero 2026",
-      status: "Auditado",
-      topics: "Ejecución Presupuestal Final, Conciliaciones",
-    },
-    {
-      id: 4,
-      month: "Diciembre 2025",
-      title: "Dictamen Revisoría Fiscal - Diciembre 2025",
-      status: "Auditado",
-      topics: "Pago de Primas, Mantenimiento Preventivo",
-    },
-    {
-      id: 5,
-      month: "Noviembre 2025",
-      title: "Dictamen Revisoría Fiscal - Noviembre 2025",
-      status: "Auditado",
-      topics: "Recaudo Cuota Extraordinaria, Seguros",
-    },
-    {
-      id: 6,
-      month: "Octubre 2025",
-      title: "Dictamen Revisoría Fiscal - Octubre 2025",
-      status: "Auditado",
-      topics: "Renovación Póliza Zonas Comunes, Cartera",
-    },
-  ];
+  const building = session.building;
+
+  const mappedMetrics = metrics.map((metric) => ({
+    title: metric.title,
+    value: metric.value,
+    subtitle: metric.subtitle,
+    icon: iconMap[metric.icon] || Building2,
+  }));
+
+  const mappedReports = reports.map((report) => ({
+    id: report.id ? parseInt(report.id, 36) % 10000 : Math.random(),
+    month: report.month,
+    title: report.title,
+    status: report.status,
+    topics: report.topics,
+  }));
 
   const handleDownloadReport = () => {
     alert("Descargando PDF del reporte.");
@@ -138,20 +119,20 @@ export const UserDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-primary-200">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <Banner info={bannerInfo} profile={bannerProfile} />
 
       <main className="max-w-6xl mx-auto px-4 md:px-8 py-16 space-y-24">
         <MetricsSection
           title="Métricas Financieras"
           subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
-          metrics={metrics}
+          metrics={mappedMetrics}
         />
 
         <ReportsSection
-          title="Archivo de Dictámenes (2025 - 2026)"
+          title="Archivo de Dictámenes"
           subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
-          reports={reports}
+          reports={mappedReports}
           onDownload={handleDownloadReport}
         />
 
