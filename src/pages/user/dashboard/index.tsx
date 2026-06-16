@@ -134,7 +134,7 @@ export const UserDashboard = () => {
         />
 
         <ReportsSection
-          title="Archivo de Dictámenes"
+          title="Reportes"
           subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
           reports={mappedReports}
           onDownload={handleDownloadReport}

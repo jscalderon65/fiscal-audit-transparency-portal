@@ -1,14 +1,15 @@
-import { useEffect, useState, createElement } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   AlertCircle, ArrowLeft, Users, Building2, Trash2, Plus, Upload,
   Wallet, PiggyBank, HardHat, DollarSign, TrendingUp, TrendingDown,
   BarChart3, PieChart, CreditCard, Landmark, Calculator, Percent,
   ArrowUpRight, ArrowDownRight, Scale, ClipboardList, FileText,
-  Receipt, Banknote,
+  Receipt, Banknote, Loader2,
 } from "lucide-react";
 import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
+import Toast from "../../../ui/Toast";
 import { ROUTES } from "../../../constants/routes";
 import {
   getBuildingById, updateBuilding, deleteBuilding,
@@ -48,6 +49,8 @@ const iconMap: Record<string, LucideIcon> = {
   ClipboardList, FileText, Receipt, Banknote,
 };
 
+const MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -65,6 +68,13 @@ export default function EditBuilding() {
   const [deleting, setDeleting] = useState(false);
   const [newMetric, setNewMetric] = useState<BuildingMetric>({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
   const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+  const [addingMetric, setAddingMetric] = useState(false);
+  const [deletingMetricId, setDeletingMetricId] = useState<string | null>(null);
+  const [addingReport, setAddingReport] = useState(false);
+  const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
+  const [metricError, setMetricError] = useState("");
+  const [reportError, setReportError] = useState("");
+  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -91,8 +101,11 @@ export default function EditBuilding() {
     setSaving(true);
     try {
       await updateBuilding(id, { name });
-      navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio actualizado correctamente" } });
-    } catch { setShowError(true); }
+      setToast({ message: "Edificio actualizado correctamente" });
+      setHasChanges(false);
+    } catch {
+      setToast({ message: "Error al guardar los cambios", type: "error" });
+    }
     setSaving(false);
   }
 
@@ -117,36 +130,89 @@ export default function EditBuilding() {
     });
   }
 
+  function validateMetric(): string | null {
+    if (!newMetric.title.trim() || newMetric.title.trim().length < 3) return "El título debe tener al menos 3 caracteres";
+    if (!newMetric.value.trim()) return "El valor es obligatorio";
+    if (!newMetric.subtitle.trim()) return "El subtítulo es obligatorio";
+    return null;
+  }
+
   async function handleAddMetric() {
-    if (!building?.code || !newMetric.title || !newMetric.value) return;
-    const metricId = await createMetric({ ...newMetric, buildingCode: building.code });
-    setMetrics((prev) => [...prev, { ...newMetric, id: metricId }]);
-    setNewMetric({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
+    const validationError = validateMetric();
+    if (validationError) { setMetricError(validationError); return; }
+    setMetricError("");
+    setAddingMetric(true);
+    try {
+      const metricId = await createMetric({ ...newMetric, buildingCode: building.code! });
+      setMetrics((prev) => [...prev, { ...newMetric, id: metricId }]);
+      setNewMetric({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
+      setToast({ message: "Métrica agregada correctamente" });
+    } catch {
+      setToast({ message: "Error al agregar la métrica", type: "error" });
+    }
+    setAddingMetric(false);
   }
 
   async function handleDeleteMetric(metricId: string) {
-    await deleteMetric(metricId);
-    setMetrics((prev) => prev.filter((m) => m.id !== metricId));
+    setDeletingMetricId(metricId);
+    try {
+      await deleteMetric(metricId);
+      setMetrics((prev) => prev.filter((m) => m.id !== metricId));
+    } catch {
+      setToast({ message: "Error al eliminar la métrica", type: "error" });
+    }
+    setDeletingMetricId(null);
+  }
+
+  function validateReport(): string | null {
+    if (!newReport.month.trim() || newReport.month.trim().length < 3) return "El mes debe tener al menos 3 caracteres";
+    if (!newReport.title.trim() || newReport.title.trim().length < 5) return "El título debe tener al menos 5 caracteres";
+    if (!newReport.topics.trim() || newReport.topics.trim().length < 5) return "Los temas deben tener al menos 5 caracteres";
+    if (newReport.file && newReport.file.size > MAX_PDF_SIZE) return "El PDF no puede superar los 10MB";
+    return null;
   }
 
   async function handleAddReport() {
-    if (!building?.code || !newReport.month || !newReport.title) return;
-    const reportId = await createReportRepo({
-      month: newReport.month, title: newReport.title, status: "Auditado",
-      topics: newReport.topics, createdAt: new Date(), buildingCode: building.code,
-    });
-    let pdfUrl: string | undefined;
-    if (newReport.file) {
-      pdfUrl = await uploadReportPdf(building.code, reportId, newReport.file);
-      await updateReportRepo(reportId, { pdfUrl });
+    const validationError = validateReport();
+    if (validationError) { setReportError(validationError); return; }
+    setReportError("");
+    setAddingReport(true);
+    try {
+      const reportId = await createReportRepo({
+        month: newReport.month.trim(),
+        title: newReport.title.trim(),
+        status: "Auditado",
+        topics: newReport.topics.trim(),
+        createdAt: new Date(),
+        buildingCode: building.code!,
+      });
+      let pdfUrl: string | undefined;
+      if (newReport.file) {
+        try {
+          pdfUrl = await uploadReportPdf(building.code!, reportId, newReport.file);
+          await updateReportRepo(reportId, { pdfUrl });
+        } catch {
+          setToast({ message: "Error al subir el PDF. Verifica la configuración de Storage.", type: "error" });
+        }
+      }
+      setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl, createdAt: new Date() }]);
+      setNewReport({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+      setToast({ message: "Reporte agregado correctamente" });
+    } catch {
+      setToast({ message: "Error al agregar el reporte", type: "error" });
     }
-    setReports((prev) => [...prev, { id: reportId, month: newReport.month, title: newReport.title, status: "Auditado", topics: newReport.topics, pdfUrl, createdAt: new Date() }]);
-    setNewReport({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+    setAddingReport(false);
   }
 
   async function handleDeleteReport(reportId: string) {
-    await deleteReport(reportId);
-    setReports((prev) => prev.filter((r) => r.id !== reportId));
+    setDeletingReportId(reportId);
+    try {
+      await deleteReport(reportId);
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
+    } catch {
+      setToast({ message: "Error al eliminar el reporte", type: "error" });
+    }
+    setDeletingReportId(null);
   }
 
   async function handleDeleteBuilding() {
@@ -193,7 +259,7 @@ export default function EditBuilding() {
         <button onClick={() => setActiveTab("info")} className={tabClass("info")}><Building2 className="w-4 h-4" /> Información</button>
         <button onClick={() => setActiveTab("users")} className={tabClass("users")}><Users className="w-4 h-4" /> Usuarios</button>
         <button onClick={() => setActiveTab("metrics")} className={tabClass("metrics")}><BarChart3 className="w-4 h-4" /> Métricas</button>
-        <button onClick={() => setActiveTab("reports")} className={tabClass("reports")}><FileText className="w-4 h-4" /> Dictámenes</button>
+        <button onClick={() => setActiveTab("reports")} className={tabClass("reports")}><FileText className="w-4 h-4" /> Reportes</button>
       </div>
 
       {/* Tab content */}
@@ -230,6 +296,7 @@ export default function EditBuilding() {
           <div className="space-y-4">
             {metrics.map((metric) => {
               const IconComponent = iconMap[metric.icon];
+              const isDeleting = deletingMetricId === metric.id;
               return (
                 <div key={metric.id} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200">
                   {IconComponent && <IconComponent className="w-5 h-5 text-primary shrink-0" />}
@@ -237,7 +304,13 @@ export default function EditBuilding() {
                     <div className="font-semibold text-slate-900 truncate">{metric.title}</div>
                     <div className="text-sm text-slate-500 truncate">{metric.value} — {metric.subtitle}</div>
                   </div>
-                  <button onClick={() => metric.id && handleDeleteMetric(metric.id)} className="text-slate-400 hover:text-danger transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
+                  <button
+                    onClick={() => metric.id && handleDeleteMetric(metric.id)}
+                    disabled={isDeleting}
+                    className="text-slate-400 hover:text-danger transition-colors shrink-0 disabled:opacity-50"
+                  >
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
                 </div>
               );
             })}
@@ -246,10 +319,20 @@ export default function EditBuilding() {
             {/* Add metric form */}
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <p className="font-bold text-slate-900 mb-3">Agregar métrica</p>
+
+              {metricError && (
+                <div className="mb-3 p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {metricError}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                <input type="text" value={newMetric.title} onChange={(e) => setNewMetric((prev) => ({ ...prev, title: e.target.value }))} placeholder="Título" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <input type="text" value={newMetric.value} onChange={(e) => setNewMetric((prev) => ({ ...prev, value: e.target.value }))} placeholder="Valor" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <input type="text" value={newMetric.subtitle} onChange={(e) => setNewMetric((prev) => ({ ...prev, subtitle: e.target.value }))} placeholder="Subtítulo" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <div>
+                  <input type="text" value={newMetric.title} onChange={(e) => { setNewMetric((prev) => ({ ...prev, title: e.target.value })); setMetricError(""); }} placeholder="Título * (mín. 3 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                </div>
+                <input type="text" value={newMetric.value} onChange={(e) => { setNewMetric((prev) => ({ ...prev, value: e.target.value })); setMetricError(""); }} placeholder="Valor *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value })); setMetricError(""); }} placeholder="Subtítulo *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
               </div>
 
               {/* Icon picker */}
@@ -276,43 +359,85 @@ export default function EditBuilding() {
                 })}
               </div>
 
-              <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
+              <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
             </div>
           </div>
         )}
 
         {activeTab === "reports" && (
           <div className="space-y-4">
-            {reports.map((report) => (
-              <div key={report.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-slate-900 truncate">{report.month} — {report.title}</div>
-                  <div className="text-sm text-slate-500 truncate">{report.topics}</div>
+            {reports.map((report) => {
+              const isDeleting = deletingReportId === report.id;
+              return (
+                <div key={report.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-slate-900 truncate">{report.month} — {report.title}</div>
+                    <div className="text-sm text-slate-500 truncate">{report.topics}</div>
+                  </div>
+                  {report.pdfUrl && (
+                    <a href={report.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline mr-3 shrink-0">PDF</a>
+                  )}
+                  <button
+                    onClick={() => report.id && handleDeleteReport(report.id)}
+                    disabled={isDeleting}
+                    className="text-slate-400 hover:text-danger transition-colors shrink-0 disabled:opacity-50"
+                  >
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  </button>
                 </div>
-                <button onClick={() => report.id && handleDeleteReport(report.id)} className="ml-3 text-slate-400 hover:text-danger transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            ))}
-            {reports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay dictámenes registrados.</p>}
+              );
+            })}
+            {reports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay reportes registrados.</p>}
 
+            {/* Add report form */}
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <p className="font-bold text-slate-900 mb-3">Agregar dictamen</p>
+              <p className="font-bold text-slate-900 mb-3">Agregar reporte</p>
+
+              {reportError && (
+                <div className="mb-3 p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {reportError}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <input type="text" value={newReport.month} onChange={(e) => setNewReport((prev) => ({ ...prev, month: e.target.value }))} placeholder="Mes (Ej: Marzo 2026)" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <input type="text" value={newReport.title} onChange={(e) => setNewReport((prev) => ({ ...prev, title: e.target.value }))} placeholder="Título" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <div className="sm:col-span-2">
-                  <input type="text" value={newReport.topics} onChange={(e) => setNewReport((prev) => ({ ...prev, topics: e.target.value }))} placeholder="Temas abordados" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <div>
+                  <input type="text" value={newReport.month} onChange={(e) => { setNewReport((prev) => ({ ...prev, month: e.target.value })); setReportError(""); }} placeholder="Mes * (Ej: Marzo 2026)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 </div>
                 <div>
-                  <input type="file" accept=".pdf" onChange={(e) => setNewReport((prev) => ({ ...prev, file: e.target.files?.[0] }))} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
+                  <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value })); setReportError(""); }} placeholder="Título * (mín. 5 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                </div>
+                <div className="sm:col-span-2">
+                  <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value })); setReportError(""); }} placeholder="Temas abordados * (mín. 5 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file && file.size > MAX_PDF_SIZE) {
+                        setReportError("El PDF no puede superar los 10MB");
+                        e.target.value = "";
+                        return;
+                      }
+                      setNewReport((prev) => ({ ...prev, file }));
+                      setReportError("");
+                    }}
+                    className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Máximo 10MB. Opcional.</p>
                 </div>
               </div>
-              <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} disabled={!newReport.month || !newReport.title}>Agregar</Button>
+              <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
             </div>
           </div>
         )}
       </div>
 
       <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Eliminar edificio" message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán." confirmLabel="Sí, eliminar" variant="danger" loading={deleting} onConfirm={handleDeleteBuilding} />
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }
