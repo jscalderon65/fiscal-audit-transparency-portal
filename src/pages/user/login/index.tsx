@@ -4,13 +4,13 @@ import { Building2, ShieldCheck, Home, ArrowLeft } from "lucide-react";
 import Card from "../../../ui/Card";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
-import { getUserByCedula } from "../../../db/repositories/user.repository";
+import { getUserByUserDocumentNumber } from "../../../db/repositories/user.repository";
 import { getBuildingByCode } from "../../../db/repositories/building.repository";
 
 export default function UserLoginPage() {
   const { buildingCode } = useParams<{ buildingCode: string }>();
   const navigate = useNavigate();
-  const [cedula, setCedula] = useState("");
+  const [userDocumentNumber, setUserDocumentNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [building, setBuilding] = useState<any>(null);
@@ -27,7 +27,7 @@ export default function UserLoginPage() {
     event.preventDefault();
     setError("");
 
-    const value = cedula.trim();
+    const value = userDocumentNumber.trim();
     if (!value) {
       setError("Ingrese su número de cédula");
       return;
@@ -39,14 +39,14 @@ export default function UserLoginPage() {
 
     setLoading(true);
     try {
-      const user = await getUserByCedula(value);
+      const user = await getUserByUserDocumentNumber(value);
       if (!user) {
         setError("Cédula no registrada en este edificio");
         setLoading(false);
         return;
       }
 
-      if (user.buildingSlug !== buildingCode) {
+      if (user.buildingCode !== buildingCode) {
         setError("Esta cédula no pertenece a este edificio");
         setLoading(false);
         return;
@@ -142,8 +142,8 @@ export default function UserLoginPage() {
           <div className="relative">
             <input
               type="text"
-              value={cedula}
-              onChange={(event) => setCedula(event.target.value)}
+              value={userDocumentNumber}
+              onChange={(event) => setUserDocumentNumber(event.target.value)}
               placeholder="Número de cédula"
               inputMode="numeric"
               className={`w-full border rounded-xl px-4 py-3 text-sm outline-none transition-all bg-white text-slate-900 focus:border-primary ${

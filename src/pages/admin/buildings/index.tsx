@@ -107,13 +107,9 @@ export default function BuildingsList() {
           {buildings.map((building, index) => (
             <div
               key={building.id}
-              className="flex items-center justify-between p-5"
-              style={{
-                borderBottom:
-                  index < buildings.length - 1
-                    ? "1px solid #f1f5f9"
-                    : "none",
-              }}
+              className={`flex items-center justify-between p-5 ${
+                index < buildings.length - 1 ? "border-b border-slate-100" : ""
+              }`}
             >
               <div className="flex items-center gap-4">
                 <Building2 className="w-5 h-5 shrink-0 text-primary" />

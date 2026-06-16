@@ -5,18 +5,9 @@ import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import { slugify } from "../../../helpers/slug";
+import { parseUserDocuments } from "../../../helpers/parseDocuments";
 import { createBuilding, generateCode } from "../../../db/repositories/building.repository";
 import { importUsers } from "../../../db/repositories/user.repository";
-
-function parseCedulas(text: string): { valids: string[]; invalids: number } {
-  const lines = text
-    .split("\n")
-    .map((l) => l.trim().split(",")[0].trim())
-    .filter((l) => l.length > 0);
-
-  const valids = lines.filter((l) => /^\d+$/.test(l));
-  return { valids, invalids: lines.length - valids.length };
-}
 
 export default function CreateBuilding() {
   const navigate = useNavigate();
@@ -24,7 +15,7 @@ export default function CreateBuilding() {
   const [name, setName] = useState("");
   const [showError, setShowError] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [pendingCedulas, setPendingCedulas] = useState<string[]>([]);
+  const [pendingDocuments, setPendingDocuments] = useState<string[]>([]);
   const [csvStatus, setCsvStatus] = useState<{
     type: "ok" | "warn";
     message: string;
@@ -44,18 +35,18 @@ export default function CreateBuilding() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
-      const { valids, invalids } = parseCedulas(text);
+      const { valids, invalids } = parseUserDocuments(text);
 
       if (valids.length === 0) {
         setCsvStatus({
           type: "warn",
           message: "No se encontraron cédulas válidas en el archivo.",
         });
-        setPendingCedulas([]);
+        setPendingDocuments([]);
         return;
       }
 
-      setPendingCedulas(valids);
+      setPendingDocuments(valids);
       setCsvStatus({
         type: "ok",
         message: `${valids.length} cédulas válidas encontradas${invalids > 0 ? `, ${invalids} ignoradas` : ""}.`,
@@ -67,7 +58,7 @@ export default function CreateBuilding() {
   }
 
   function clearCsv() {
-    setPendingCedulas([]);
+    setPendingDocuments([]);
     setCsvStatus(null);
   }
 
@@ -87,9 +78,9 @@ export default function CreateBuilding() {
     try {
       await createBuilding({ code, slug, name, createdAt: new Date(), data: {} });
 
-      if (pendingCedulas.length > 0) {
+      if (pendingDocuments.length > 0) {
         await importUsers(
-          pendingCedulas.map((cedula) => ({ cedula, buildingSlug: code }))
+          pendingDocuments.map((doc) => ({ userDocumentNumber: doc, buildingCode: code }))
         );
       }
 
@@ -169,10 +160,9 @@ export default function CreateBuilding() {
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="Ej: Conjunto Residencial Los Alamos"
-                className="w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary"
-                style={{
-                  borderColor: showError ? "#dc2626" : "#d1d5db",
-                }}
+                className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${
+                  showError ? "border-danger" : "border-slate-300"
+                }`}
               />
               {showError && (
                 <div className="mt-2 flex items-center gap-1.5">
@@ -230,7 +220,7 @@ export default function CreateBuilding() {
                 Seleccionar archivo
               </Button>
 
-              {pendingCedulas.length > 0 && (
+              {pendingDocuments.length > 0 && (
                 <button
                   onClick={clearCsv}
                   className="text-sm text-slate-400 hover:text-slate-600 transition-colors"

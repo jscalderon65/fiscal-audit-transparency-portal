@@ -88,7 +88,7 @@ export default function Modal({
                 disabled={loading}
                 className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 ${
                   variant === "danger"
-                    ? "bg-danger text-white hover:bg-red-700"
+                    ? "bg-danger text-white hover:bg-danger-dark"
                     : "bg-primary text-white hover:bg-primary-dark"
                 }`}
               >

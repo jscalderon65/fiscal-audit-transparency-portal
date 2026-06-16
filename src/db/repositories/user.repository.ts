@@ -4,30 +4,30 @@ import type { User } from "../types/user";
 
 const COLLECTION = "users";
 
-export async function getUserByCedula(cedula: string): Promise<User | null> {
-  const snapshot = await getDoc(doc(db, COLLECTION, cedula));
+export async function getUserByUserDocumentNumber(userDocumentNumber: string): Promise<User | null> {
+  const snapshot = await getDoc(doc(db, COLLECTION, userDocumentNumber));
   if (!snapshot.exists()) return null;
   return snapshot.data() as User;
 }
 
-export async function getUsersByBuildingSlug(slug: string): Promise<User[]> {
-  const q = query(collection(db, COLLECTION), where("buildingSlug", "==", slug));
+export async function getUsersByBuildingCode(buildingCode: string): Promise<User[]> {
+  const q = query(collection(db, COLLECTION), where("buildingCode", "==", buildingCode));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((d) => d.data() as User);
 }
 
 export async function createUser(user: User): Promise<void> {
-  await setDoc(doc(db, COLLECTION, user.cedula), user);
+  await setDoc(doc(db, COLLECTION, user.userDocumentNumber), user);
 }
 
-export async function deleteUser(cedula: string): Promise<void> {
-  await deleteDoc(doc(db, COLLECTION, cedula));
+export async function deleteUser(userDocumentNumber: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTION, userDocumentNumber));
 }
 
 export async function importUsers(users: User[]): Promise<void> {
   const batch = writeBatch(db);
   for (const user of users) {
-    batch.set(doc(db, COLLECTION, user.cedula), user);
+    batch.set(doc(db, COLLECTION, user.userDocumentNumber), user);
   }
   await batch.commit();
 }

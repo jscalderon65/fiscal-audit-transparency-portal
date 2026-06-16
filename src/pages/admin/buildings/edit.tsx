@@ -10,7 +10,7 @@ import {
   deleteBuilding,
 } from "../../../db/repositories/building.repository";
 import {
-  getUsersByBuildingSlug,
+  getUsersByBuildingCode,
   createUser,
   deleteUser,
   importUsers,
@@ -30,7 +30,7 @@ export default function EditBuilding() {
   const [showError, setShowError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<{ cedula: string }[]>([]);
+  const [users, setUsers] = useState<{ userDocumentNumber: string }[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("info");
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function EditBuilding() {
 
   useEffect(() => {
     if (!building?.code) return;
-    getUsersByBuildingSlug(building.code).then(setUsers);
+    getUsersByBuildingCode(building.code).then(setUsers);
   }, [building?.code]);
 
   function handleNameChange(value: string) {
@@ -72,27 +72,27 @@ export default function EditBuilding() {
     setSaving(false);
   }
 
-  async function handleAddUser(cedula: string) {
+  async function handleAddUser(userDocumentNumber: string) {
     if (!building?.code) return;
-    await createUser({ cedula, buildingSlug: building.code });
-    setUsers((prev) => [...prev, { cedula }]);
+    await createUser({ userDocumentNumber, buildingCode: building.code });
+    setUsers((prev) => [...prev, { userDocumentNumber }]);
   }
 
-  async function handleDeleteUser(cedula: string) {
-    await deleteUser(cedula);
-    setUsers((prev) => prev.filter((u) => u.cedula !== cedula));
+  async function handleDeleteUser(userDocumentNumber: string) {
+    await deleteUser(userDocumentNumber);
+    setUsers((prev) => prev.filter((u) => u.userDocumentNumber !== userDocumentNumber));
   }
 
-  async function handleImportCsv(cedulas: string[]) {
+  async function handleImportCsv(documents: string[]) {
     if (!building?.code) return;
-    const newUsers = cedulas.map((c) => ({
-      cedula: c,
-      buildingSlug: building.code,
+    const newUsers = documents.map((d) => ({
+      userDocumentNumber: d,
+      buildingCode: building.code,
     }));
     await importUsers(newUsers);
     setUsers((prev) => {
-      const existentes = new Set(prev.map((u) => u.cedula));
-      const nuevos = newUsers.filter((u) => !existentes.has(u.cedula));
+      const existing = new Set(prev.map((u) => u.userDocumentNumber));
+      const nuevos = newUsers.filter((u) => !existing.has(u.userDocumentNumber));
       return [...prev, ...nuevos];
     });
   }
@@ -184,10 +184,9 @@ export default function EditBuilding() {
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Ej: Conjunto Residencial Los Alamos"
-                  className="w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary"
-                  style={{
-                    borderColor: showError ? "#dc2626" : "#d1d5db",
-                  }}
+                className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${
+                  showError ? "border-danger" : "border-slate-300"
+                }`}
                 />
                 {showError && (
                   <div className="mt-2 flex items-center gap-1.5">
@@ -294,7 +293,7 @@ export default function EditBuilding() {
         ) : (
           <UsersTable
             users={users}
-            buildingSlug={building.code}
+            buildingCode={building.code}
             onAdd={handleAddUser}
             onDelete={handleDeleteUser}
             onImport={handleImportCsv}

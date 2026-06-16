@@ -1,4 +1,4 @@
 export interface User {
-  cedula: string;
-  buildingSlug: string;
+  userDocumentNumber: string;
+  buildingCode: string;
 }

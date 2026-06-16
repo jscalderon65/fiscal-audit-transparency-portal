@@ -2,23 +2,14 @@ import { useState, useRef } from "react";
 import { Trash2, Upload, Plus, FileText } from "lucide-react";
 import Button from "../../../../ui/Button";
 import { Small } from "../../../../ui/Typography";
-
-function parseCedulas(text: string): { valids: string[]; invalids: number } {
-  const lines = text
-    .split("\n")
-    .map((l) => l.trim().split(",")[0].trim())
-    .filter((l) => l.length > 0);
-
-  const valids = lines.filter((l) => /^\d+$/.test(l));
-  return { valids, invalids: lines.length - valids.length };
-}
+import { parseUserDocuments } from "../../../../helpers/parseDocuments";
 
 export interface UsersTableProps {
-  users: { cedula: string }[];
-  buildingSlug: string;
-  onAdd: (cedula: string) => Promise<void>;
-  onDelete: (cedula: string) => Promise<void>;
-  onImport: (cedulas: string[]) => Promise<void>;
+  users: { userDocumentNumber: string }[];
+  buildingCode: string;
+  onAdd: (userDocumentNumber: string) => Promise<void>;
+  onDelete: (userDocumentNumber: string) => Promise<void>;
+  onImport: (documents: string[]) => Promise<void>;
 }
 
 export default function UsersTable({
@@ -27,7 +18,7 @@ export default function UsersTable({
   onDelete,
   onImport,
 }: UsersTableProps) {
-  const [newCedula, setNewCedula] = useState("");
+  const [newUserDocumentNumber, setNewUserDocumentNumber] = useState("");
   const [adding, setAdding] = useState(false);
   const [csvStatus, setCsvStatus] = useState<{
     type: "ok" | "warn";
@@ -37,12 +28,12 @@ export default function UsersTable({
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleAdd() {
-    const val = newCedula.trim();
+    const val = newUserDocumentNumber.trim();
     if (!/^\d+$/.test(val)) return;
     setAdding(true);
     try {
       await onAdd(val);
-      setNewCedula("");
+      setNewUserDocumentNumber("");
     } finally {
       setAdding(false);
     }
@@ -56,7 +47,7 @@ export default function UsersTable({
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const text = ev.target?.result as string;
-      const { valids, invalids } = parseCedulas(text);
+      const { valids, invalids } = parseUserDocuments(text);
 
       if (valids.length === 0) {
         setCsvStatus({
@@ -79,7 +70,6 @@ export default function UsersTable({
     };
     reader.readAsText(file);
 
-    // Reset input so same file can be re-selected
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -95,14 +85,14 @@ export default function UsersTable({
           </span>
         </div>
 
-        {/* Add single cedula */}
+        {/* Add single user */}
         <div className="flex items-center gap-2">
           <input
             type="text"
-            value={newCedula}
+            value={newUserDocumentNumber}
             onChange={(e) => {
               const val = e.target.value.replace(/\D/g, "");
-              setNewCedula(val);
+              setNewUserDocumentNumber(val);
             }}
             placeholder="Número de cédula"
             inputMode="numeric"
@@ -114,7 +104,7 @@ export default function UsersTable({
             leftIcon={Plus}
             onClick={handleAdd}
             loading={adding}
-            disabled={!/^\d+$/.test(newCedula)}
+            disabled={!/^\d+$/.test(newUserDocumentNumber)}
           >
             Agregar
           </Button>
@@ -173,16 +163,16 @@ export default function UsersTable({
             <tbody>
               {users.map((user) => (
                 <tr
-                  key={user.cedula}
+                  key={user.userDocumentNumber}
                   className="border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors"
                 >
                   <td className="px-5 py-4 font-mono text-slate-900 font-medium">
-                    {user.cedula}
+                    {user.userDocumentNumber}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <button
-                      onClick={() => onDelete(user.cedula)}
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-danger hover:text-red-700 transition-colors"
+                      onClick={() => onDelete(user.userDocumentNumber)}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-danger hover:text-danger-dark transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                       Eliminar
