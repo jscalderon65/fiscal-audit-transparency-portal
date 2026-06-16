@@ -141,7 +141,6 @@ export default function EditBuilding() {
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
         Editar edificio
       </h1>
-      <Text className="text-slate-500">{building.name}</Text>
 
       {/* Tabs */}
       <div className="mt-8 border-b border-slate-200 flex">
