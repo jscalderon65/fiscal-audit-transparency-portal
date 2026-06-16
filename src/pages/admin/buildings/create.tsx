@@ -201,8 +201,11 @@ export default function CreateBuilding() {
       {step === 2 && (
         <div className="mt-8 space-y-6">
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-1">
-              Importar residentes <span className="text-slate-400 font-normal text-sm">(opcional)</span>
+            <h3 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
+              Importar residentes
+              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                Opcional
+              </span>
             </h3>
             <Text className="text-slate-500 text-sm mb-4">
               Sube un archivo CSV o TXT con las cédulas de los residentes. Una
