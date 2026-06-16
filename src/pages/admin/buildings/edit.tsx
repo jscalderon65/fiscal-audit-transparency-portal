@@ -16,6 +16,7 @@ import {
   importUsers,
 } from "../../../db/repositories/user.repository";
 import type { Building } from "../../../db/types/building";
+import Modal from "../../../ui/Modal";
 import UsersTable from "./components/UsersTable";
 
 type Tab = "info" | "users";
@@ -97,19 +98,19 @@ export default function EditBuilding() {
     });
   }
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   async function handleDelete() {
     if (!id) return;
-    const confirmed = window.confirm(
-      "¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán."
-    );
-    if (!confirmed) return;
-
+    setDeleting(true);
     try {
       await deleteBuilding(id);
       navigate(ROUTES.PANEL_BUILDINGS);
     } catch {
       setShowError(true);
     }
+    setDeleting(false);
   }
 
   if (loading) {
@@ -280,14 +281,14 @@ export default function EditBuilding() {
                 residentes y la información asociada.
               </p>
               <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  leftIcon={Trash2}
-                  onClick={handleDelete}
-                  className="border-danger text-danger hover:bg-danger hover:text-white"
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all py-2 px-4 bg-transparent border-2 border-danger text-danger hover:bg-danger hover:text-white"
                 >
+                  <Trash2 className="w-4 h-4" />
                   Eliminar este edificio
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -301,6 +302,17 @@ export default function EditBuilding() {
           />
         )}
       </div>
+
+      <Modal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Eliminar edificio"
+        message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán."
+        confirmLabel="Sí, eliminar"
+        variant="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
