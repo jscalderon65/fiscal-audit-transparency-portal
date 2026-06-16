@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AlertCircle, Copy, Check, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, Users, Building2 } from "lucide-react";
 import { Small, Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
-import { slugify } from "../../../helpers/slug";
 import {
   getBuildingById,
   updateBuilding,
@@ -18,6 +17,8 @@ import {
 import type { Building } from "../../../db/types/building";
 import UsersTable from "./components/UsersTable";
 
+type Tab = "info" | "users";
+
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -27,11 +28,8 @@ export default function EditBuilding() {
   const [showError, setShowError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
   const [users, setUsers] = useState<{ cedula: string }[]>([]);
-  const [slug, setSlug] = useState("");
-
-  const link = `${window.location.origin}/user/${slug}/login`;
+  const [activeTab, setActiveTab] = useState<Tab>("info");
 
   useEffect(() => {
     if (!id) return;
@@ -40,7 +38,6 @@ export default function EditBuilding() {
         if (data) {
           setBuilding(data);
           setName(data.name);
-          setSlug(data.slug);
         }
       })
       .finally(() => setLoading(false));
@@ -53,24 +50,8 @@ export default function EditBuilding() {
 
   function handleNameChange(value: string) {
     setName(value);
-    setSlug(slugify(value));
     setHasChanges(value !== building?.name);
     if (showError) setShowError(false);
-  }
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(link);
-    } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = link;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleSave() {
@@ -81,8 +62,9 @@ export default function EditBuilding() {
 
     setSaving(true);
     try {
-      await updateBuilding(id, { name, slug });
+      await updateBuilding(id, { name });
       setHasChanges(false);
+      setBuilding((prev) => (prev ? { ...prev, name } : prev));
     } catch {
       setShowError(true);
     }
@@ -102,7 +84,10 @@ export default function EditBuilding() {
 
   async function handleImportCsv(cedulas: string[]) {
     if (!building?.slug) return;
-    const newUsers = cedulas.map((c) => ({ cedula: c, buildingSlug: building.slug }));
+    const newUsers = cedulas.map((c) => ({
+      cedula: c,
+      buildingSlug: building.slug,
+    }));
     await importUsers(newUsers);
     setUsers((prev) => {
       const existentes = new Set(prev.map((u) => u.cedula));
@@ -136,6 +121,13 @@ export default function EditBuilding() {
     );
   }
 
+  const tabClass = (tab: Tab) =>
+    `flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+      activeTab === tab
+        ? "border-primary text-primary"
+        : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+    }`;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       <button
@@ -149,93 +141,74 @@ export default function EditBuilding() {
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">
         Editar edificio
       </h1>
-      <Text className="text-slate-500">
-        Modifica los datos del conjunto residencial.
-      </Text>
+      <Text className="text-slate-500">{building.name}</Text>
 
-      <div className="mt-8 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-        <Small className="text-slate-500">Link de Acceso</Small>
-        <div className="mt-2 flex items-center justify-between gap-4 p-3 rounded-xl bg-slate-100 text-primary text-sm font-mono break-all">
-          <span className="truncate">{link}</span>
-        </div>
-
-        <button
-          onClick={handleCopy}
-          className="mt-3 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors border-2"
-          style={{
-            backgroundColor: copied ? "var(--color-primary)" : "transparent",
-            color: copied ? "#fff" : "var(--color-primary)",
-            borderColor: copied ? "transparent" : "var(--color-primary)",
-          }}
-        >
-          {copied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
-          )}
-          {copied ? "Copiado" : "Copiar link"}
+      {/* Tabs */}
+      <div className="mt-8 border-b border-slate-200 flex gap-6 overflow-x-auto">
+        <button onClick={() => setActiveTab("info")} className={tabClass("info")}>
+          <Building2 className="w-4 h-4" />
+          Información
+        </button>
+        <button onClick={() => setActiveTab("users")} className={tabClass("users")}>
+          <Users className="w-4 h-4" />
+          Usuarios
         </button>
       </div>
 
-      <div className="mt-8 space-y-6">
-        <div>
-          <Small className="text-slate-500">Nombre del edificio *</Small>
-          <div className="mt-2 relative">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Ej: Conjunto Residencial Los Alamos"
-              className="w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary"
-              style={{
-                borderColor: showError ? "#dc2626" : "#d1d5db",
-              }}
-            />
-            {showError && (
-              <div className="mt-2 flex items-center gap-1.5">
-                <AlertCircle className="w-3.5 h-3.5 text-danger" />
-                <span className="text-sm text-danger">
-                  El nombre debe tener al menos 3 caracteres
-                </span>
+      {/* Tab content */}
+      <div className="mt-6">
+        {activeTab === "info" ? (
+          <div className="space-y-6">
+            <div>
+              <Small className="text-slate-500">Nombre del edificio *</Small>
+              <div className="mt-2 relative">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="Ej: Conjunto Residencial Los Alamos"
+                  className="w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary"
+                  style={{
+                    borderColor: showError ? "#dc2626" : "#d1d5db",
+                  }}
+                />
+                {showError && (
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-danger" />
+                    <span className="text-sm text-danger">
+                      El nombre debe tener al menos 3 caracteres
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                variant="primary"
+                loading={saving}
+                onClick={handleSave}
+                disabled={!hasChanges || name.trim().length < 3}
+              >
+                Guardar cambios
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
+              >
+                Cancelar
+              </Button>
+            </div>
           </div>
-        </div>
-
-        <div>
-          <Small className="text-slate-500">Slug (identificador único)</Small>
-          <div className="mt-2 px-4 py-3 rounded-xl bg-slate-100 text-slate-600 text-sm font-mono">
-            {slug}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            variant="primary"
-            loading={saving}
-            onClick={handleSave}
-            disabled={!hasChanges || name.trim().length < 3}
-          >
-            Guardar cambios
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
-          >
-            Cancelar
-          </Button>
-        </div>
-      </div>
-
-      {/* Users table */}
-      <div className="mt-10">
-        <UsersTable
-          users={users}
-          buildingSlug={building.slug}
-          onAdd={handleAddUser}
-          onDelete={handleDeleteUser}
-          onImport={handleImportCsv}
-        />
+        ) : (
+          <UsersTable
+            users={users}
+            buildingSlug={building.slug}
+            onAdd={handleAddUser}
+            onDelete={handleDeleteUser}
+            onImport={handleImportCsv}
+          />
+        )}
       </div>
     </div>
   );
