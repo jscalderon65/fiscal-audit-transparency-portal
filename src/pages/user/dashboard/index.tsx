@@ -15,7 +15,7 @@ import { Banner } from "../components/banner";
 import type { Building } from "../../../db/types/building";
 
 interface Session {
-  cedula: string;
+  userDocumentNumber: string;
   building: Building;
 }
 

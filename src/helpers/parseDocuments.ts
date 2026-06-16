@@ -3,9 +3,9 @@ export function parseUserDocuments(
 ): { valids: string[]; invalids: number } {
   const lines = text
     .split("\n")
-    .map((l) => l.trim().split(",")[0].trim())
-    .filter((l) => l.length > 0);
+    .map((line) => line.trim().split(",")[0].trim())
+    .filter((line) => line.length > 0);
 
-  const valids = lines.filter((l) => /^\d+$/.test(l));
+  const valids = lines.filter((line) => /^\d+$/.test(line));
   return { valids, invalids: lines.length - valids.length };
 }

@@ -62,7 +62,7 @@ export default function UserLoginPage() {
       localStorage.setItem(
         "session",
         JSON.stringify({
-          cedula: value,
+          userDocumentNumber: value,
           building: buildingData,
         })
       );

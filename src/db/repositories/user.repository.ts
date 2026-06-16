@@ -13,7 +13,7 @@ export async function getUserByUserDocumentNumber(userDocumentNumber: string): P
 export async function getUsersByBuildingCode(buildingCode: string): Promise<User[]> {
   const q = query(collection(db, COLLECTION), where("buildingCode", "==", buildingCode));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => d.data() as User);
+  return snapshot.docs.map((doc) => doc.data() as User);
 }
 
 export async function createUser(user: User): Promise<void> {

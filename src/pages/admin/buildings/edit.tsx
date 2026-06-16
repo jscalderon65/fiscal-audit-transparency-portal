@@ -80,20 +80,20 @@ export default function EditBuilding() {
 
   async function handleDeleteUser(userDocumentNumber: string) {
     await deleteUser(userDocumentNumber);
-    setUsers((prev) => prev.filter((u) => u.userDocumentNumber !== userDocumentNumber));
+    setUsers((prev) => prev.filter((user) => user.userDocumentNumber !== userDocumentNumber));
   }
 
   async function handleImportCsv(documents: string[]) {
     if (!building?.code) return;
-    const newUsers = documents.map((d) => ({
-      userDocumentNumber: d,
+    const newUsers = documents.map((document) => ({
+      userDocumentNumber: document,
       buildingCode: building.code,
     }));
     await importUsers(newUsers);
     setUsers((prev) => {
-      const existing = new Set(prev.map((u) => u.userDocumentNumber));
-      const nuevos = newUsers.filter((u) => !existing.has(u.userDocumentNumber));
-      return [...prev, ...nuevos];
+      const existing = new Set(prev.map((user) => user.userDocumentNumber));
+      const incomingUsers = newUsers.filter((user) => !existing.has(user.userDocumentNumber));
+      return [...prev, ...incomingUsers];
     });
   }
 
