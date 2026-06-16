@@ -201,13 +201,14 @@ export default function CreateBuilding() {
       {step === 2 && (
         <div className="mt-8 space-y-6">
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-3">
-              Importar residentes
+            <h3 className="font-bold text-slate-900 mb-1">
+              Importar residentes <span className="text-slate-400 font-normal text-sm">(opcional)</span>
             </h3>
             <Text className="text-slate-500 text-sm mb-4">
               Sube un archivo CSV o TXT con las cédulas de los residentes. Una
               cédula por línea o en la primera columna. Solo números, sin
-              letras ni espacios.
+              letras ni espacios. Puedes agregarlos más tarde desde la edición
+              del edificio.
             </Text>
 
             <div className="flex flex-wrap items-center gap-3">
