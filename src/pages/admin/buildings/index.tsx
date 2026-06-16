@@ -90,14 +90,7 @@ export default function BuildingsList() {
           <Text className="text-slate-500 mt-4">
             No hay edificios registrados todavía.
           </Text>
-          <Button
-            variant="primary"
-            leftIcon={Plus}
-            className="mt-6"
-            onClick={() => navigate(ROUTES.PANEL_BUILDINGS_CREATE)}
-          >
-            Crear el primer edificio
-          </Button>
+
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
