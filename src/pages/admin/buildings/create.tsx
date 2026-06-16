@@ -1,6 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, createElement } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, ArrowLeft, Upload, FileText, Check, Plus, Trash2, X } from "lucide-react";
+import {
+  AlertCircle, ArrowLeft, Upload, FileText, Check, Plus, X,
+  Wallet, PiggyBank, HardHat, Building2,
+  DollarSign, TrendingUp, TrendingDown, BarChart3,
+  PieChart, CreditCard, Landmark, Calculator,
+  Percent, ArrowUpRight, ArrowDownRight, Scale,
+  ClipboardList, FileText as FileTextIcon, Receipt, Banknote,
+} from "lucide-react";
 import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
@@ -12,8 +19,23 @@ import { createMetric } from "../../../db/repositories/metric.repository";
 import { createReport, uploadReportPdf, updateReport } from "../../../db/repositories/report.repository";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
+import type { LucideIcon } from "lucide-react";
 
-const METRIC_ICONS = ["Wallet", "PiggyBank", "HardHat", "Building2"] as const;
+const METRIC_ICONS = [
+  "Wallet", "PiggyBank", "HardHat", "Building2",
+  "DollarSign", "TrendingUp", "TrendingDown", "BarChart3",
+  "PieChart", "CreditCard", "Landmark", "Calculator",
+  "Percent", "ArrowUpRight", "ArrowDownRight", "Scale",
+  "ClipboardList", "FileText", "Receipt", "Banknote",
+] as const;
+
+const iconMap: Record<string, LucideIcon> = {
+  Wallet, PiggyBank, HardHat, Building2,
+  DollarSign, TrendingUp, TrendingDown, BarChart3,
+  PieChart, CreditCard, Landmark, Calculator,
+  Percent, ArrowUpRight, ArrowDownRight, Scale,
+  ClipboardList, FileText: FileTextIcon, Receipt, Banknote,
+};
 
 const emptyMetric = (): BuildingMetric => ({
   title: "",
@@ -251,11 +273,29 @@ export default function CreateBuilding() {
                     <label className="block text-xs font-semibold text-slate-600 mb-1">Subtítulo</label>
                     <input type="text" value={metric.subtitle} onChange={(e) => updateMetric(index, "subtitle", e.target.value)} placeholder="Ej: Cierre Fiscal 2025" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="block text-xs font-semibold text-slate-600 mb-1">Icono</label>
-                    <select value={metric.icon} onChange={(e) => updateMetric(index, "icon", e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900">
-                      {METRIC_ICONS.map((icon) => <option key={icon} value={icon}>{icon}</option>)}
-                    </select>
+                    <div className="flex flex-wrap gap-1.5">
+                      {METRIC_ICONS.map((iconName) => {
+                        const IconComponent = iconMap[iconName];
+                        const isSelected = metric.icon === iconName;
+                        return (
+                          <button
+                            key={iconName}
+                            type="button"
+                            onClick={() => updateMetric(index, "icon", iconName)}
+                            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border-2 ${
+                              isSelected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                            }`}
+                            title={iconName}
+                          >
+                            {IconComponent && <IconComponent className="w-4.5 h-4.5" />}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>

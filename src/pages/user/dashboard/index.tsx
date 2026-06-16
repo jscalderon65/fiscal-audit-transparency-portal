@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Building2,
-  Wallet,
-  PiggyBank,
-  HardHat,
-  ShieldCheck,
+  Building2, Wallet, PiggyBank, HardHat, ShieldCheck,
+  DollarSign, TrendingUp, TrendingDown, BarChart3,
+  PieChart, CreditCard, Landmark, Calculator,
+  Percent, ArrowUpRight, ArrowDownRight, Scale,
+  ClipboardList, FileText, Receipt, Banknote,
 } from "lucide-react";
 import Footer from "../../../ui/Footer";
 import { ContactForm } from "../components/contact-form";
@@ -20,6 +20,10 @@ import { getReportsByBuildingCode } from "../../../db/repositories/report.reposi
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wallet, PiggyBank, HardHat, Building2,
+  DollarSign, TrendingUp, TrendingDown, BarChart3,
+  PieChart, CreditCard, Landmark, Calculator,
+  Percent, ArrowUpRight, ArrowDownRight, Scale,
+  ClipboardList, FileText, Receipt, Banknote,
 };
 
 interface Session {

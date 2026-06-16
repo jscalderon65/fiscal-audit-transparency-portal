@@ -1,42 +1,52 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, createElement } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AlertCircle, ArrowLeft, Users, Building2, Trash2, Plus, X, Upload, Wallet } from "lucide-react";
+import {
+  AlertCircle, ArrowLeft, Users, Building2, Trash2, Plus, Upload,
+  Wallet, PiggyBank, HardHat, DollarSign, TrendingUp, TrendingDown,
+  BarChart3, PieChart, CreditCard, Landmark, Calculator, Percent,
+  ArrowUpRight, ArrowDownRight, Scale, ClipboardList, FileText,
+  Receipt, Banknote,
+} from "lucide-react";
 import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import {
-  getBuildingById,
-  updateBuilding,
-  deleteBuilding,
+  getBuildingById, updateBuilding, deleteBuilding,
 } from "../../../db/repositories/building.repository";
 import {
-  getUsersByBuildingCode,
-  createUser,
-  deleteUser,
-  importUsers,
+  getUsersByBuildingCode, createUser, deleteUser, importUsers,
 } from "../../../db/repositories/user.repository";
 import {
-  getMetricsByBuildingCode,
-  createMetric,
-  updateMetric as updateMetricRepo,
-  deleteMetric,
+  getMetricsByBuildingCode, createMetric, deleteMetric,
 } from "../../../db/repositories/metric.repository";
 import {
-  getReportsByBuildingCode,
-  createReport as createReportRepo,
-  updateReport as updateReportRepo,
-  deleteReport,
-  uploadReportPdf,
+  getReportsByBuildingCode, createReport as createReportRepo,
+  updateReport as updateReportRepo, deleteReport, uploadReportPdf,
 } from "../../../db/repositories/report.repository";
 import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
 import Modal from "../../../ui/Modal";
 import UsersTable from "./components/UsersTable";
+import type { LucideIcon } from "lucide-react";
 
 type Tab = "info" | "users" | "metrics" | "reports";
 
-const METRIC_ICONS = ["Wallet", "PiggyBank", "HardHat", "Building2"] as const;
+const METRIC_ICONS = [
+  "Wallet", "PiggyBank", "HardHat", "Building2",
+  "DollarSign", "TrendingUp", "TrendingDown", "BarChart3",
+  "PieChart", "CreditCard", "Landmark", "Calculator",
+  "Percent", "ArrowUpRight", "ArrowDownRight", "Scale",
+  "ClipboardList", "FileText", "Receipt", "Banknote",
+] as const;
+
+const iconMap: Record<string, LucideIcon> = {
+  Wallet, PiggyBank, HardHat, Building2,
+  DollarSign, TrendingUp, TrendingDown, BarChart3,
+  PieChart, CreditCard, Landmark, Calculator,
+  Percent, ArrowUpRight, ArrowDownRight, Scale,
+  ClipboardList, FileText, Receipt, Banknote,
+};
 
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
@@ -53,8 +63,6 @@ export default function EditBuilding() {
   const [reports, setReports] = useState<BuildingReport[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  // New metric form state
   const [newMetric, setNewMetric] = useState<BuildingMetric>({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
   const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
 
@@ -124,12 +132,8 @@ export default function EditBuilding() {
   async function handleAddReport() {
     if (!building?.code || !newReport.month || !newReport.title) return;
     const reportId = await createReportRepo({
-      month: newReport.month,
-      title: newReport.title,
-      status: "Auditado",
-      topics: newReport.topics,
-      createdAt: new Date(),
-      buildingCode: building.code,
+      month: newReport.month, title: newReport.title, status: "Auditado",
+      topics: newReport.topics, createdAt: new Date(), buildingCode: building.code,
     });
     let pdfUrl: string | undefined;
     if (newReport.file) {
@@ -175,7 +179,7 @@ export default function EditBuilding() {
   }
 
   const tabClass = (tab: Tab) =>
-    `flex-1 sm:flex-none flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+    `flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
       activeTab === tab ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
     }`;
 
@@ -185,17 +189,17 @@ export default function EditBuilding() {
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Editar edificio</h1>
 
       {/* Tabs */}
-      <div className="mt-8 border-b border-slate-200 flex overflow-x-auto">
+      <div className="mt-8 border-b border-slate-200 flex">
         <button onClick={() => setActiveTab("info")} className={tabClass("info")}><Building2 className="w-4 h-4" /> Información</button>
         <button onClick={() => setActiveTab("users")} className={tabClass("users")}><Users className="w-4 h-4" /> Usuarios</button>
-        <button onClick={() => setActiveTab("metrics")} className={tabClass("metrics")}><Wallet className="w-4 h-4" /> Métricas</button>
-        <button onClick={() => setActiveTab("reports")} className={tabClass("reports")}><Upload className="w-4 h-4" /> Dictámenes</button>
+        <button onClick={() => setActiveTab("metrics")} className={tabClass("metrics")}><BarChart3 className="w-4 h-4" /> Métricas</button>
+        <button onClick={() => setActiveTab("reports")} className={tabClass("reports")}><FileText className="w-4 h-4" /> Dictámenes</button>
       </div>
 
       {/* Tab content */}
-      <div className="mt-6">
+      <div className="mt-6 max-w-2xl mx-auto">
         {activeTab === "info" && (
-          <div className="space-y-6 max-w-2xl">
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nombre del edificio *</label>
               <input type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ej: Conjunto Residencial Los Alamos" className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${showError ? "border-danger" : "border-slate-300"}`} />
@@ -223,35 +227,62 @@ export default function EditBuilding() {
         )}
 
         {activeTab === "metrics" && (
-          <div className="space-y-4 max-w-2xl">
-            {metrics.map((metric) => (
-              <div key={metric.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-slate-900 truncate">{metric.title}</div>
-                  <div className="text-sm text-slate-500 truncate">{metric.value} — {metric.subtitle}</div>
+          <div className="space-y-4">
+            {metrics.map((metric) => {
+              const IconComponent = iconMap[metric.icon];
+              return (
+                <div key={metric.id} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200">
+                  {IconComponent && <IconComponent className="w-5 h-5 text-primary shrink-0" />}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-slate-900 truncate">{metric.title}</div>
+                    <div className="text-sm text-slate-500 truncate">{metric.value} — {metric.subtitle}</div>
+                  </div>
+                  <button onClick={() => metric.id && handleDeleteMetric(metric.id)} className="text-slate-400 hover:text-danger transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
                 </div>
-                <button onClick={() => metric.id && handleDeleteMetric(metric.id)} className="ml-3 text-slate-400 hover:text-danger transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            ))}
+              );
+            })}
             {metrics.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>}
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Agregar métrica</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            {/* Add metric form */}
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <p className="font-bold text-slate-900 mb-3">Agregar métrica</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 <input type="text" value={newMetric.title} onChange={(e) => setNewMetric((prev) => ({ ...prev, title: e.target.value }))} placeholder="Título" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newMetric.value} onChange={(e) => setNewMetric((prev) => ({ ...prev, value: e.target.value }))} placeholder="Valor" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newMetric.subtitle} onChange={(e) => setNewMetric((prev) => ({ ...prev, subtitle: e.target.value }))} placeholder="Subtítulo" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <select value={newMetric.icon} onChange={(e) => setNewMetric((prev) => ({ ...prev, icon: e.target.value }))} className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900">
-                  {METRIC_ICONS.map((icon) => <option key={icon} value={icon}>{icon}</option>)}
-                </select>
               </div>
+
+              {/* Icon picker */}
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Icono</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {METRIC_ICONS.map((iconName) => {
+                  const IconComponent = iconMap[iconName];
+                  const isSelected = newMetric.icon === iconName;
+                  return (
+                    <button
+                      key={iconName}
+                      type="button"
+                      onClick={() => setNewMetric((prev) => ({ ...prev, icon: iconName }))}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border-2 ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                      }`}
+                      title={iconName}
+                    >
+                      {IconComponent && <IconComponent className="w-5 h-5" />}
+                    </button>
+                  );
+                })}
+              </div>
+
               <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
             </div>
           </div>
         )}
 
         {activeTab === "reports" && (
-          <div className="space-y-4 max-w-2xl">
+          <div className="space-y-4">
             {reports.map((report) => (
               <div key={report.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
                 <div className="flex-1 min-w-0">
@@ -263,8 +294,8 @@ export default function EditBuilding() {
             ))}
             {reports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay dictámenes registrados.</p>}
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Agregar dictamen</p>
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <p className="font-bold text-slate-900 mb-3">Agregar dictamen</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <input type="text" value={newReport.month} onChange={(e) => setNewReport((prev) => ({ ...prev, month: e.target.value }))} placeholder="Mes (Ej: Marzo 2026)" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newReport.title} onChange={(e) => setNewReport((prev) => ({ ...prev, title: e.target.value }))} placeholder="Título" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
