@@ -5,7 +5,7 @@ import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import { slugify } from "../../../helpers/slug";
-import { createBuilding } from "../../../db/repositories/building.repository";
+import { createBuilding, generateCode } from "../../../db/repositories/building.repository";
 import { importUsers } from "../../../db/repositories/user.repository";
 
 function parseCedulas(text: string): { valids: string[]; invalids: number } {
@@ -80,15 +80,16 @@ export default function CreateBuilding() {
   }
 
   async function handleSave() {
+    const code = generateCode();
     const slug = slugify(name);
 
     setCreating(true);
     try {
-      await createBuilding({ slug, name, createdAt: new Date(), data: {} });
+      await createBuilding({ code, slug, name, createdAt: new Date(), data: {} });
 
       if (pendingCedulas.length > 0) {
         await importUsers(
-          pendingCedulas.map((cedula) => ({ cedula, buildingSlug: slug }))
+          pendingCedulas.map((cedula) => ({ cedula, buildingSlug: code }))
         );
       }
 

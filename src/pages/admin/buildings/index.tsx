@@ -29,8 +29,8 @@ export default function BuildingsList() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function copyLink(slug: string, id: string) {
-    const link = `${window.location.origin}/user/${slug}/login`;
+  async function copyLink(code: string, id: string) {
+    const link = `${window.location.origin}/user/${code}/login`;
     try {
       await navigator.clipboard.writeText(link);
       setCopiedId(id);
@@ -126,7 +126,7 @@ export default function BuildingsList() {
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => copyLink(building.slug, building.id)}
+                  onClick={() => copyLink(building.code, building.id)}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors border-2"
                   style={{
                     backgroundColor: copiedId === building.id ? "var(--color-primary)" : "transparent",

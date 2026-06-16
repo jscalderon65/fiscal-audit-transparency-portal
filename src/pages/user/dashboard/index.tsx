@@ -20,23 +20,23 @@ interface Session {
 }
 
 export const UserDashboard = () => {
-  const { buildingSlug } = useParams<{ buildingSlug: string }>();
+  const { buildingCode } = useParams<{ buildingCode: string }>();
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("session");
     if (!raw) {
-      navigate(`/user/${buildingSlug}/login`, { replace: true });
+      navigate(`/user/${buildingCode}/login`, { replace: true });
       return;
     }
     const parsed: Session = JSON.parse(raw);
-    if (parsed.building.slug !== buildingSlug) {
-      navigate(`/user/${buildingSlug}/login`, { replace: true });
+    if (parsed.building.code !== buildingCode) {
+      navigate(`/user/${buildingCode}/login`, { replace: true });
       return;
     }
     setSession(parsed);
-  }, [buildingSlug, navigate]);
+  }, [buildingCode, navigate]);
 
   if (!session) {
     return (

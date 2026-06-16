@@ -46,9 +46,9 @@ export default function EditBuilding() {
   }, [id]);
 
   useEffect(() => {
-    if (!building?.slug) return;
-    getUsersByBuildingSlug(building.slug).then(setUsers);
-  }, [building?.slug]);
+    if (!building?.code) return;
+    getUsersByBuildingSlug(building.code).then(setUsers);
+  }, [building?.code]);
 
   function handleNameChange(value: string) {
     setName(value);
@@ -74,8 +74,8 @@ export default function EditBuilding() {
   }
 
   async function handleAddUser(cedula: string) {
-    if (!building?.slug) return;
-    await createUser({ cedula, buildingSlug: building.slug });
+    if (!building?.code) return;
+    await createUser({ cedula, buildingSlug: building.code });
     setUsers((prev) => [...prev, { cedula }]);
   }
 
@@ -85,10 +85,10 @@ export default function EditBuilding() {
   }
 
   async function handleImportCsv(cedulas: string[]) {
-    if (!building?.slug) return;
+    if (!building?.code) return;
     const newUsers = cedulas.map((c) => ({
       cedula: c,
-      buildingSlug: building.slug,
+      buildingSlug: building.code,
     }));
     await importUsers(newUsers);
     setUsers((prev) => {
@@ -295,7 +295,7 @@ export default function EditBuilding() {
         ) : (
           <UsersTable
             users={users}
-            buildingSlug={building.slug}
+            buildingSlug={building.code}
             onAdd={handleAddUser}
             onDelete={handleDeleteUser}
             onImport={handleImportCsv}

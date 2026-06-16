@@ -1,5 +1,6 @@
 export interface Building {
   id: string;
+  code: string;
   slug: string;
   name: string;
   createdAt: Date;

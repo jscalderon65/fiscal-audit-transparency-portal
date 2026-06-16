@@ -3,8 +3,8 @@ export const ROUTES = {
 
   DESIGN_SYSTEM: "/design-system",
 
-  USER_LOGIN: "/user/:buildingSlug/login",
-  USER_DASHBOARD: "/user/:buildingSlug/dashboard",
+  USER_LOGIN: "/user/:buildingCode/login",
+  USER_DASHBOARD: "/user/:buildingCode/dashboard",
 
   PANEL_LOGIN: "/admin/login",
   PANEL_BUILDINGS: "/admin/buildings",

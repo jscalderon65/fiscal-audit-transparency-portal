@@ -4,6 +4,10 @@ import type { Building } from "../types/building";
 
 const COLLECTION = "buildings";
 
+export function generateCode(): string {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 function formatDocument(id: string, data: Record<string, any>): Building {
   return {
     id,
@@ -16,6 +20,14 @@ export async function getBuildingById(id: string): Promise<Building | null> {
   const snapshot = await getDoc(doc(db, COLLECTION, id));
   if (!snapshot.exists()) return null;
   return formatDocument(snapshot.id, snapshot.data());
+}
+
+export async function getBuildingByCode(code: string): Promise<Building | null> {
+  const q = query(collection(db, COLLECTION), where("code", "==", code));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  return formatDocument(doc.id, doc.data());
 }
 
 export async function getBuildingBySlug(slug: string): Promise<Building | null> {

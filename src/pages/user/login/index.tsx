@@ -5,10 +5,10 @@ import Card from "../../../ui/Card";
 import Button from "../../../ui/Button";
 import { ROUTES } from "../../../constants/routes";
 import { getUserByCedula } from "../../../db/repositories/user.repository";
-import { getBuildingBySlug } from "../../../db/repositories/building.repository";
+import { getBuildingByCode } from "../../../db/repositories/building.repository";
 
 export default function UserLoginPage() {
-  const { buildingSlug } = useParams<{ buildingSlug: string }>();
+  const { buildingCode } = useParams<{ buildingCode: string }>();
   const navigate = useNavigate();
   const [cedula, setCedula] = useState("");
   const [error, setError] = useState("");
@@ -17,11 +17,11 @@ export default function UserLoginPage() {
   const [buildingLoading, setBuildingLoading] = useState(true);
 
   useEffect(() => {
-    if (!buildingSlug) return;
-    getBuildingBySlug(buildingSlug)
+    if (!buildingCode) return;
+    getBuildingByCode(buildingCode)
       .then((b) => setBuilding(b))
       .finally(() => setBuildingLoading(false));
-  }, [buildingSlug]);
+  }, [buildingCode]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -46,13 +46,13 @@ export default function UserLoginPage() {
         return;
       }
 
-      if (user.buildingSlug !== buildingSlug) {
+      if (user.buildingSlug !== buildingCode) {
         setError("Esta cédula no pertenece a este edificio");
         setLoading(false);
         return;
       }
 
-      const buildingData = await getBuildingBySlug(buildingSlug);
+      const buildingData = await getBuildingByCode(buildingCode);
       if (!buildingData) {
         setError("Edificio no encontrado");
         setLoading(false);
@@ -67,7 +67,7 @@ export default function UserLoginPage() {
         })
       );
 
-      navigate(`/user/${buildingSlug}/dashboard`);
+      navigate(`/user/${buildingCode}/dashboard`);
     } catch {
       setError("Error al iniciar sesión. Intente de nuevo.");
     }
