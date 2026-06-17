@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ROUTES } from "./constants/routes";
 import Layout from "./ui/Layout";
-import Splash from "./ui/Splash";
 import AdminGuard from "./pages/admin/AdminGuard";
 
 const UserLoginPage = lazy(() => import("./pages/user/login"));
@@ -32,7 +31,7 @@ const App = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Suspense fallback={<Splash />}>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" /></div>}>
           <Routes>
             {/* Public routes with global navbar + footer */}
             <Route element={<Layout />}>
