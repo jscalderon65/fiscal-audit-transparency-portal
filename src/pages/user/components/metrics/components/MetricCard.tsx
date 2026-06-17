@@ -33,7 +33,7 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
         {title}
       </div>
 
-      <div className="font-extrabold tracking-tight text-slate-900 text-lg sm:text-xl md:text-2xl break-words max-w-full">
+      <div className="font-extrabold tracking-tight text-slate-900 text-lg sm:text-xl md:text-2xl whitespace-nowrap max-w-full overflow-hidden text-ellipsis">
         {value}
       </div>
 
