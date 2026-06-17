@@ -35,7 +35,13 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
   if (isAdmin) return <Navigate to={ROUTES.PANEL_BUILDINGS} replace />;
 
   async function handleLogin() {

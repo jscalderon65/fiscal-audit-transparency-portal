@@ -64,6 +64,7 @@ export default function UserLoginPage() {
         JSON.stringify({
           userDocumentNumber: value,
           building: buildingData,
+          expiresAt: Date.now() + 24 * 60 * 60 * 1000,
         })
       );
 

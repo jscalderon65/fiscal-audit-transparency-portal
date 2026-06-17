@@ -14,6 +14,7 @@ const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const BuildingsList = lazy(() => import("./pages/admin/buildings"));
 const CreateBuilding = lazy(() => import("./pages/admin/buildings/create"));
 const EditBuilding = lazy(() => import("./pages/admin/buildings/edit"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 function Loader() {
   return (
@@ -55,7 +56,7 @@ const App = () => {
             <Route path={ROUTES.PANEL_BUILDINGS_CREATE} element={<AdminRoute><CreateBuilding /></AdminRoute>} />
             <Route path={ROUTES.PANEL_BUILDINGS_EDIT} element={<AdminRoute><EditBuilding /></AdminRoute>} />
 
-            <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>

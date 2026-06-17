@@ -8,6 +8,7 @@ import {
   ClipboardList, FileText, Receipt, Banknote,
 } from "lucide-react";
 import Footer from "../../../ui/Footer";
+import Toast from "../../../ui/Toast";
 import { ContactForm } from "../components/contact-form";
 import { ReportsSection } from "../components/reports";
 import { MetricsSection } from "../components/metrics";
@@ -29,6 +30,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 interface Session {
   userDocumentNumber: string;
   building: Building;
+  expiresAt?: number;
 }
 
 export const UserDashboard = () => {
@@ -38,6 +40,7 @@ export const UserDashboard = () => {
   const [metrics, setMetrics] = useState<BuildingMetric[]>([]);
   const [reports, setReports] = useState<BuildingReport[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("session");
@@ -46,6 +49,11 @@ export const UserDashboard = () => {
       return;
     }
     const parsed: Session = JSON.parse(raw);
+    if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+      localStorage.removeItem("session");
+      navigate(`/user/${buildingCode}/login`, { replace: true });
+      return;
+    }
     if (parsed.building.code !== buildingCode) {
       navigate(`/user/${buildingCode}/login`, { replace: true });
       return;
@@ -61,6 +69,8 @@ export const UserDashboard = () => {
     ]).then(([fetchedMetrics, fetchedReports]) => {
       setMetrics(fetchedMetrics);
       setReports(fetchedReports);
+    }).catch(() => {
+      setToast?.({ message: "Error al cargar los datos del dashboard", type: "error" });
     }).finally(() => setDashboardLoading(false));
   }, [buildingCode]);
 
@@ -146,15 +156,12 @@ export const UserDashboard = () => {
         />
 
         <section className="pb-16">
-          <ContactForm />
+          <ContactForm buildingCode={buildingCode} />
         </section>
       </main>
 
-      <Footer
-        year={new Date().getFullYear()}
-        portalName="Portal de Transparencia"
-        residentialName={building.name}
-      />
+      <Footer year={new Date().getFullYear()} portalName="Portal de Transparencia" residentialName={building.name} />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

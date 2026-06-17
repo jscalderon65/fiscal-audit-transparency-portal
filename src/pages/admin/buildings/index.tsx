@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Building2, Plus, Copy, Check } from "lucide-react";
+import { Building2, Plus, Copy, Check, Search } from "lucide-react";
 import Button from "../../../ui/Button";
 import Toast from "../../../ui/Toast";
 import { Text, Small } from "../../../ui/Typography";
@@ -26,6 +26,16 @@ export default function BuildingsList() {
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [visibleCount, setVisibleCount] = useState(10);
+
+  const filteredBuildings = useMemo(
+    () => buildings.filter((b) => b.name.toLowerCase().includes(searchTerm.toLowerCase())),
+    [buildings, searchTerm]
+  );
+
+  const visibleBuildings = filteredBuildings.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredBuildings.length;
 
   useEffect(() => {
     if (location.state?.toast) {
@@ -79,33 +89,31 @@ export default function BuildingsList() {
     <div className="max-w-4xl mx-auto px-4 py-10">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">
-            Edificios
-          </h1>
-          <Text className="text-slate-500 mt-1">
-            Administra los conjuntos residenciales registrados en el portal.
-          </Text>
+          <h1 className="text-3xl font-extrabold text-slate-900">Edificios</h1>
+          <Text className="text-slate-500 mt-1">Administra los conjuntos residenciales registrados en el portal.</Text>
         </div>
-        <Button
-          variant="primary"
-          leftIcon={Plus}
-          onClick={() => navigate(ROUTES.PANEL_BUILDINGS_CREATE)}
-        >
-          Crear edificio
-        </Button>
+        <Button variant="primary" leftIcon={Plus} onClick={() => navigate(ROUTES.PANEL_BUILDINGS_CREATE)}>Crear edificio</Button>
       </div>
 
-      {buildings.length === 0 ? (
+      {/* Search */}
+      <div className="relative mb-6 max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <input type="text" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(10); }} placeholder="Buscar edificio..." className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm outline-none focus:border-primary transition-colors bg-white text-slate-900" />
+      </div>
+
+          {buildings.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200">
           <Building2 className="w-12 h-12 mx-auto text-slate-300" />
-          <Text className="text-slate-500 mt-4">
-            No hay edificios registrados todavía.
-          </Text>
-
+          <Text className="text-slate-500 mt-4">No hay edificios registrados todavía.</Text>
+        </div>
+      ) : filteredBuildings.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <Building2 className="w-12 h-12 mx-auto text-slate-300" />
+          <Text className="text-slate-500 mt-4">No se encontraron edificios con ese nombre.</Text>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          {buildings.map((building, index) => (
+          {visibleBuildings.map((building, index) => (
             <motion.div
               key={building.id}
               initial={{ opacity: 0, y: 10 }}
@@ -161,6 +169,13 @@ export default function BuildingsList() {
               </div>
             </motion.div>
           ))}
+          {hasMore && (
+            <div className="p-4 text-center border-t border-slate-100">
+              <button onClick={() => setVisibleCount((prev) => prev + 10)} className="text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
+                Mostrar más ({filteredBuildings.length - visibleCount} restantes)
+              </button>
+            </div>
+          )}
         </div>
       )}
 
