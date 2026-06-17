@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider } from "../db/config";
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAIL || "").split(",").map((e: string) => e.trim()).filter(Boolean);
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -31,14 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.email ? ADMIN_EMAILS.includes(user.email) : false;
 
   async function loginWithGoogle(): Promise<string | null> {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const email = result.user.email;
 
-      if (email !== ADMIN_EMAIL) {
+      if (!email || !ADMIN_EMAILS.includes(email)) {
         await signOut(auth);
         return `Acceso denegado. El correo ${email} no está autorizado.`;
       }
