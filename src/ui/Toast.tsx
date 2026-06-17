@@ -20,8 +20,8 @@ export default function Toast({ message, type = "success", onClose }: ToastProps
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg border transition-all duration-200 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+      className={`fixed top-4 right-4 left-4 sm:left-auto sm:max-w-md z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-lg border transition-all duration-200 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
       } ${
         type === "success"
           ? "bg-emerald-50 border-emerald-200 text-emerald-800"
