@@ -1,138 +1,195 @@
-import React from "react";
+import { H1, H2, Text, Small } from "../../ui/Typography";
+import Card from "../../ui/Card";
+import Badge from "../../ui/Badge";
+import {
+  GraduationCap,
+  Briefcase,
+  ShieldCheck,
+  Award,
+  Calendar,
+  FileText,
+  TrendingUp,
+  Laptop,
+  type LucideIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import WhatsAppButton from "../../ui/WhatsAppButton";
+
+type Item = {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+};
+
+const credenciales: Item[] = [
+  { icon: Award, title: "Contadora Pública", desc: "Área Andina" },
+  {
+    icon: TrendingUp,
+    title: "Especialista en Gerencia Financiera",
+    desc: "Profesionalización",
+  },
+  {
+    icon: Briefcase,
+    title: "Especialista en Alta Gerencia",
+    desc: "Gestión estratégica",
+  },
+  {
+    icon: FileText,
+    title: "Diplomado en NIIF",
+    desc: "Normas Internacionales de Información Financiera",
+  },
+];
+
+const experiencia: Item[] = [
+  {
+    icon: Calendar,
+    title: "29 años de trayectoria",
+    desc: "Gestión administrativa, tesorería y sector inmobiliario",
+  },
+  {
+    icon: ShieldCheck,
+    title: "6 años como Revisora Fiscal",
+    desc: "Auditoría y control financiero para copropiedades",
+  },
+  {
+    icon: GraduationCap,
+    title: "Actualización permanente",
+    desc: "Vanguardia tributaria y normativa cada año",
+  },
+  {
+    icon: Laptop,
+    title: "Dominio técnico",
+    desc: "SIMI ERP, CRM y facturación",
+  },
+];
+
+const InfoCard = ({ icon: Icon, title, desc }: Item) => (
+  <Card className="h-full transition-shadow hover:shadow-md">
+    <div className="flex items-start gap-4">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100">
+        <Icon className="h-6 w-6 text-primary-dark" aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        <div className="font-bold leading-snug">{title}</div>
+        <Small>{desc}</Small>
+      </div>
+    </div>
+  </Card>
+);
+
+const Section = ({ children }: { children: React.ReactNode }) => (
+  <motion.section
+    initial={{ opacity: 0, y: 24 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-80px" }}
+    transition={{ duration: 0.5 }}
+  >
+    {children}
+  </motion.section>
+);
 
 const Profile: React.FC = () => {
   return (
-    <main className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow overflow-hidden">
-        <div className="md:flex">
-          <div className="md:w-1/3 bg-gradient-to-b from-blue-600 to-indigo-600 text-white p-8 flex flex-col items-center justify-center">
-            <svg
-              className="w-32 h-32 rounded-full bg-white p-2 text-blue-600 mb-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
-            <h1 className="text-2xl font-bold">Bertha Zaray Bravo</h1>
-            <p className="mt-2 text-sm opacity-90">Profesional Contable</p>
-            <p className="mt-4 text-xs text-white/90 text-center">
-              Contadora pública con experiencia en auditoría, conciliación y
-              gestión financiera.
-            </p>
-          </div>
-
-          <section className="md:w-2/3 p-8">
-            <header className="mb-6">
-              <h2 className="text-xl font-semibold">Resumen profesional</h2>
-              <p className="mt-2 text-gray-600">
-                Profesional contable con más de 10 años de experiencia en
-                asesoría financiera, auditoría externa e interna, y cumplimiento
-                tributario. Líder orientada a resultados, con habilidades en
-                análisis de estados financieros, control interno y mejora de
-                procesos.
-              </p>
-            </header>
-
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <h3 className="font-medium">Experiencia destacada</h3>
-                <ul className="mt-2 list-disc list-inside text-gray-700">
-                  <li>
-                    <strong>Auditora Senior</strong> — Firma de auditoría
-                    (2018-2023). Planificación y ejecución de auditorías
-                    externas, informes de hallazgos y recomendaciones.
-                  </li>
-                  <li className="mt-1">
-                    <strong>Contadora Corporativa</strong> — Empresa del sector
-                    industrial (2014-2018). Responsable de cierre contable,
-                    conciliaciones bancarias y preparación de estados
-                    financieros.
-                  </li>
-                  <li className="mt-1">
-                    <strong>Asesora Tributaria</strong> — Consultoría
-                    (2012-2014). Gestión de impuestos, declaraciones y
-                    cumplimiento normativo.
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-medium">Educación y certificaciones</h3>
-                <ul className="mt-2 text-gray-700">
-                  <li>
-                    <strong>Contaduría Pública</strong> — Universidad Nacional
-                    (2011)
-                  </li>
-                  <li className="mt-1">
-                    Certificación en Normas Internacionales de Información
-                    Financiera (NIIF)
-                  </li>
-                  <li className="mt-1">Diplomado en Auditoría Forense</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-medium">Habilidades</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[
-                    "Auditoría",
-                    "NIIF",
-                    "Gestión Tributaria",
-                    "Análisis Financiero",
-                    "Control Interno",
-                    "Conciliaciones",
-                  ].map((s) => (
-                    <span
-                      key={s}
-                      className="text-sm px-3 py-1 bg-gray-100 rounded-full text-gray-800"
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-medium">Logros relevantes</h3>
-                <ol className="mt-2 list-decimal list-inside text-gray-700">
-                  <li>
-                    Implementación de controles que redujeron riesgos operativos
-                    en un 30%.
-                  </li>
-                  <li className="mt-1">
-                    Lideró procesos de mejora para acelerar cierres contables
-                    mensuales de 12 a 5 días.
-                  </li>
-                </ol>
-              </div>
-
-              <div>
-                <h3 className="font-medium">Contacto</h3>
-                <p className="mt-2 text-gray-700">
-                  Correo: bertha.bravo@example.com
-                </p>
-                <p className="text-gray-700">Teléfono: +57 300 000 0000</p>
-                <div className="mt-4 flex gap-3">
-                  <a
-                    href="mailto:bertha.bravo@example.com"
-                    className="inline-block px-4 py-2 bg-blue-600 text-white rounded shadow"
-                  >
-                    Enviar correo
-                  </a>
-                  <button
-                    onClick={() => alert("Descarga de CV (ejemplo)")}
-                    className="inline-block px-4 py-2 border border-gray-300 rounded"
-                  >
-                    Descargar CV
-                  </button>
-                </div>
+    <div className="w-full">
+      {/* Hero */}
+      <header className="w-full bg-slate-900">
+        <div className="mx-auto max-w-6xl px-4 py-16 md:py-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="grid items-center gap-10 md:grid-cols-2 md:gap-12"
+          >
+            {/* Texto */}
+            <div className="order-2 text-center text-white md:order-1 md:text-left">
+              <H1>Bertha Zaray Bravo Ruiz</H1>
+              <H2 className="mt-3 md:mt-4">
+                Contadora Pública · Especialista en Alta Gerencia
+              </H2>
+              <div className="mt-4 md:mt-6">
+                <Text>
+                  Revisora fiscal enfocada en la transparencia, la
+                  confidencialidad y el liderazgo financiero de las
+                  copropiedades.
+                </Text>
               </div>
             </div>
-          </section>
+
+            {/* Tarjeta de identidad */}
+            <div className="order-1 flex justify-center md:order-2 md:block">
+              <div className="w-full max-w-sm">
+                <Card>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-light to-primary-dark text-xl font-bold text-white">
+                      BZ
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold">Revisora Fiscal</div>
+                      <Small>Contadora Pública titulada</Small>
+                    </div>
+                  </div>
+
+                  <div className="my-4 border-t border-slate-200" />
+
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-primary-dark">
+                      29
+                    </span>
+                    <span className="text-sm font-medium text-slate-600">
+                      años de trayectoria profesional
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Badge variant="success">Transparencia</Badge>
+                    <Badge variant="default">Confidencialidad</Badge>
+                    <Badge variant="default">Liderazgo</Badge>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </main>
+      </header>
+
+      {/* Cuerpo */}
+      <main className="bg-slate-50">
+        <div className="mx-auto max-w-6xl space-y-16 px-4 py-16">
+          {/* Credenciales */}
+          <Section>
+            <H2>Credenciales</H2>
+            <div className="mt-2 max-w-2xl">
+              <Small>
+                Formación académica y certificaciones profesionales.
+              </Small>
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {credenciales.map((item) => (
+                <InfoCard key={item.title} {...item} />
+              ))}
+            </div>
+          </Section>
+
+          {/* Experiencia */}
+          <Section>
+            <H2>Experiencia destacada</H2>
+            <div className="mt-2 max-w-2xl">
+              <Small>
+                Casi tres décadas al servicio del control financiero en
+                copropiedades.
+              </Small>
+            </div>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {experiencia.map((item) => (
+                <InfoCard key={item.title} {...item} />
+              ))}
+            </div>
+          </Section>
+        </div>
+      </main>
+
+      <WhatsAppButton />
+    </div>
   );
 };
 

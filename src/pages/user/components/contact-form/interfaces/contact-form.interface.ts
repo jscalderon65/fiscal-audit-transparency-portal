@@ -2,7 +2,7 @@ export interface IContactFormInfo {
   title: string;
   description: string;
   features: {
-    icon: any; // React element/component
+    icon: any;
     text: string;
   }[];
 }

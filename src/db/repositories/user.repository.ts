@@ -1,0 +1,33 @@
+import { doc, getDoc, setDoc, deleteDoc, getDocs, collection, query, where, writeBatch } from "firebase/firestore";
+import { db } from "../config";
+import type { User } from "../types/user";
+
+const COLLECTION = "users";
+
+export async function getUserByUserDocumentNumber(userDocumentNumber: string): Promise<User | null> {
+  const snapshot = await getDoc(doc(db, COLLECTION, userDocumentNumber));
+  if (!snapshot.exists()) return null;
+  return snapshot.data() as User;
+}
+
+export async function getUsersByBuildingCode(buildingCode: string): Promise<User[]> {
+  const q = query(collection(db, COLLECTION), where("buildingCode", "==", buildingCode));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => doc.data() as User);
+}
+
+export async function createUser(user: User): Promise<void> {
+  await setDoc(doc(db, COLLECTION, user.userDocumentNumber), user);
+}
+
+export async function deleteUser(userDocumentNumber: string): Promise<void> {
+  await deleteDoc(doc(db, COLLECTION, userDocumentNumber));
+}
+
+export async function importUsers(users: User[]): Promise<void> {
+  const batch = writeBatch(db);
+  for (const user of users) {
+    batch.set(doc(db, COLLECTION, user.userDocumentNumber), user);
+  }
+  await batch.commit();
+}

@@ -1,5 +1,4 @@
-import { motion, HTMLMotionProps } from "framer-motion";
-import { PALETTE } from "../../../../../constants/theme";
+import { motion, type HTMLMotionProps } from "framer-motion";
 
 export interface ICardProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
@@ -37,16 +36,12 @@ export const Card: React.FC<ICardProps> = ({
               scale: 1.02,
               boxShadow:
                 "0px 20px 25px -5px rgba(0, 0, 0, 0.1), 0px 10px 10px -5px rgba(0, 0, 0, 0.04)",
-              borderColor: PALETTE.primary.dark,
+              borderColor: "var(--color-primary-dark)",
             }
           : {}
       }
       whileTap={hoverEffect ? { scale: 0.98 } : {}}
       className={`${baseClasses} ${className}`}
-      style={{
-        backgroundColor: PALETTE.background.surface,
-        border: `1px solid ${PALETTE.neutral[200]}`,
-      }}
       {...props}
     >
       {hoverEffect && (
@@ -54,7 +49,8 @@ export const Card: React.FC<ICardProps> = ({
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           initial={false}
           style={{
-            background: `linear-gradient(135deg, ${PALETTE.primary.alpha50}, transparent)`,
+            background:
+              "linear-gradient(135deg, #ecfdf580, transparent)",
           }}
         />
       )}

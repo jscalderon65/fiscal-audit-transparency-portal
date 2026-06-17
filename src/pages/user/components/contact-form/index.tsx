@@ -1,14 +1,79 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, User, Home, Mail, FileCheck, ShieldCheck } from "lucide-react";
-import { IContactFormData } from "./interfaces/contact-form.interface";
-import { PALETTE } from "../../../../constants/theme";
+import {
+  Send,
+  User,
+  Home,
+  Mail,
+  Phone,
+  ShieldCheck,
+  FileCheck,
+  AlertCircle,
+} from "lucide-react";
+import { saveContactMessage } from "../../../../db/repositories/contact.repository";
 
-export const ContactForm: React.FC = () => {
+export interface ContactFormProps {
+  buildingCode?: string;
+}
+
+export const ContactForm: React.FC<ContactFormProps> = ({
+  buildingCode = "",
+}) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    unit: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState<{ unit?: string; phone?: string }>({});
+  const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "ok" | "error";
+    message: string;
+  } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
+    setErrors({});
+
+    if (!formData.unit.trim() || formData.unit.trim().length < 3) {
+      setErrors({ unit: "Debes ingresar tu torre y apto (mín. 3 caracteres)" });
+      return;
+    }
+    if (!formData.phone.trim() || formData.phone.trim().length < 7) {
+      setErrors({ phone: "Ingresa un número de teléfono válido" });
+      return;
+    }
+
+    setSending(true);
+    try {
+      await saveContactMessage({
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        unit: formData.unit.trim(),
+        message: formData.message.trim(),
+        buildingCode,
+      });
+      setFeedback({
+        type: "ok",
+        message:
+          "Mensaje enviado correctamente. La Revisoría lo contactará a la brevedad.",
+      });
+      setFormData({ name: "", phone: "", unit: "", message: "" });
+    } catch {
+      setFeedback({
+        type: "error",
+        message: "Error al enviar el mensaje. Intente de nuevo más tarde.",
+      });
+    }
+    setSending(false);
+  };
+
   const contactInfo = {
     title: "Línea Directa con Revisoría",
     description:
-      "¿Encontró alguna inconsistencia? ¿Tiene dudas sobre la ejecución de la obra de los ascensores? Escríbame directamente.",
+      "¿Encontró alguna inconsistencia? ¿Tiene dudas sobre la ejecución del presupuesto? Escríbame directamente.",
     features: [
       {
         icon: ShieldCheck,
@@ -21,180 +86,162 @@ export const ContactForm: React.FC = () => {
     ],
   };
 
-  const [formData, setFormData] = useState<IContactFormData>({
-    name: "",
-    unit: "",
-    message: "",
-  });
-
-  const handleContactSubmit = (formData: IContactFormData) => {
-    alert(
-      "Mensaje radicado con éxito en el despacho de la Revisoría Fiscal. Su número de radicado es el #4092. Gracias por su participación.",
-    );
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleContactSubmit(formData);
-    setFormData({ name: "", unit: "", message: "" });
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="rounded-3xl overflow-hidden shadow-2xl"
-      style={{
-        backgroundColor: PALETTE.neutral[900],
-        border: `1px solid ${PALETTE.neutral[800]}`,
-      }}
+      className="rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-slate-800"
     >
       <div className="grid md:grid-cols-5 h-full">
-        {/* Info Section */}
-        <div
-          className="p-8 md:p-12 md:col-span-2 flex flex-col justify-center relative overflow-hidden"
-          style={{ color: PALETTE.text.inverted }}
-        >
-          <div
-            className="absolute top-0 left-0 w-full h-full -z-10"
-            style={{
-              backgroundColor: PALETTE.overlays.primary900_40,
-            }}
-          ></div>
-          <h2
-            className="text-3xl md:text-4xl font-bold mb-4 tracking-tight"
-            style={{ color: PALETTE.text.inverted }}
-          >
+        <div className="p-6 sm:p-8 md:p-12 md:col-span-2 flex flex-col justify-center relative overflow-hidden text-white">
+          <div className="absolute top-0 left-0 w-full h-full -z-10 bg-emerald-900/40" />
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 tracking-tight text-white">
             {contactInfo.title}
           </h2>
-          <p
-            className="mb-8 text-lg leading-relaxed font-light"
-            style={{ color: PALETTE.text.subtle }}
-          >
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed font-light text-slate-300">
             {contactInfo.description}
           </p>
-          <div className="space-y-5" style={{ color: PALETTE.text.subtle }}>
+          <div className="space-y-5 text-slate-300">
             {contactInfo.features.map((feature, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-4 p-4 rounded-xl"
-                style={{
-                  backgroundColor: PALETTE.overlays.neutral800_50,
-                  border: `1px solid ${PALETTE.overlays.neutral700_50}`,
-                }}
+                className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50"
               >
-                <feature.icon
-                  className="w-6 h-6 shrink-0"
-                  style={{ color: PALETTE.primary.DEFAULT }}
-                />
+                <feature.icon className="w-6 h-6 shrink-0 text-primary" />
                 <p className="text-sm font-medium">{feature.text}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Form Section */}
-        <div
-          className="p-8 md:p-12 md:col-span-3"
-          style={{ backgroundColor: PALETTE.background.surface }}
-        >
+        <div className="p-8 md:p-12 md:col-span-3 bg-white flex flex-col justify-center">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {feedback && (
+              <div
+                className={`p-3 rounded-lg text-sm flex items-center gap-2 ${feedback.type === "ok" ? "bg-primary/10 text-primary-dark" : "bg-danger/10 text-danger"}`}
+              >
+                {feedback.type === "ok" ? (
+                  <FileCheck className="w-4 h-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                )}
+                {feedback.message}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label
-                  className="text-sm font-bold flex items-center gap-2"
-                  style={{ color: PALETTE.neutral[700] }}
-                >
-                  <User
-                    className="w-4 h-4"
-                    style={{ color: PALETTE.neutral[400] }}
-                  />{" "}
-                  Residente o Propietario
+                <label className="text-sm font-bold flex items-center gap-2 text-slate-700">
+                  <User className="w-4 h-4 text-slate-400" /> Residente o
+                  Propietario
                 </label>
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium"
-                  style={{
-                    backgroundColor: PALETTE.neutral[50],
-                    border: `1px solid ${PALETTE.neutral[200]}`,
-                    color: PALETTE.text.default,
-                  }}
-                  placeholder="Ej. Carlos Mendoza"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
+                  placeholder="Ej. Carlos Mendoza"
+                  className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border border-slate-200 text-slate-900"
                 />
               </div>
               <div className="space-y-2">
-                <label
-                  className="text-sm font-bold flex items-center gap-2"
-                  style={{ color: PALETTE.neutral[700] }}
-                >
-                  <Home
-                    className="w-4 h-4"
-                    style={{ color: PALETTE.neutral[400] }}
-                  />{" "}
-                  Interior / Apto
+                <label className="text-sm font-bold flex items-center gap-2 text-slate-700">
+                  <Phone className="w-4 h-4 text-slate-400" /> Teléfono de
+                  contacto
                 </label>
                 <input
-                  type="text"
+                  type="tel"
                   required
-                  className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium"
-                  style={{
-                    backgroundColor: PALETTE.neutral[50],
-                    border: `1px solid ${PALETTE.neutral[200]}`,
-                    color: PALETTE.text.default,
+                  value={formData.phone}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      phone: e.target.value.replace(/\D/g, "").slice(0, 10),
+                    });
+                    if (errors.phone) setErrors({});
                   }}
-                  placeholder="Ej. Torre 3, Apto 502"
-                  value={formData.unit}
-                  onChange={(e) =>
-                    setFormData({ ...formData, unit: e.target.value })
-                  }
+                  placeholder="Ej. 3001234567"
+                  className={`w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border text-slate-900 ${errors.phone ? "border-danger" : "border-slate-200"}`}
                 />
+                {errors.phone && (
+                  <p className="text-xs text-danger mt-1">{errors.phone}</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label
-                className="text-sm font-bold flex items-center gap-2"
-                style={{ color: PALETTE.neutral[700] }}
-              >
-                <Mail
-                  className="w-4 h-4"
-                  style={{ color: PALETTE.neutral[400] }}
-                />{" "}
-                Solicitud o Denuncia
+              <label className="text-sm font-bold flex items-center gap-2 text-slate-700">
+                <Home className="w-4 h-4 text-slate-400" /> Interior / Apto
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.unit}
+                onChange={(e) => {
+                  setFormData({ ...formData, unit: e.target.value });
+                  if (errors.unit) setErrors({});
+                }}
+                placeholder="Ej. Torre 3, Apto 502"
+                className={`w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border text-slate-900 ${errors.unit ? "border-danger" : "border-slate-200"}`}
+              />
+              {errors.unit && (
+                <p className="text-xs text-danger mt-1">{errors.unit}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold flex items-center gap-2 text-slate-700">
+                <Mail className="w-4 h-4 text-slate-400" /> Solicitud o Denuncia
               </label>
               <textarea
                 required
                 rows={5}
-                className="w-full px-4 py-3.5 rounded-xl resize-none font-medium"
-                style={{
-                  backgroundColor: PALETTE.neutral[50],
-                  border: `1px solid ${PALETTE.neutral[200]}`,
-                  color: PALETTE.text.default,
-                }}
-                placeholder="Describa su solicitud sobre los estados financieros de forma clara..."
                 value={formData.message}
                 onChange={(e) =>
                   setFormData({ ...formData, message: e.target.value })
                 }
-              ></textarea>
+                placeholder="Describa su solicitud sobre los estados financieros de forma clara..."
+                className="w-full px-4 py-3.5 rounded-xl resize-none font-medium bg-slate-50 border border-slate-200 text-slate-900"
+              />
             </div>
 
             <button
               type="submit"
-              className="w-full text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 text-lg"
-              style={{
-                backgroundColor: PALETTE.primary.DEFAULT,
-                boxShadow: `0 10px 20px -10px ${PALETTE.primary.alpha60_from_200}`,
-              }}
+              disabled={sending}
+              className="w-full text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 text-lg bg-primary hover:bg-primary-dark disabled:opacity-65"
             >
-              <Send className="w-5 h-5" />
-              Radicar Mensaje a Revisoría
+              {sending ? (
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="animate-spin w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeOpacity="0.25"
+                    />
+                    <path
+                      d="M22 12a10 10 0 00-10-10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>{" "}
+                  Enviando...
+                </span>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" /> Radicar Mensaje a Revisoría
+                </>
+              )}
             </button>
           </form>
         </div>

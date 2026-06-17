@@ -1,5 +1,4 @@
 import React from "react";
-import { PALETTE } from "../constants/theme";
 
 export interface InputProps {
   label?: string;
@@ -25,21 +24,22 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label className="text-sm font-medium mb-1" style={{ color: PALETTE.neutral[700], display: 'block' }}>{label}</label>
+        <label className="block text-sm font-medium mb-1 text-slate-700">
+          {label}
+        </label>
       )}
       <div className="flex items-center gap-2">
-        {LeftIcon && <LeftIcon className="w-4 h-4" />}
+        {LeftIcon && <LeftIcon className="w-4 h-4 shrink-0" />}
         <input
           value={value}
           type={type}
           placeholder={placeholder}
           onChange={(e) => onChange && onChange(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl outline-none"
-          style={{ backgroundColor: PALETTE.neutral[50], border: `1px solid ${PALETTE.neutral[200]}`, color: PALETTE.text.default }}
+          className="w-full px-4 py-3 rounded-xl outline-none bg-slate-50 border border-slate-200 text-slate-900 focus:border-primary transition-colors"
         />
-        {RightIcon && <RightIcon className="w-4 h-4" />}
+        {RightIcon && <RightIcon className="w-4 h-4 shrink-0" />}
       </div>
-      {error && <p className="mt-2 text-sm" style={{ color: PALETTE.danger.DEFAULT }}>{error}</p>}
+      {error && <p className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 };

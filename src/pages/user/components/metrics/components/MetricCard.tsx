@@ -1,6 +1,5 @@
-import { LucideIcon } from "lucide-react";
-import { Card } from "./Card";
-import { PALETTE } from "../../../../../constants/theme";
+import type { LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 export interface IMetric {
   title: string;
@@ -18,51 +17,30 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
   const { title, value, subtitle, icon: Icon } = metric;
 
   return (
-    <Card
-      delay={index * 0.05}
-      className={`flex flex-col h-full p-4`}
-      hoverEffect={true}
-      style={{
-        border: `1px solid ${PALETTE.neutral[200]}`,
-        backgroundColor: PALETTE.background.surface,
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm border border-slate-200 bg-white flex flex-col items-center text-center gap-1.5 sm:gap-2"
     >
-      <div className="flex-1">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex gap-3">
-            {Icon && (
-              <div className="mt-1">
-                <Icon
-                  className={`w-6 h-6`}
-                  style={{ color: PALETTE.primary.DEFAULT }}
-                />
-              </div>
-            )}
-            <span
-              className="font-bold text-lg leading-tight"
-              style={{ color: PALETTE.text.default }}
-            >
-              {title}
-            </span>
-          </div>
+      {Icon && (
+        <div className="mb-1">
+          <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
         </div>
+      )}
+
+      <div className="font-bold text-slate-700 text-sm sm:text-base md:text-lg leading-tight">
+        {title}
       </div>
 
-      <div className="mt-auto">
-        <div
-          className="text-2xl font-extrabold tracking-tight"
-          style={{ color: PALETTE.text.default }}
-        >
-          {value}
-        </div>
-        <div
-          className="text-sm font-medium mt-1"
-          style={{ color: PALETTE.text.muted }}
-        >
-          {subtitle}
-        </div>
+      <div className="font-extrabold tracking-tight text-slate-900 text-base sm:text-lg md:text-xl whitespace-nowrap">
+        {value}
       </div>
-    </Card>
+
+      <div className="font-medium text-slate-500 text-xs sm:text-sm">
+        {subtitle}
+      </div>
+    </motion.div>
   );
 };
 
