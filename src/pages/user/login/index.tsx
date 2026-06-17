@@ -16,6 +16,11 @@ export default function UserLoginPage() {
   const [building, setBuilding] = useState<any>(null);
   const [buildingLoading, setBuildingLoading] = useState(true);
 
+  // Clear any existing session when visiting login
+  useEffect(() => {
+    localStorage.removeItem("session");
+  }, []);
+
   useEffect(() => {
     if (!buildingCode) return;
     getBuildingByCode(buildingCode)

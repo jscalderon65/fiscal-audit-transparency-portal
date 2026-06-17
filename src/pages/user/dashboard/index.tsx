@@ -1,28 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
 import {
-  Building2,
-  Wallet,
-  PiggyBank,
-  HardHat,
-  ShieldCheck,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  CreditCard,
-  Landmark,
-  Calculator,
-  Percent,
-  ArrowUpRight,
-  ArrowDownRight,
-  Scale,
-  ClipboardList,
-  FileText,
-  Receipt,
-  Banknote,
+  Building2, Wallet, PiggyBank, HardHat, ShieldCheck,
+  DollarSign, TrendingUp, TrendingDown, BarChart3,
+  PieChart, CreditCard, Landmark, Calculator,
+  Percent, ArrowUpRight, ArrowDownRight, Scale,
+  ClipboardList, FileText, Receipt, Banknote,
 } from "lucide-react";
 import Footer from "../../../ui/Footer";
 import Toast from "../../../ui/Toast";
@@ -198,16 +181,7 @@ export const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      <div className="relative">
-        <Banner info={bannerInfo} profile={bannerProfile} />
-        <button
-          onClick={handleLogout}
-          className="absolute top-14 sm:top-16 right-4 sm:right-8 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-lg bg-slate-800/60 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors text-xs sm:text-sm"
-        >
-          <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          Salir
-        </button>
-      </div>
+      <Banner info={bannerInfo} profile={bannerProfile} />
 
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-8 md:space-y-16">
         {mappedMetrics.length > 0 && (
