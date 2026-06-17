@@ -34,8 +34,8 @@ const App = () => {
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" /></div>}>
           <Routes>
             {/* Public routes with global navbar + footer */}
+            <Route path={ROUTES.HOME} element={<Profile />} />
             <Route element={<Layout />}>
-              <Route path={ROUTES.HOME} element={<Profile />} />
               <Route path={ROUTES.DESIGN_SYSTEM} element={<Showcase />} />
               <Route path={ROUTES.USER_LOGIN} element={<UserLoginPage />} />
             </Route>
