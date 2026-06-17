@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="max-w-6xl mx-auto px-4 flex">
           <button
             onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}
-            className={`flex items-center justify-center gap-2 flex-1 sm:flex-none px-3 sm:px-6 py-3 text-sm font-semibold border-b-2 transition-colors ${
+            className={`flex items-center justify-center gap-2 flex-1 px-3 sm:px-6 py-3 sm:py-3.5 text-sm font-semibold border-b-2 transition-colors ${
               !isMessages
                 ? "border-primary text-primary"
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </button>
           <button
             onClick={() => navigate(ROUTES.PANEL_CONTACT_MESSAGES)}
-            className={`flex items-center justify-center gap-2 flex-1 sm:flex-none px-3 sm:px-6 py-3 text-sm font-semibold border-b-2 transition-colors ${
+            className={`flex items-center justify-center gap-2 flex-1 px-3 sm:px-6 py-3 sm:py-3.5 text-sm font-semibold border-b-2 transition-colors ${
               isMessages
                 ? "border-primary text-primary"
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"

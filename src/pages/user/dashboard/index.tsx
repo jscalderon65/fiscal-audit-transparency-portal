@@ -155,21 +155,33 @@ export const UserDashboard = () => {
           </button>
         </div>
 
-        {mappedMetrics.length > 0 && (
-          <MetricsSection
-            title="Métricas Financieras"
-            subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
-            metrics={mappedMetrics}
-          />
-        )}
+        {mappedMetrics.length === 0 && mappedReports.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-slate-100">
+              <ShieldCheck className="w-8 h-8 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-700 mb-2">Portal de Transparencia</h2>
+            <p className="text-slate-500">Aún no hay información publicada para este edificio.</p>
+          </div>
+        ) : (
+          <>
+            {mappedMetrics.length > 0 && (
+              <MetricsSection
+                title="Métricas Financieras"
+                subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
+                metrics={mappedMetrics}
+              />
+            )}
 
-        {mappedReports.length > 0 && (
-          <ReportsSection
-            title="Reportes"
-            subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
-            reports={mappedReports}
-            onDownload={handleDownloadReport}
-          />
+            {mappedReports.length > 0 && (
+              <ReportsSection
+                title="Reportes"
+                subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
+                reports={mappedReports}
+                onDownload={handleDownloadReport}
+              />
+            )}
+          </>
         )}
 
         <section className="pb-16">

@@ -236,7 +236,7 @@ export default function EditBuilding() {
   }
 
   const tabClass = (tab: Tab) =>
-    `flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+    `flex-1 flex items-center justify-center gap-0 sm:gap-2 px-1 sm:px-4 py-3 text-[11px] sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
       activeTab === tab ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
     }`;
 
@@ -260,7 +260,7 @@ export default function EditBuilding() {
       <button onClick={() => navigate(ROUTES.PANEL_BUILDINGS)} className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors"><ArrowLeft className="w-4 h-4" /> Volver a edificios</button>
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Editar edificio</h1>
 
-      <div className="mt-8 border-b border-slate-200 flex">
+      <div className="mt-8 border-b border-slate-200 flex overflow-x-auto">
         <button onClick={() => setActiveTab("info")} className={tabClass("info")}><Building2 className="w-4 h-4" /> Información</button>
         <button onClick={() => setActiveTab("users")} className={tabClass("users")}><Users className="w-4 h-4" /> Usuarios</button>
         <button onClick={() => setActiveTab("metrics")} className={tabClass("metrics")}><BarChart3 className="w-4 h-4" /> Métricas</button>
