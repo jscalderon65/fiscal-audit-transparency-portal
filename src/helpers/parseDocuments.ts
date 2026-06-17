@@ -13,8 +13,9 @@ export function parseUserDocuments(
 export function formatCurrency(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   if (!digits) return "";
-  // String-based formatting: handles ANY size number
-  const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  // Cap at 999.999.999 (mil millones)
+  const capped = digits.length > 9 ? digits.slice(0, 9) : digits;
+  const formatted = capped.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return "$ " + formatted;
 }
 
