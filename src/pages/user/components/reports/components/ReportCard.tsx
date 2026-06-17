@@ -25,20 +25,24 @@ const ReportCard: React.FC<ReportCardProps> = ({
         <div className="flex justify-between items-start mb-4 gap-2">
           <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider px-3 py-1 rounded-lg text-slate-500 bg-slate-100 shrink-0">
             <CalendarDays className="w-4 h-4 shrink-0" />
-            <span className="truncate max-w-28" title={report.month}>{report.month}</span>
+            <span className="truncate max-w-24" title={report.month}>{report.month}</span>
           </div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-50 border border-primary-200 text-primary-dark shrink-0">
             <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
             {report.status}
           </span>
         </div>
-        <h3 className="font-bold text-xl mb-3 leading-snug text-slate-900 line-clamp-2" title={report.title}>
-          {report.title}
-        </h3>
-        <p className="text-sm leading-relaxed mb-6 text-slate-600 line-clamp-2" title={report.topics}>
-          <strong className="text-slate-900">Enfoque de auditoría:</strong>{" "}
-          {report.topics}.
-        </p>
+        <div className="h-[3.25rem] overflow-hidden mb-2">
+          <h3 className="font-bold text-xl leading-snug text-slate-900 line-clamp-2" title={report.title}>
+            {report.title}
+          </h3>
+        </div>
+        <div className="h-[3rem] overflow-hidden mb-4">
+          <p className="text-sm leading-relaxed text-slate-600 line-clamp-2" title={report.topics}>
+            <strong className="text-slate-900">Enfoque de auditoría:</strong>{" "}
+            {report.topics}.
+          </p>
+        </div>
       </div>
       <button
         type="button"

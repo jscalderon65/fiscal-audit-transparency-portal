@@ -30,19 +30,25 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
                 <Icon className="w-6 h-6 text-primary" />
               </div>
             )}
-            <span className="font-bold text-lg leading-tight text-slate-900 line-clamp-2" title={title}>
-              {title}
-            </span>
+            <div className="h-[3.25rem] overflow-hidden">
+              <span className="font-bold text-lg leading-tight text-slate-900 line-clamp-2" title={title}>
+                {title}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="mt-auto">
-        <div className="text-2xl font-extrabold tracking-tight text-slate-900 truncate" title={`${value}`}>
-          {value}
+        <div className="h-[3.5rem] overflow-hidden flex flex-col justify-center">
+          <div className="text-2xl font-extrabold tracking-tight text-slate-900 truncate" title={`${value}`}>
+            {value}
+          </div>
         </div>
-        <div className="text-sm font-medium mt-1 text-slate-500 truncate" title={subtitle}>
-          {subtitle}
+        <div className="h-[2.5rem] overflow-hidden flex flex-col justify-center">
+          <div className="text-sm font-medium text-slate-500 truncate" title={subtitle}>
+            {subtitle}
+          </div>
         </div>
       </div>
     </Card>
