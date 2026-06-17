@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Navbar
         rightContent={
           <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-xs sm:text-sm text-slate-400 hidden sm:inline truncate max-w-[120px]">
+            <span className="text-xs sm:text-sm text-slate-400 truncate max-w-[100px] sm:max-w-[160px]" title={user?.email}>
               {user?.email}
             </span>
             <button
