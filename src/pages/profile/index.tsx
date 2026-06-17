@@ -9,6 +9,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import WhatsAppButton from "../../ui/WhatsAppButton";
 
 const Profile: React.FC = () => {
   return (
@@ -156,6 +157,8 @@ const Profile: React.FC = () => {
           </section>
         </div>
       </main>
+
+      <WhatsAppButton />
     </div>
   );
 };
