@@ -17,16 +17,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Navbar
         rightContent={
           <div className="flex items-center gap-1 sm:gap-2">
-            <span className="text-xs sm:text-sm text-slate-400 truncate max-w-[100px] sm:max-w-[160px]" title={user?.email}>
-              {user?.email}
-            </span>
             <button
               onClick={async () => { await logout(); navigate(ROUTES.PANEL_LOGIN); }}
-              className="flex items-center gap-1 sm:gap-2 p-2 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm text-slate-400 transition-colors hover:bg-slate-800"
-              title="Salir"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 rounded-lg text-xs sm:text-sm text-slate-400 transition-colors hover:bg-slate-800"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Salir</span>
+              Salir
             </button>
           </div>
         }

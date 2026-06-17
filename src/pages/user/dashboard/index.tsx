@@ -202,10 +202,10 @@ export const UserDashboard = () => {
         <Banner info={bannerInfo} profile={bannerProfile} />
         <button
           onClick={handleLogout}
-          className="absolute top-4 right-4 z-20 p-2 rounded-lg bg-slate-800/60 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
-          title="Cerrar sesión"
+          className="absolute top-4 right-4 z-20 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800/60 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors text-xs sm:text-sm"
         >
           <LogOut className="w-4 h-4" />
+          Cerrar sesión
         </button>
       </div>
 
