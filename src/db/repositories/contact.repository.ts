@@ -6,6 +6,7 @@ const COLLECTION = "contactMessages";
 export interface ContactMessage {
   id?: string;
   name: string;
+  phone?: string;
   unit: string;
   message: string;
   buildingCode: string;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, User, Home, Mail, ShieldCheck, FileCheck, AlertCircle } from "lucide-react";
+import { Send, User, Home, Mail, Phone, ShieldCheck, FileCheck, AlertCircle } from "lucide-react";
 import { saveContactMessage } from "../../../../db/repositories/contact.repository";
 
 export interface ContactFormProps {
@@ -8,8 +8,8 @@ export interface ContactFormProps {
 }
 
 export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) => {
-  const [formData, setFormData] = useState({ name: "", unit: "", message: "" });
-  const [errors, setErrors] = useState<{ unit?: string }>({});
+  const [formData, setFormData] = useState({ name: "", phone: "", unit: "", message: "" });
+  const [errors, setErrors] = useState<{ unit?: string; phone?: string }>({});
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "error"; message: string } | null>(null);
 
@@ -22,17 +22,22 @@ export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) =
       setErrors({ unit: "Debes ingresar tu torre y apto (mín. 3 caracteres)" });
       return;
     }
+    if (!formData.phone.trim() || formData.phone.trim().length < 7) {
+      setErrors({ phone: "Ingresa un número de teléfono válido" });
+      return;
+    }
 
     setSending(true);
     try {
       await saveContactMessage({
         name: formData.name.trim(),
+        phone: formData.phone.trim(),
         unit: formData.unit.trim(),
         message: formData.message.trim(),
         buildingCode,
       });
-      setFeedback({ type: "ok", message: "Mensaje enviado correctamente. La Revisoría lo responderá a la brevedad." });
-      setFormData({ name: "", unit: "", message: "" });
+      setFeedback({ type: "ok", message: "Mensaje enviado correctamente. La Revisoría lo contactará a la brevedad." });
+      setFormData({ name: "", phone: "", unit: "", message: "" });
     } catch {
       setFeedback({ type: "error", message: "Error al enviar el mensaje. Intente de nuevo más tarde." });
     }
@@ -85,10 +90,16 @@ export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) =
                 <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Ej. Carlos Mendoza" className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border border-slate-200 text-slate-900" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold flex items-center gap-2 text-slate-700"><Home className="w-4 h-4 text-slate-400" /> Interior / Apto</label>
-                <input type="text" required value={formData.unit} onChange={(e) => { setFormData({ ...formData, unit: e.target.value }); if (errors.unit) setErrors({}); }} placeholder="Ej. Torre 3, Apto 502" className={`w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border text-slate-900 ${errors.unit ? "border-danger" : "border-slate-200"}`} />
-                {errors.unit && <p className="text-xs text-danger mt-1">{errors.unit}</p>}
+                <label className="text-sm font-bold flex items-center gap-2 text-slate-700"><Phone className="w-4 h-4 text-slate-400" /> Teléfono de contacto</label>
+                <input type="tel" required value={formData.phone} onChange={(e) => { setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }); if (errors.phone) setErrors({}); }} placeholder="Ej. 3001234567" className={`w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border text-slate-900 ${errors.phone ? "border-danger" : "border-slate-200"}`} />
+                {errors.phone && <p className="text-xs text-danger mt-1">{errors.phone}</p>}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold flex items-center gap-2 text-slate-700"><Home className="w-4 h-4 text-slate-400" /> Interior / Apto</label>
+              <input type="text" required value={formData.unit} onChange={(e) => { setFormData({ ...formData, unit: e.target.value }); if (errors.unit) setErrors({}); }} placeholder="Ej. Torre 3, Apto 502" className={`w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border text-slate-900 ${errors.unit ? "border-danger" : "border-slate-200"}`} />
+              {errors.unit && <p className="text-xs text-danger mt-1">{errors.unit}</p>}
             </div>
 
             <div className="space-y-2">

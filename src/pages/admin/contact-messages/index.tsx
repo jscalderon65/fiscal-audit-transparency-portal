@@ -52,11 +52,12 @@ export default function ContactMessages() {
       ) : (
         <div className="space-y-4">
           {messages.map((msg) => (
-            <div key={msg.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <div key={msg.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
                   <p className="font-bold text-slate-900">{msg.name}</p>
                   <p className="text-sm text-slate-500">{msg.unit}</p>
+                  {msg.phone && <p className="text-sm text-primary font-medium mt-0.5">📞 {msg.phone}</p>}
                 </div>
                 <div className="text-right shrink-0">
                   <div className="flex items-center gap-1.5 text-xs text-slate-400">

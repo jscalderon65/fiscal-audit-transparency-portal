@@ -155,38 +155,21 @@ export const UserDashboard = () => {
           </button>
         </div>
 
-        {mappedMetrics.length === 0 && mappedReports.length === 0 ? (
-          <div className="text-center py-12 max-w-lg mx-auto">
-            <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-5 bg-slate-100">
-              <ShieldCheck className="w-8 h-8 text-primary" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-3">Portal de Transparencia</h2>
-            <p className="text-sm text-slate-500 leading-relaxed mb-4">
-              Este es el portal oficial de transparencia financiera de tu copropiedad. Aquí se publicarán las métricas financieras, dictámenes de revisoría fiscal y demás información relevante para los copropietarios, una vez sea cargada por la administración.
-            </p>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              Mientras tanto, puedes usar el formulario de contacto para comunicarte de forma segura y confidencial con la Revisoría Fiscal.
-            </p>
-          </div>
-        ) : (
-          <>
-            {mappedMetrics.length > 0 && (
-              <MetricsSection
-                title="Métricas Financieras"
-                subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
-                metrics={mappedMetrics}
-              />
-            )}
+        {mappedMetrics.length > 0 && (
+          <MetricsSection
+            title="Métricas Financieras"
+            subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
+            metrics={mappedMetrics}
+          />
+        )}
 
-            {mappedReports.length > 0 && (
-              <ReportsSection
-                title="Reportes"
-                subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
-                reports={mappedReports}
-                onDownload={handleDownloadReport}
-              />
-            )}
-          </>
+        {mappedReports.length > 0 && (
+          <ReportsSection
+            title="Reportes"
+            subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
+            reports={mappedReports}
+            onDownload={handleDownloadReport}
+          />
         )}
 
         <section className="pb-16">
