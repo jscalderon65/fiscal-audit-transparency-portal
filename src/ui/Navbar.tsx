@@ -12,10 +12,10 @@ export default function Navbar({ rightContent, className = "" }: NavbarProps) {
     <header className={`bg-slate-900 border-b border-slate-800 h-16 ${className}`}>
       <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary">
-            <ShieldCheck className="w-5 h-5 text-white" />
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center bg-primary shrink-0">
+            <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
-          <span className="font-bold text-white">Portal de Transparencia</span>
+          <span className="font-bold text-white text-sm sm:text-base hidden sm:inline">Portal de Transparencia</span>
         </Link>
 
         {rightContent && (
