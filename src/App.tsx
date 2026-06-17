@@ -38,6 +38,7 @@ const App = () => {
             <Route element={<Layout />}>
               <Route path={ROUTES.DESIGN_SYSTEM} element={<Showcase />} />
               <Route path={ROUTES.USER_LOGIN} element={<UserLoginPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
 
             {/* User dashboard - standalone */}
@@ -50,7 +51,6 @@ const App = () => {
             <Route path={ROUTES.PANEL_BUILDINGS_EDIT} element={<AdminRoute><EditBuilding /></AdminRoute>} />
             <Route path={ROUTES.PANEL_CONTACT_MESSAGES} element={<AdminRoute><ContactMessages /></AdminRoute>} />
 
-            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
