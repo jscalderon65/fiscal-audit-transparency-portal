@@ -1,4 +1,4 @@
-import { useState, useRef, createElement } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle, ArrowLeft, Upload, FileText, Check, Plus, X,
@@ -16,10 +16,12 @@ import { parseUserDocuments, formatCurrency } from "../../../helpers/parseDocume
 import { createBuilding, generateCode } from "../../../db/repositories/building.repository";
 import { importUsers } from "../../../db/repositories/user.repository";
 import { createMetric } from "../../../db/repositories/metric.repository";
-import { createReport, uploadReportPdf, updateReport } from "../../../db/repositories/report.repository";
+import { createReport, uploadReportPdfWithProgress, updateReport } from "../../../db/repositories/report.repository";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
 import type { LucideIcon } from "lucide-react";
+import MetricCard from "../../../pages/user/components/metrics/components/MetricCard";
+import type { IMetric } from "../../../pages/user/components/metrics/components/MetricCard";
 
 const METRIC_ICONS = [
   "Wallet", "PiggyBank", "HardHat", "Building2",
@@ -38,19 +40,11 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 const emptyMetric = (): BuildingMetric => ({
-  title: "",
-  value: "",
-  subtitle: "",
-  icon: "Wallet",
-  order: 0,
+  title: "", value: "", subtitle: "", icon: "Wallet", order: 0,
 });
 
 const emptyReport = (): BuildingReport & { file?: File } => ({
-  month: "",
-  title: "",
-  status: "Auditado",
-  topics: "",
-  createdAt: new Date(),
+  month: "", title: "", status: "Auditado", topics: "", createdAt: new Date(),
 });
 
 export default function CreateBuilding() {
@@ -66,7 +60,7 @@ export default function CreateBuilding() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   function handleNameChange(value: string) {
-    setName(value);
+    setName(value.toUpperCase());
     if (showError) setShowError(false);
   }
 
@@ -78,11 +72,7 @@ export default function CreateBuilding() {
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
       const { valids, invalids } = parseUserDocuments(text);
-      if (valids.length === 0) {
-        setCsvStatus({ type: "warn", message: "No se encontraron cédulas válidas en el archivo." });
-        setPendingDocuments([]);
-        return;
-      }
+      if (valids.length === 0) { setCsvStatus({ type: "warn", message: "No se encontraron cédulas válidas en el archivo." }); setPendingDocuments([]); return; }
       setPendingDocuments(valids);
       setCsvStatus({ type: "ok", message: `${valids.length} cédulas válidas encontradas${invalids > 0 ? `, ${invalids} ignoradas` : ""}.` });
     };
@@ -90,75 +80,39 @@ export default function CreateBuilding() {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  function clearCsv() {
-    setPendingDocuments([]);
-    setCsvStatus(null);
-  }
+  function clearCsv() { setPendingDocuments([]); setCsvStatus(null); }
 
-  function addMetric() {
-    setPendingMetrics((prev) => [...prev, { ...emptyMetric(), order: prev.length }]);
-  }
-
+  function addMetric() { setPendingMetrics((prev) => [...prev, { ...emptyMetric(), order: prev.length }]); }
   function updateMetric(index: number, field: keyof BuildingMetric, value: string | number) {
     setPendingMetrics((prev) => prev.map((m, i) => (i === index ? { ...m, [field]: value } : m)));
   }
+  function removeMetric(index: number) { setPendingMetrics((prev) => prev.filter((_, i) => i !== index)); }
 
-  function removeMetric(index: number) {
-    setPendingMetrics((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function addReport() {
-    setPendingReports((prev) => [...prev, emptyReport()]);
-  }
-
+  function addReport() { setPendingReports((prev) => [...prev, emptyReport()]); }
   function updateReport(index: number, field: keyof (BuildingReport & { file?: File }), value: any) {
     setPendingReports((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)));
   }
-
-  function removeReport(index: number) {
-    setPendingReports((prev) => prev.filter((_, i) => i !== index));
-  }
+  function removeReport(index: number) { setPendingReports((prev) => prev.filter((_, i) => i !== index)); }
 
   async function handleSave() {
     const code = generateCode();
     const slug = slugify(name);
     setCreating(true);
-
     try {
       await createBuilding({ code, slug, name, createdAt: new Date(), data: {} });
-
-      if (pendingDocuments.length > 0) {
-        await importUsers(pendingDocuments.map((doc) => ({ userDocumentNumber: doc, buildingCode: code })));
-      }
-
-      for (const metric of pendingMetrics) {
-        if (metric.title && metric.value) {
-          await createMetric({ ...metric, buildingCode: code });
-        }
-      }
-
+      if (pendingDocuments.length > 0) await importUsers(pendingDocuments.map((doc) => ({ userDocumentNumber: doc, buildingCode: code })));
+      for (const metric of pendingMetrics) { if (metric.title && metric.value) await createMetric({ ...metric, buildingCode: code }); }
       for (const report of pendingReports) {
         if (report.month && report.title) {
-          const reportId = await createReport({
-            month: report.month,
-            title: report.title,
-            status: report.status,
-            topics: report.topics,
-            createdAt: new Date(),
-            buildingCode: code,
-          });
-
+          const reportId = await createReport({ month: report.month, title: report.title, status: report.status, topics: report.topics, createdAt: new Date(), buildingCode: code });
           if (report.file) {
-            const pdfUrl = await uploadReportPdf(code, reportId, report.file);
+            const pdfUrl = await uploadReportPdfWithProgress(code, reportId, report.file, () => {});
             await updateReport(reportId, { pdfUrl });
           }
         }
       }
-
       navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio creado correctamente" } });
-    } catch {
-      setShowError(true);
-    }
+    } catch { setShowError(true); }
     setCreating(false);
   }
 
@@ -171,21 +125,18 @@ export default function CreateBuilding() {
     </div>
   );
 
-  const stepLine = (active: boolean) => (
-    <div className={`flex-1 h-px ${active ? "bg-primary" : "bg-slate-200"}`} />
-  );
+  const stepLine = (active: boolean) => <div className={`flex-1 h-px ${active ? "bg-primary" : "bg-slate-200"}`} />;
+
+  const previewMetrics: IMetric[] = pendingMetrics.map((m) => ({ title: m.title, value: m.value, subtitle: m.subtitle, icon: iconMap[m.icon] }));
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-10">
       <button onClick={() => navigate(ROUTES.PANEL_BUILDINGS)} className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors">
-        <ArrowLeft className="w-4 h-4" />
-        Volver a edificios
+        <ArrowLeft className="w-4 h-4" /> Volver a edificios
       </button>
-
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Crear edificio</h1>
       <Text className="text-slate-500">Registra un nuevo conjunto residencial en el portal de transparencia.</Text>
 
-      {/* Steps indicator */}
       <div className="mt-8 flex items-center gap-2 sm:gap-3">
         {stepCircle(1, "Información", step === 1, step > 1)}
         {stepLine(step >= 2)}
@@ -198,18 +149,11 @@ export default function CreateBuilding() {
 
       {/* Step 1: Información */}
       {step === 1 && (
-        <div className="mt-8 space-y-6">
+        <div className="mt-8 space-y-6 max-w-2xl mx-auto">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nombre del edificio *</label>
-            <div className="relative">
-              <input type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ej: Conjunto Residencial Los Alamos" className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${showError ? "border-danger" : "border-slate-300"}`} />
-              {showError && (
-                <div className="mt-2 flex items-center gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 text-danger" />
-                  <span className="text-sm text-danger">El nombre debe tener al menos 3 caracteres</span>
-                </div>
-              )}
-            </div>
+            <input type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ej: CONJUNTO RESIDENCIAL LOS ALAMOS" className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary uppercase ${showError ? "border-danger" : "border-slate-300"}`} />
+            {showError && <div className="mt-2 flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 text-danger" /><span className="text-sm text-danger">El nombre debe tener al menos 3 caracteres</span></div>}
           </div>
           <div className="flex justify-end">
             <Button variant="primary" onClick={() => { if (name.trim().length < 3) setShowError(true); else setStep(2); }} disabled={name.trim().length < 3}>Siguiente →</Button>
@@ -219,24 +163,18 @@ export default function CreateBuilding() {
 
       {/* Step 2: Residentes */}
       {step === 2 && (
-        <div className="mt-8 space-y-6">
+        <div className="mt-8 space-y-6 max-w-2xl mx-auto">
           <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
             <h3 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
-              Importar residentes
-              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Opcional</span>
+              Importar residentes <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Opcional</span>
             </h3>
-            <Text className="text-slate-500 text-sm mb-4">Sube un archivo CSV o TXT con las cédulas de los residentes. Una cédula por línea o en la primera columna. Solo números, sin letras ni espacios. Puedes agregarlos más tarde desde la edición del edificio.</Text>
+            <Text className="text-slate-500 text-sm mb-4">Sube un archivo CSV o TXT con las cédulas de los residentes. Una cédula por línea o en la primera columna. Solo números.</Text>
             <div className="flex flex-wrap items-center gap-3">
               <input ref={fileRef} type="file" accept=".csv,.txt" onChange={handleFileSelected} className="hidden" />
               <Button variant="outline" leftIcon={Upload} onClick={() => fileRef.current?.click()}>Seleccionar archivo</Button>
               {pendingDocuments.length > 0 && <button onClick={clearCsv} className="text-sm text-slate-400 hover:text-slate-600 transition-colors">Limpiar</button>}
             </div>
-            {csvStatus && (
-              <div className="mt-3 flex items-center gap-1.5 text-sm">
-                <FileText className="w-4 h-4 shrink-0" />
-                <span className={csvStatus.type === "ok" ? "text-primary font-medium" : "text-danger font-medium"}>{csvStatus.message}</span>
-              </div>
-            )}
+            {csvStatus && <div className="mt-3 flex items-center gap-1.5 text-sm"><FileText className="w-4 h-4 shrink-0" /><span className={csvStatus.type === "ok" ? "text-primary font-medium" : "text-danger font-medium"}>{csvStatus.message}</span></div>}
           </div>
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => setStep(1)}>← Anterior</Button>
@@ -247,50 +185,44 @@ export default function CreateBuilding() {
 
       {/* Step 3: Métricas */}
       {step === 3 && (
-        <div className="mt-8 space-y-6">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div className="mt-8 space-y-8">
+          {previewMetrics.length > 0 && (
+            <div>
+              <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Vista previa — cómo lo verán los residentes</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {previewMetrics.map((metric, index) => (
+                  <div key={index} className="relative group">
+                    <MetricCard metric={metric} index={index} />
+                    <button onClick={() => removeMetric(index)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
             <h3 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
-              Métricas financieras
-              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Opcional</span>
+              Agregar métricas <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Opcional</span>
             </h3>
-            <Text className="text-slate-500 text-sm mb-4">Agrega las métricas financieras que verán los residentes en su dashboard.</Text>
 
             {pendingMetrics.map((metric, index) => (
               <div key={index} className="mb-4 p-4 rounded-xl bg-slate-50 border border-slate-200 relative">
-                <button onClick={() => removeMetric(index)} className="absolute top-3 right-3 text-slate-400 hover:text-danger transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
+                <button onClick={() => removeMetric(index)} className="absolute top-3 right-3 text-slate-400 hover:text-danger transition-colors"><X className="w-4 h-4" /></button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Título</label>
-                    <input type="text" value={metric.title} onChange={(e) => updateMetric(index, "title", e.target.value)} placeholder="Ej: Excedente Acumulado" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Valor</label>
-                    <input type="text" value={metric.value} onChange={(e) => updateMetric(index, "value", formatCurrency(e.target.value))} placeholder="$ *" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Subtítulo</label>
-                    <input type="text" value={metric.subtitle} onChange={(e) => updateMetric(index, "subtitle", e.target.value)} placeholder="Ej: Cierre Fiscal 2025" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  </div>
+                  <input type="text" value={metric.title} onChange={(e) => updateMetric(index, "title", e.target.value.toUpperCase())} placeholder="TÍTULO" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <input type="text" value={metric.value} onChange={(e) => updateMetric(index, "value", formatCurrency(e.target.value))} placeholder="$" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <input type="text" value={metric.subtitle} onChange={(e) => updateMetric(index, "subtitle", e.target.value.toUpperCase())} placeholder="SUBTÍTULO" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Icono</label>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">ICONO</p>
                     <div className="flex flex-wrap gap-1.5">
                       {METRIC_ICONS.map((iconName) => {
                         const IconComponent = iconMap[iconName];
                         const isSelected = metric.icon === iconName;
                         return (
-                          <button
-                            key={iconName}
-                            type="button"
-                            onClick={() => updateMetric(index, "icon", iconName)}
-                            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border-2 ${
-                              isSelected
-                                ? "border-primary bg-primary/10 text-primary"
-                                : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"
-                            }`}
-                            title={iconName}
-                          >
+                          <button key={iconName} type="button" onClick={() => updateMetric(index, "icon", iconName)}
+                            className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border-2 ${isSelected ? "border-primary bg-primary/10 text-primary" : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"}`} title={iconName}>
                             {IconComponent && <IconComponent className="w-4 h-4" />}
                           </button>
                         );
@@ -303,43 +235,53 @@ export default function CreateBuilding() {
 
             <Button variant="outline" leftIcon={Plus} onClick={addMetric}>Agregar métrica</Button>
           </div>
-          <div className="flex items-center justify-between">
+
+          <div className="flex items-center justify-between max-w-2xl mx-auto">
             <Button variant="ghost" onClick={() => setStep(2)}>← Anterior</Button>
             <Button variant="primary" onClick={() => setStep(4)}>Siguiente →</Button>
           </div>
         </div>
       )}
 
-      {/* Step 4: Dictámenes */}
+      {/* Step 4: Reportes */}
       {step === 4 && (
-        <div className="mt-8 space-y-6">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div className="mt-8 space-y-8">
+          {pendingReports.length > 0 && (
+            <div>
+              <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Vista previa — cómo lo verán los residentes</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pendingReports.map((report, index) => (
+                  <div key={index} className="relative group">
+                    <div className="rounded-2xl p-6 shadow-sm bg-white border border-slate-200">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider px-3 py-1 rounded-lg text-slate-500 bg-slate-100"><FileText className="w-4 h-4" />{report.month}</div>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-50 border border-primary-200 text-primary-dark"><Check className="w-3.5 h-3.5" />{report.status}</span>
+                      </div>
+                      <h3 className="font-bold text-xl mb-3 leading-snug text-slate-900">{report.title}</h3>
+                      <p className="text-sm leading-relaxed mb-6 text-slate-600"><strong className="text-slate-900">Enfoque de auditoría:</strong> {report.topics}.</p>
+                    </div>
+                    <button onClick={() => removeReport(index)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger z-10"><X className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
             <h3 className="font-bold text-slate-900 mb-1 flex items-center gap-2">
-              Reportes
-              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Opcional</span>
+              Agregar reportes <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Opcional</span>
             </h3>
-            <Text className="text-slate-500 text-sm mb-4">Agrega los reportes mensuales que los residentes podrán consultar y descargar.</Text>
 
             {pendingReports.map((report, index) => (
               <div key={index} className="mb-4 p-4 rounded-xl bg-slate-50 border border-slate-200 relative">
-                <button onClick={() => removeReport(index)} className="absolute top-3 right-3 text-slate-400 hover:text-danger transition-colors">
-                  <X className="w-4 h-4" />
-                </button>
+                <button onClick={() => removeReport(index)} className="absolute top-3 right-3 text-slate-400 hover:text-danger transition-colors"><X className="w-4 h-4" /></button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Mes</label>
-                    <input type="text" value={report.month} onChange={(e) => updateReport(index, "month", e.target.value)} placeholder="Ej: Marzo 2026" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Título</label>
-                    <input type="text" value={report.title} onChange={(e) => updateReport(index, "title", e.target.value)} placeholder="Ej: Reporte Marzo 2026" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  </div>
+                  <input type="text" value={report.month} onChange={(e) => updateReport(index, "month", e.target.value)} placeholder="MES (Ej: MARZO 2026)" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <input type="text" value={report.title} onChange={(e) => updateReport(index, "title", e.target.value.toUpperCase())} placeholder="TÍTULO" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Temas abordados</label>
-                    <input type="text" value={report.topics} onChange={(e) => updateReport(index, "topics", e.target.value)} placeholder="Ej: Revisión extractos, Cartera y Anticipos de Obra" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                    <input type="text" value={report.topics} onChange={(e) => updateReport(index, "topics", e.target.value.toUpperCase())} placeholder="TEMAS ABORDADOS" className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">PDF (opcional)</label>
                     <input type="file" accept=".pdf" onChange={(e) => updateReport(index, "file", e.target.files?.[0])} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
                   </div>
                 </div>
@@ -348,7 +290,8 @@ export default function CreateBuilding() {
 
             <Button variant="outline" leftIcon={Plus} onClick={addReport}>Agregar reporte</Button>
           </div>
-          <div className="flex items-center justify-between">
+
+          <div className="flex items-center justify-between max-w-2xl mx-auto">
             <Button variant="ghost" onClick={() => setStep(3)}>← Anterior</Button>
             <div className="flex items-center gap-3">
               <Button variant="ghost" onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}>Cancelar</Button>

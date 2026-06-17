@@ -12,25 +12,24 @@ import Button from "../../../ui/Button";
 import Toast from "../../../ui/Toast";
 import { ROUTES } from "../../../constants/routes";
 import { formatCurrency, validateMonth } from "../../../helpers/parseDocuments";
-import {
-  getBuildingById, updateBuilding, deleteBuilding,
-} from "../../../db/repositories/building.repository";
-import {
-  getUsersByBuildingCode, createUser, deleteUser, importUsers,
-} from "../../../db/repositories/user.repository";
-import {
-  getMetricsByBuildingCode, createMetric, deleteMetric,
-} from "../../../db/repositories/metric.repository";
+import { getBuildingById, updateBuilding, deleteBuilding } from "../../../db/repositories/building.repository";
+import { getUsersByBuildingCode, createUser, deleteUser, importUsers } from "../../../db/repositories/user.repository";
+import { getMetricsByBuildingCode, createMetric, deleteMetric } from "../../../db/repositories/metric.repository";
 import {
   getReportsByBuildingCode, createReport as createReportRepo,
-  updateReport as updateReportRepo, deleteReport, uploadReportPdf,
+  updateReport as updateReportRepo, deleteReport,
+  uploadReportPdfWithProgress, downloadPdf,
 } from "../../../db/repositories/report.repository";
 import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
+import type { LucideIcon } from "lucide-react";
 import Modal from "../../../ui/Modal";
 import UsersTable from "./components/UsersTable";
-import type { LucideIcon } from "lucide-react";
+import MetricCard from "../../../pages/user/components/metrics/components/MetricCard";
+import ReportCard from "../../../pages/user/components/reports/components/ReportCard";
+import type { IMetric } from "../../../pages/user/components/metrics/components/MetricCard";
+import type { IReportData } from "../../../pages/user/components/reports/interfaces/reports-section.interface";
 
 type Tab = "info" | "users" | "metrics" | "reports";
 
@@ -50,7 +49,7 @@ const iconMap: Record<string, LucideIcon> = {
   ClipboardList, FileText, Receipt, Banknote,
 };
 
-const MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_PDF_SIZE = 10 * 1024 * 1024;
 
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
@@ -73,6 +72,7 @@ export default function EditBuilding() {
   const [deletingMetricId, setDeletingMetricId] = useState<string | null>(null);
   const [addingReport, setAddingReport] = useState(false);
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [metricError, setMetricError] = useState("");
   const [reportError, setReportError] = useState("");
   const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
@@ -92,8 +92,8 @@ export default function EditBuilding() {
   }, [building?.code]);
 
   function handleNameChange(value: string) {
-    setName(value);
-    setHasChanges(value !== building?.name);
+    setName(value.toUpperCase());
+    setHasChanges(value.toUpperCase() !== building?.name);
     if (showError) setShowError(false);
   }
 
@@ -101,12 +101,10 @@ export default function EditBuilding() {
     if (name.trim().length < 3 || !id) { setShowError(true); return; }
     setSaving(true);
     try {
-      await updateBuilding(id, { name });
+      await updateBuilding(id, { name: name.trim() });
       setToast({ message: "Edificio actualizado correctamente" });
       setHasChanges(false);
-    } catch {
-      setToast({ message: "Error al guardar los cambios", type: "error" });
-    }
+    } catch { setToast({ message: "Error al guardar los cambios", type: "error" }); }
     setSaving(false);
   }
 
@@ -148,20 +146,14 @@ export default function EditBuilding() {
       setMetrics((prev) => [...prev, { ...newMetric, id: metricId }]);
       setNewMetric({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
       setToast({ message: "Métrica agregada correctamente" });
-    } catch {
-      setToast({ message: "Error al agregar la métrica", type: "error" });
-    }
+    } catch { setToast({ message: "Error al agregar la métrica", type: "error" }); }
     setAddingMetric(false);
   }
 
   async function handleDeleteMetric(metricId: string) {
     setDeletingMetricId(metricId);
-    try {
-      await deleteMetric(metricId);
-      setMetrics((prev) => prev.filter((m) => m.id !== metricId));
-    } catch {
-      setToast({ message: "Error al eliminar la métrica", type: "error" });
-    }
+    try { await deleteMetric(metricId); setMetrics((prev) => prev.filter((m) => m.id !== metricId)); }
+    catch { setToast({ message: "Error al eliminar la métrica", type: "error" }); }
     setDeletingMetricId(null);
   }
 
@@ -174,67 +166,48 @@ export default function EditBuilding() {
   }
 
   async function handleAddReport() {
-    const monthError = validateMonth(newReport.month);
-    if (monthError) { setReportError(monthError); return; }
+    const monthValidation = validateMonth(newReport.month);
+    if (monthValidation) { setReportError(monthValidation); return; }
     const validationError = validateReport();
     if (validationError) { setReportError(validationError); return; }
     setReportError("");
     setAddingReport(true);
+    setUploadProgress(0);
     try {
       const reportId = await createReportRepo({
-        month: newReport.month.trim(),
-        title: newReport.title.trim(),
-        status: "Auditado",
-        topics: newReport.topics.trim(),
-        createdAt: new Date(),
-        buildingCode: building.code!,
+        month: newReport.month.trim(), title: newReport.title.trim(),
+        status: "Auditado", topics: newReport.topics.trim(),
+        createdAt: new Date(), buildingCode: building.code!,
       });
       let pdfUrl: string | undefined;
       if (newReport.file) {
         try {
-          const uploadWithTimeout = (promise: Promise<string>, ms: number) =>
-            Promise.race([
-              promise,
-              new Promise<string>((_, reject) =>
-                setTimeout(() => reject(new Error("Tiempo de espera agotado. Verifica la configuración de Storage.")), ms)
-              ),
-            ]);
-          pdfUrl = await uploadWithTimeout(uploadReportPdf(building.code!, reportId, newReport.file), 30000);
+          pdfUrl = await uploadReportPdfWithProgress(building.code!, reportId, newReport.file, setUploadProgress);
           await updateReportRepo(reportId, { pdfUrl });
-        } catch (uploadError) {
-          setToast({
-            message: uploadError instanceof Error ? uploadError.message : "Error al subir el PDF",
-            type: "error",
-          });
+        } catch {
+          setToast({ message: "Error al subir el PDF. Verifica la configuración de Storage.", type: "error" });
         }
       }
       setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl, createdAt: new Date() }]);
       setNewReport({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+      setUploadProgress(null);
       setToast({ message: "Reporte agregado correctamente" });
-    } catch {
-      setToast({ message: "Error al agregar el reporte", type: "error" });
-    }
+    } catch { setToast({ message: "Error al agregar el reporte", type: "error" }); }
     setAddingReport(false);
   }
 
   async function handleDeleteReport(reportId: string) {
     setDeletingReportId(reportId);
-    try {
-      await deleteReport(reportId);
-      setReports((prev) => prev.filter((r) => r.id !== reportId));
-    } catch {
-      setToast({ message: "Error al eliminar el reporte", type: "error" });
-    }
+    try { await deleteReport(reportId); setReports((prev) => prev.filter((r) => r.id !== reportId)); }
+    catch { setToast({ message: "Error al eliminar el reporte", type: "error" }); }
     setDeletingReportId(null);
   }
 
   async function handleDeleteBuilding() {
     if (!id) return;
     setDeleting(true);
-    try {
-      await deleteBuilding(id);
-      navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio eliminado" } });
-    } catch { setShowError(true); }
+    try { await deleteBuilding(id); navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio eliminado" } }); }
+    catch { setShowError(true); }
     setDeleting(false);
   }
 
@@ -262,12 +235,26 @@ export default function EditBuilding() {
       activeTab === tab ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
     }`;
 
+  const previewMetrics: IMetric[] = metrics.map((m) => ({
+    title: m.title,
+    value: m.value,
+    subtitle: m.subtitle,
+    icon: iconMap[m.icon],
+  }));
+
+  const previewReports: IReportData[] = reports.map((r) => ({
+    id: r.id || "",
+    month: r.month,
+    title: r.title,
+    status: r.status,
+    topics: r.topics,
+  }));
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-6xl mx-auto px-4 py-10">
       <button onClick={() => navigate(ROUTES.PANEL_BUILDINGS)} className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors"><ArrowLeft className="w-4 h-4" /> Volver a edificios</button>
       <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Editar edificio</h1>
 
-      {/* Tabs */}
       <div className="mt-8 border-b border-slate-200 flex">
         <button onClick={() => setActiveTab("info")} className={tabClass("info")}><Building2 className="w-4 h-4" /> Información</button>
         <button onClick={() => setActiveTab("users")} className={tabClass("users")}><Users className="w-4 h-4" /> Usuarios</button>
@@ -275,20 +262,18 @@ export default function EditBuilding() {
         <button onClick={() => setActiveTab("reports")} className={tabClass("reports")}><FileText className="w-4 h-4" /> Reportes</button>
       </div>
 
-      {/* Tab content */}
-      <div className="mt-6 max-w-2xl mx-auto">
+      <div className="mt-6 max-w-4xl mx-auto">
         {activeTab === "info" && (
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-2xl mx-auto">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nombre del edificio *</label>
-              <input type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ej: Conjunto Residencial Los Alamos" className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary ${showError ? "border-danger" : "border-slate-300"}`} />
+              <input type="text" value={name} onChange={(e) => handleNameChange(e.target.value)} placeholder="Ej: CONJUNTO RESIDENCIAL LOS ALAMOS" className={`w-full px-4 py-3 rounded-xl outline-none transition-all bg-white text-slate-900 focus:border-primary uppercase ${showError ? "border-danger" : "border-slate-300"}`} />
               {showError && <div className="mt-2 flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 text-danger" /><span className="text-sm text-danger">El nombre debe tener al menos 3 caracteres</span></div>}
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <Button variant="primary" loading={saving} onClick={handleSave} disabled={!hasChanges || name.trim().length < 3}>Guardar cambios</Button>
               <Button variant="ghost" onClick={() => navigate(ROUTES.PANEL_BUILDINGS)}>Cancelar</Button>
             </div>
-
             <div className="border-t border-slate-200 pt-6 mt-10">
               <h3 className="text-base font-bold text-slate-900">Eliminar edificio</h3>
               <p className="text-sm text-slate-500 mt-1 mb-4">Al eliminar este edificio se perderá el acceso de todos sus residentes y la información asociada.</p>
@@ -306,72 +291,52 @@ export default function EditBuilding() {
         )}
 
         {activeTab === "metrics" && (
-          <div className="space-y-4">
-            {metrics.map((metric) => {
-              const IconComponent = iconMap[metric.icon];
-              const isDeleting = deletingMetricId === metric.id;
-              return (
-                <div key={metric.id} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200">
-                  {IconComponent && <IconComponent className="w-5 h-5 text-primary shrink-0" />}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 truncate">{metric.title}</div>
-                    <div className="text-sm text-slate-500 truncate">{metric.value} — {metric.subtitle}</div>
-                  </div>
-                  <button
-                    onClick={() => metric.id && handleDeleteMetric(metric.id)}
-                    disabled={isDeleting}
-                    className="text-slate-400 hover:text-danger transition-colors shrink-0 disabled:opacity-50"
-                  >
-                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  </button>
+          <div className="space-y-8">
+            {previewMetrics.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Vista previa — cómo lo verán los residentes</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {previewMetrics.map((metric, index) => (
+                    <div key={index} className="relative group">
+                      <MetricCard metric={metric} index={index} />
+                      <button
+                        onClick={() => metrics[index]?.id && handleDeleteMetric(metrics[index].id!)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-            {metrics.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>}
+              </div>
+            )}
+            {previewMetrics.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>}
 
-            {/* Add metric form */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
               <p className="font-bold text-slate-900 mb-3">Agregar métrica</p>
-
               {metricError && (
                 <div className="mb-3 p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {metricError}
+                  <AlertCircle className="w-4 h-4 shrink-0" /> {metricError}
                 </div>
               )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                <div>
-                  <input type="text" value={newMetric.title} onChange={(e) => { setNewMetric((prev) => ({ ...prev, title: e.target.value })); setMetricError(""); }} placeholder="Título * (mín. 3 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                </div>
+                <input type="text" value={newMetric.title} onChange={(e) => { setNewMetric((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="TÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newMetric.value} onChange={(e) => { setNewMetric((prev) => ({ ...prev, value: formatCurrency(e.target.value) })); setMetricError(""); }} placeholder="$ *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value })); setMetricError(""); }} placeholder="Subtítulo *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="SUBTÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
               </div>
-
-              {/* Icon picker */}
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Icono</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ICONO</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 {METRIC_ICONS.map((iconName) => {
                   const IconComponent = iconMap[iconName];
                   const isSelected = newMetric.icon === iconName;
                   return (
-                    <button
-                      key={iconName}
-                      type="button"
-                      onClick={() => setNewMetric((prev) => ({ ...prev, icon: iconName }))}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border-2 ${
-                        isSelected
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"
-                      }`}
-                      title={iconName}
-                    >
+                    <button key={iconName} type="button" onClick={() => setNewMetric((prev) => ({ ...prev, icon: iconName }))}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border-2 ${isSelected ? "border-primary bg-primary/10 text-primary" : "border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"}`} title={iconName}>
                       {IconComponent && <IconComponent className="w-5 h-5" />}
                     </button>
                   );
                 })}
               </div>
-
               <div className="flex justify-center">
                 <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
               </div>
@@ -380,70 +345,63 @@ export default function EditBuilding() {
         )}
 
         {activeTab === "reports" && (
-          <div className="space-y-4">
-            {reports.map((report) => {
-              const isDeleting = deletingReportId === report.id;
-              return (
-                <div key={report.id} className="flex items-center justify-between p-4 rounded-xl bg-white border border-slate-200">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-900 truncate">{report.month} — {report.title}</div>
-                    <div className="text-sm text-slate-500 truncate">{report.topics}</div>
-                  </div>
-                  {report.pdfUrl && (
-                    <a href={report.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline mr-3 shrink-0">PDF</a>
-                  )}
-                  <button
-                    onClick={() => report.id && handleDeleteReport(report.id)}
-                    disabled={isDeleting}
-                    className="text-slate-400 hover:text-danger transition-colors shrink-0 disabled:opacity-50"
-                  >
-                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                  </button>
+          <div className="space-y-8">
+            {previewReports.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Vista previa — cómo lo verán los residentes</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {previewReports.map((report, index) => (
+                    <div key={index} className="relative group">
+                      <ReportCard report={report} index={index} onDownload={(r) => reports[index]?.pdfUrl ? downloadPdf(reports[index].pdfUrl!, `${r.month}-${r.title}.pdf`) : alert("No hay PDF disponible")} />
+                      <button
+                        onClick={() => reports[index]?.id && handleDeleteReport(reports[index].id!)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger z-10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-            {reports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay reportes registrados.</p>}
+              </div>
+            )}
+            {previewReports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay reportes registrados.</p>}
 
-            {/* Add report form */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
               <p className="font-bold text-slate-900 mb-3">Agregar reporte</p>
-
               {reportError && (
                 <div className="mb-3 p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {reportError}
+                  <AlertCircle className="w-4 h-4 shrink-0" /> {reportError}
                 </div>
               )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <div>
-                  <input type="text" value={newReport.month} onChange={(e) => { setNewReport((prev) => ({ ...prev, month: e.target.value })); setReportError(""); }} placeholder="Mes * (Ej: Marzo 2026)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                </div>
-                <div>
-                  <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value })); setReportError(""); }} placeholder="Título * (mín. 5 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                </div>
+                <input type="text" value={newReport.month} onChange={(e) => { setNewReport((prev) => ({ ...prev, month: e.target.value })); setReportError(""); }} placeholder="MES (Ej: MARZO 2026)" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <div className="sm:col-span-2">
-                  <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value })); setReportError(""); }} placeholder="Temas abordados * (mín. 5 caracteres)" className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TEMAS ABORDADOS *" className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 </div>
                 <div>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file && file.size > MAX_PDF_SIZE) {
-                        setReportError("El PDF no puede superar los 10MB");
-                        e.target.value = "";
-                        return;
-                      }
-                      setNewReport((prev) => ({ ...prev, file }));
-                      setReportError("");
-                    }}
-                    className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
-                  />
+                  <input type="file" accept=".pdf" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && file.size > MAX_PDF_SIZE) { setReportError("El PDF no puede superar los 10MB"); e.target.value = ""; return; }
+                    setNewReport((prev) => ({ ...prev, file }));
+                    setReportError("");
+                  }} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
                   <p className="text-xs text-slate-400 mt-1">Máximo 10MB. Opcional.</p>
                 </div>
               </div>
+
+              {uploadProgress !== null && (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>Subiendo PDF...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-center">
                 <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
               </div>
@@ -453,7 +411,6 @@ export default function EditBuilding() {
       </div>
 
       <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Eliminar edificio" message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán." confirmLabel="Sí, eliminar" variant="danger" loading={deleting} onConfirm={handleDeleteBuilding} />
-
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );

@@ -16,7 +16,7 @@ import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
 import { getMetricsByBuildingCode } from "../../../db/repositories/metric.repository";
-import { getReportsByBuildingCode } from "../../../db/repositories/report.repository";
+import { getReportsByBuildingCode, downloadPdf } from "../../../db/repositories/report.repository";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wallet, PiggyBank, HardHat, Building2,
@@ -102,10 +102,15 @@ export const UserDashboard = () => {
     title: report.title,
     status: report.status,
     topics: report.topics,
+    pdfUrl: report.pdfUrl,
   }));
 
-  const handleDownloadReport = () => {
-    alert("Descargando PDF del reporte.");
+  const handleDownloadReport = (report: { month: string; title: string; pdfUrl?: string }) => {
+    if (report.pdfUrl) {
+      downloadPdf(report.pdfUrl, `${report.month}-${report.title}.pdf`);
+    } else {
+      alert("No hay PDF disponible para este reporte.");
+    }
   };
 
   const bannerInfo = {
