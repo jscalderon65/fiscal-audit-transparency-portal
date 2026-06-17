@@ -32,10 +32,10 @@ export const Banner: React.FC<IBannerProps> = ({ info, profile }) => {
                 })}{" "}
               {info.badge}
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-sm">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-sm">
               {info.title}
             </h1>
-            <p className="text-xl md:text-2xl font-light flex items-center gap-3 text-slate-300">
+            <p className="text-lg sm:text-xl md:text-2xl font-light flex items-center gap-3 text-slate-300">
               {info.subtitle}
             </p>
           </div>

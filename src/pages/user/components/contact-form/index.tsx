@@ -56,10 +56,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) =
       className="rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-slate-800"
     >
       <div className="grid md:grid-cols-5 h-full">
-        <div className="p-8 md:p-12 md:col-span-2 flex flex-col justify-center relative overflow-hidden text-white">
+        <div className="p-6 sm:p-8 md:p-12 md:col-span-2 flex flex-col justify-center relative overflow-hidden text-white">
           <div className="absolute top-0 left-0 w-full h-full -z-10 bg-emerald-900/40" />
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-white">{contactInfo.title}</h2>
-          <p className="mb-8 text-lg leading-relaxed font-light text-slate-300">{contactInfo.description}</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 tracking-tight text-white">{contactInfo.title}</h2>
+          <p className="mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed font-light text-slate-300">{contactInfo.description}</p>
           <div className="space-y-5 text-slate-300">
             {contactInfo.features.map((feature, idx) => (
               <div key={idx} className="flex items-center gap-4 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">

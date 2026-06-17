@@ -23,15 +23,15 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
       hoverEffect={true}
     >
       <div className="flex-1">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex gap-3 min-w-0">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex gap-2 min-w-0">
             {Icon && (
               <div className="mt-1 shrink-0">
-                <Icon className="w-6 h-6 text-primary" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
             )}
-            <div className="h-[3.25rem] overflow-hidden">
-              <span className="font-bold text-lg leading-tight text-slate-900 line-clamp-2" title={title}>
+            <div className="h-[2.5rem] sm:h-[3.25rem] overflow-hidden">
+              <span className="font-bold text-sm sm:text-lg leading-tight text-slate-900 line-clamp-2" title={title}>
                 {title}
               </span>
             </div>
@@ -40,13 +40,13 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
       </div>
 
       <div className="mt-auto">
-        <div className="h-[3.5rem] overflow-hidden flex flex-col justify-center">
-          <div className="text-2xl font-extrabold tracking-tight text-slate-900 truncate" title={`${value}`}>
+        <div className="h-[2.5rem] sm:h-[3.5rem] overflow-hidden flex flex-col justify-center">
+          <div className="text-lg sm:text-2xl font-extrabold tracking-tight text-slate-900 truncate" title={`${value}`}>
             {value}
           </div>
         </div>
-        <div className="h-[2.5rem] overflow-hidden flex flex-col justify-center">
-          <div className="text-sm font-medium text-slate-500 truncate" title={subtitle}>
+        <div className="h-[2rem] sm:h-[2.5rem] overflow-hidden flex flex-col justify-center">
+          <div className="text-[11px] sm:text-sm font-medium text-slate-500 truncate" title={subtitle}>
             {subtitle}
           </div>
         </div>

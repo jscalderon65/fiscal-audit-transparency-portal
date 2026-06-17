@@ -16,11 +16,11 @@ export const MetricsSection: React.FC<IMetricsSectionProps> = ({
     <section>
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold flex items-center gap-3 tracking-tight text-slate-900">
-            <Wallet className="w-8 h-8 text-primary" />
+          <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-3 tracking-tight text-slate-900">
+            <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             {title}
           </h2>
-          <p className="mt-2 text-lg text-slate-500">{subtitle}</p>
+          <p className="mt-2 text-sm sm:text-lg text-slate-500">{subtitle}</p>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -13,8 +13,9 @@ export function parseUserDocuments(
 export function formatCurrency(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   if (!digits) return "";
-  const number = parseInt(digits, 10);
-  return "$ " + number.toLocaleString("es-CO");
+  // String-based formatting: handles ANY size number
+  const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return "$ " + formatted;
 }
 
 const SPANISH_MONTHS = [

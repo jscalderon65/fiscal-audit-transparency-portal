@@ -98,12 +98,12 @@ export default function BuildingsList() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: index * 0.04 }}
-              className={`flex items-center justify-between p-5 ${index < buildings.length - 1 ? "border-b border-slate-100" : ""}`}
+              className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3 ${index < buildings.length - 1 ? "border-b border-slate-100" : ""}`}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 min-w-0">
                 <Building2 className="w-5 h-5 shrink-0 text-primary" />
-                <div>
-                  <div className="font-bold text-base text-slate-900">
+                <div className="min-w-0">
+                  <div className="font-bold text-sm sm:text-base text-slate-900 truncate">
                     {building.name}
                   </div>
                   <Small className="text-slate-400">
@@ -119,10 +119,10 @@ export default function BuildingsList() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => copyLink(building.code, building.id)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors border-2"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors border-2"
                   style={{
                     backgroundColor: copiedId === building.id ? "var(--color-primary)" : "transparent",
                     color: copiedId === building.id ? "#fff" : "var(--color-primary)",
@@ -130,11 +130,12 @@ export default function BuildingsList() {
                   }}
                 >
                   {copiedId === building.id ? (
-                    <Check className="w-4 h-4" />
+                    <Check className="w-3.5 h-3.5" />
                   ) : (
-                    <Copy className="w-4 h-4" />
+                    <Copy className="w-3.5 h-3.5" />
                   )}
-                  {copiedId === building.id ? "Copiado" : "Copiar link de acceso"}
+                  <span className="hidden sm:inline">{copiedId === building.id ? "Copiado" : "Copiar link de acceso"}</span>
+                  <span className="sm:hidden">{copiedId === building.id ? "Copiado" : "Copiar"}</span>
                 </button>
 
                 <Button
