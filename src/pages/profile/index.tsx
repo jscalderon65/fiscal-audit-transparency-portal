@@ -1,5 +1,4 @@
 import { H1, H2, Text, Small } from "../../ui/Typography";
-import Button from "../../ui/Button";
 import Card from "../../ui/Card";
 import Badge from "../../ui/Badge";
 import {
@@ -33,13 +32,6 @@ const Profile: React.FC = () => {
                     Profesional enfocada en la transparencia, confidencialidad y
                     el liderazgo financiero y administrativo.
                   </Text>
-                </div>
-
-                <div className="mt-8 flex items-center gap-4">
-                  <Button variant="primary" leftIcon={ShieldCheck}>
-                    Contactar a la Revisoría
-                  </Button>
-                  <Button variant="outline">Ver Dictámenes</Button>
                 </div>
               </div>
 
@@ -160,20 +152,6 @@ const Profile: React.FC = () => {
                   <Small>SIMI ERP, CRM, Facturación</Small>
                 </div>
               </Card>
-            </div>
-          </section>
-
-          {/* CTA */}
-          <section className="bg-slate-950 rounded-2xl p-8 md:p-12 text-center">
-            <div className="text-white text-xl font-bold mb-3">
-              ¿Necesita auditoría para su copropiedad?
-            </div>
-            <Text className="text-white">
-              Contacte a la Revisoría para una evaluación profesional y confidencial.
-            </Text>
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <Button variant="primary">Solicitar Cotización</Button>
-              <Button variant="outline">Contactar</Button>
             </div>
           </section>
         </div>
