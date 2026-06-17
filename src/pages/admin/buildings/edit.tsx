@@ -225,7 +225,7 @@ export default function EditBuilding() {
   }
 
   const tabClass = (tab: Tab) =>
-    `flex-1 flex-shrink-0 flex items-center justify-center gap-0 sm:gap-2 px-2 sm:px-4 py-3 text-[11px] sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+    `flex-1 flex-shrink-0 flex items-center justify-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-3 text-[11px] sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
       activeTab === tab ? "border-primary text-primary" : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
     }`;
 
