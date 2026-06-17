@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Building2, Calendar } from "lucide-react";
+import { Mail, Building2 } from "lucide-react";
 import { Text } from "../../../ui/Typography";
-import { ROUTES } from "../../../constants/routes";
 import { getContactMessages, type ContactMessage } from "../../../db/repositories/contact.repository";
 import { getBuildingByCode } from "../../../db/repositories/building.repository";
 
 export default function ContactMessages() {
-  const navigate = useNavigate();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [buildingNames, setBuildingNames] = useState<Record<string, string>>({});
@@ -28,10 +25,6 @@ export default function ContactMessages() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <button onClick={() => navigate(ROUTES.PANEL_BUILDINGS)} className="flex items-center gap-2 text-sm text-slate-500 mb-6 hover:text-slate-900 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Volver a edificios
-      </button>
-
       <div className="flex items-center gap-3 mb-2">
         <Mail className="w-6 h-6 text-primary" />
         <h1 className="text-3xl font-extrabold text-slate-900">Mensajes de contacto</h1>
@@ -52,7 +45,7 @@ export default function ContactMessages() {
       ) : (
         <div className="space-y-4">
           {messages.map((msg) => (
-              <div key={msg.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <div key={msg.id} className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
                   <p className="font-bold text-slate-900">{msg.name}</p>
