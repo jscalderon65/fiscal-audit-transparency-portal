@@ -26,12 +26,12 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex gap-2 min-w-0">
             {Icon && (
-              <div className="mt-1 shrink-0">
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <div className="mt-0.5 shrink-0">
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </div>
             )}
-            <div className="h-[2.5rem] sm:h-[3.25rem] overflow-hidden">
-              <span className="font-bold text-sm sm:text-lg leading-tight text-slate-900 line-clamp-2" title={title}>
+            <div className="overflow-hidden">
+              <span className="font-bold text-xs sm:text-sm md:text-lg leading-tight text-slate-900 line-clamp-2" title={title}>
                 {title}
               </span>
             </div>
@@ -41,7 +41,7 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
 
       <div className="mt-auto">
         <div className="flex flex-col justify-center">
-          <div className="text-[11px] sm:text-sm md:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 whitespace-nowrap overflow-hidden text-ellipsis" title={`${value}`}>
+          <div className="text-sm sm:text-base md:text-lg lg:text-2xl font-extrabold tracking-tight text-slate-900 overflow-x-auto scrollbar-none" title={`${value}`}>
             {value}
           </div>
         </div>
