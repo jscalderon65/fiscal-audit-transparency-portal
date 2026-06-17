@@ -288,21 +288,19 @@ export default function CreateBuilding() {
             {pendingReports.map((report, index) => (
               <div key={index} className="mb-4 p-4 rounded-xl bg-slate-50 border border-slate-200 relative">
                 <button onClick={() => removeReport(index)} className="absolute top-3 right-3 text-slate-400 hover:text-danger transition-colors"><X className="w-4 h-4" /></button>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
+                <div className="space-y-3 pr-8">
                   <div className="flex gap-2">
-                    <select value={report.month ? report.month.split(" ")[0] : ""} onChange={(e) => { const m = e.target.value; const y = report.month?.split(" ")[1] || ""; updateReport(index, "month", m ? `${m} ${y}` : ""); }} className={`flex-1 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold uppercase ${report.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}>
-                      <option value="">Selecciona un mes</option>
+                    <select value={report.month ? report.month.split(" ")[0] : ""} onChange={(e) => { const m = e.target.value; const y = report.month?.split(" ")[1] || ""; updateReport(index, "month", m ? `${m} ${y}` : ""); }} className={`flex-1 px-3 py-2.5 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold uppercase ${report.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}>
+                      <option value="">SELECCIONA UN MES</option>
                       {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
                     </select>
-                    <select value={report.month ? report.month.split(" ")[1] || "" : ""} onChange={(e) => { const y = e.target.value; const m = report.month?.split(" ")[0] || ""; updateReport(index, "month", y ? `${m} ${y}` : ""); }} className={`w-24 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold ${report.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}>
-                      <option value="">Selecciona año</option>
+                    <select value={report.month ? report.month.split(" ")[1] || "" : ""} onChange={(e) => { const y = e.target.value; const m = report.month?.split(" ")[0] || ""; updateReport(index, "month", y ? `${m} ${y}` : ""); }} className={`w-28 px-3 py-2.5 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold ${report.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}>
+                      <option value="">AÑO</option>
                       {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                     </select>
                   </div>
-                  <input type="text" value={report.title} onChange={(e) => updateReport(index, "title", e.target.value.toUpperCase())} placeholder="TÍTULO" maxLength={80} className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  <div className="sm:col-span-2">
-                    <input type="text" value={report.topics} onChange={(e) => updateReport(index, "topics", e.target.value.toUpperCase())} placeholder="TEMAS ABORDADOS" maxLength={120} className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                  </div>
+                  <input type="text" value={report.title} onChange={(e) => updateReport(index, "title", e.target.value.toUpperCase())} placeholder="TÍTULO *" maxLength={80} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <input type="text" value={report.topics} onChange={(e) => updateReport(index, "topics", e.target.value.toUpperCase())} placeholder="DESCRIPCIÓN *" maxLength={120} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   <div>
                     <input type="file" accept=".pdf" onChange={(e) => updateReport(index, "file", e.target.files?.[0])} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
                   </div>

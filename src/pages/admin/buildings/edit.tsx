@@ -404,7 +404,7 @@ export default function EditBuilding() {
                   <AlertCircle className="w-4 h-4 shrink-0" /> {reportError}
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <div className="space-y-3 mb-3">
                 <div className="flex gap-2">
                   <select
                     value={newReport.month ? newReport.month.split(" ")[0] : ""}
@@ -414,9 +414,9 @@ export default function EditBuilding() {
                       setNewReport((prev) => ({ ...prev, month: month ? `${month} ${year}` : "" }));
                       setReportError("");
                     }}
-                    className={`flex-1 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold uppercase ${newReport.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}
+                    className={`flex-1 px-3 py-2.5 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold uppercase ${newReport.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}
                   >
-                    <option value="">Selecciona un mes</option>
+                    <option value="">SELECCIONA UN MES</option>
                     {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                   <select
@@ -427,16 +427,14 @@ export default function EditBuilding() {
                       setNewReport((prev) => ({ ...prev, month: year ? `${month} ${year}` : "" }));
                       setReportError("");
                     }}
-                    className={`w-24 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold ${newReport.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}
+                    className={`w-28 px-3 py-2.5 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold ${newReport.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}
                   >
-                    <option value="">Selecciona año</option>
+                    <option value="">AÑO</option>
                     {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
-                <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" maxLength={80} className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <div className="sm:col-span-2">
-                  <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TEMAS ABORDADOS *" maxLength={120} className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                </div>
+                <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" maxLength={80} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="DESCRIPCIÓN *" maxLength={120} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <div>
                   <input type="file" accept=".pdf" onChange={(e) => {
                     const file = e.target.files?.[0];
