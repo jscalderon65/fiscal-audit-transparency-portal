@@ -16,7 +16,7 @@ export function formatCurrency(raw: string): string {
   // Cap at 999.999.999 (mil millones)
   const capped = digits.length > 9 ? digits.slice(0, 9) : digits;
   const formatted = capped.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return "$ " + formatted;
+  return "$\u00A0" + formatted;
 }
 
 const SPANISH_MONTHS = [

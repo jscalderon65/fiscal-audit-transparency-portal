@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Card } from "./Card";
+import { motion } from "framer-motion";
 
 export interface IMetric {
   title: string;
@@ -17,30 +17,30 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
   const { title, value, subtitle, icon: Icon } = metric;
 
   return (
-    <Card
-      delay={index * 0.05}
-      className="flex flex-col p-4 sm:p-5 border border-slate-200 bg-white"
-      hoverEffect={true}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="rounded-2xl p-4 sm:p-5 md:p-6 shadow-sm border border-slate-200 bg-white flex flex-col items-center text-center gap-1.5 sm:gap-2"
     >
-      <div className="flex items-center gap-3 mb-3 sm:mb-4">
-        {Icon && (
-          <div className="shrink-0">
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-          </div>
-        )}
-        <span className="font-bold text-xs sm:text-sm md:text-base text-slate-900 leading-tight line-clamp-1" title={title}>
-          {title}
-        </span>
+      {Icon && (
+        <div className="mb-1">
+          <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
+        </div>
+      )}
+
+      <div className="font-bold text-slate-700 text-sm sm:text-base md:text-lg leading-tight">
+        {title}
       </div>
 
-      <div className="font-extrabold tracking-tight text-slate-900 text-base sm:text-lg md:text-xl lg:text-2xl mb-0.5 sm:mb-1">
+      <div className="font-extrabold tracking-tight text-slate-900 text-lg sm:text-xl md:text-2xl break-words max-w-full">
         {value}
       </div>
 
-      <div className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-500 truncate" title={subtitle}>
+      <div className="font-medium text-slate-500 text-xs sm:text-sm">
         {subtitle}
       </div>
-    </Card>
+    </motion.div>
   );
 };
 
