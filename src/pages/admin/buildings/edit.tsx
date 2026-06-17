@@ -292,28 +292,26 @@ export default function EditBuilding() {
 
         {activeTab === "metrics" && (
           <div className="space-y-8">
-            {previewMetrics.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Vista previa — cómo lo verán los residentes</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {previewMetrics.map((metric, index) => (
-                    <div key={index} className="relative group">
-                      <MetricCard metric={metric} index={index} />
-                      <button
-                        onClick={() => metrics[index]?.id && handleDeleteMetric(metrics[index].id!)}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {previewMetrics.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>}
-
+            {/* Add form with live preview */}
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
               <p className="font-bold text-slate-900 mb-3">Agregar métrica</p>
+
+              {/* Live preview */}
+              <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Vista previa en vivo</p>
+                <div className="max-w-xs mx-auto">
+                  <MetricCard
+                    metric={{
+                      title: newMetric.title || "TÍTULO",
+                      value: newMetric.value || "$ 0",
+                      subtitle: newMetric.subtitle || "SUBTÍTULO",
+                      icon: (newMetric.title || newMetric.value ? iconMap[newMetric.icon] : iconMap["Wallet"]),
+                    }}
+                    index={0}
+                  />
+                </div>
+              </div>
+
               {metricError && (
                 <div className="mb-3 p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
                   <AlertCircle className="w-4 h-4 shrink-0" /> {metricError}
@@ -341,33 +339,53 @@ export default function EditBuilding() {
                 <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
               </div>
             </div>
-          </div>
-        )}
 
-        {activeTab === "reports" && (
-          <div className="space-y-8">
-            {previewReports.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Vista previa — cómo lo verán los residentes</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {previewReports.map((report, index) => (
+            {/* Created metrics */}
+            <div>
+              <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Métricas creadas ({previewMetrics.length})</p>
+              {previewMetrics.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {previewMetrics.map((metric, index) => (
                     <div key={index} className="relative group">
-                      <ReportCard report={report} index={index} onDownload={(r) => reports[index]?.pdfUrl ? downloadPdf(reports[index].pdfUrl!, `${r.month}-${r.title}.pdf`) : alert("No hay PDF disponible")} />
-                      <button
-                        onClick={() => reports[index]?.id && handleDeleteReport(reports[index].id!)}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger z-10"
-                      >
+                      <MetricCard metric={metric} index={index} />
+                      <button onClick={() => metrics[index]?.id && handleDeleteMetric(metrics[index].id!)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-            {previewReports.length === 0 && <p className="text-sm text-slate-400 text-center py-8">No hay reportes registrados.</p>}
+              ) : (
+                <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>
+              )}
+            </div>
+          </div>
+        )}
 
+        {activeTab === "reports" && (
+          <div className="space-y-8">
+            {/* Add form with live preview */}
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
               <p className="font-bold text-slate-900 mb-3">Agregar reporte</p>
+
+              {/* Live preview */}
+              <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Vista previa en vivo</p>
+                <div className="max-w-sm mx-auto">
+                  <ReportCard
+                    report={{
+                      id: "preview",
+                      month: newReport.month || "MES AÑO",
+                      title: newReport.title || "TÍTULO DEL REPORTE",
+                      status: "Auditado",
+                      topics: newReport.topics || "TEMAS ABORDADOS",
+                    }}
+                    index={0}
+                    onDownload={() => {}}
+                  />
+                </div>
+              </div>
+
               {reportError && (
                 <div className="mb-3 p-3 rounded-lg text-sm flex items-center gap-2 bg-danger/10 text-danger">
                   <AlertCircle className="w-4 h-4 shrink-0" /> {reportError}
@@ -405,6 +423,26 @@ export default function EditBuilding() {
               <div className="flex justify-center">
                 <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
               </div>
+            </div>
+
+            {/* Created reports */}
+            <div>
+              <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Reportes creados ({previewReports.length})</p>
+              {previewReports.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {previewReports.map((report, index) => (
+                    <div key={index} className="relative group">
+                      <ReportCard report={report} index={index} onDownload={(r) => reports[index]?.pdfUrl ? downloadPdf(reports[index].pdfUrl!, `${r.month}-${r.title}.pdf`) : alert("No hay PDF disponible")} />
+                      <button onClick={() => reports[index]?.id && handleDeleteReport(reports[index].id!)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger z-10">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400 text-center py-8">No hay reportes registrados.</p>
+              )}
             </div>
           </div>
         )}
