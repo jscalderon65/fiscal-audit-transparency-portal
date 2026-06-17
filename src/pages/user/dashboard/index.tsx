@@ -145,15 +145,18 @@ export const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      <Banner info={bannerInfo} profile={bannerProfile} />
+      <div className="relative">
+        <Banner info={bannerInfo} profile={bannerProfile} />
+        <button
+          onClick={handleLogout}
+          className="absolute top-4 right-4 z-20 p-2 rounded-lg bg-slate-800/60 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+          title="Cerrar sesión"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
 
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-8 md:space-y-16">
-        <div className="flex justify-end mb-4">
-          <button onClick={handleLogout} className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-600 transition-colors">
-            <LogOut className="w-4 h-4" />
-            Cerrar sesión
-          </button>
-        </div>
 
         {mappedMetrics.length > 0 && (
           <MetricsSection
