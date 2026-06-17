@@ -296,7 +296,7 @@ export default function EditBuilding() {
         {activeTab === "metrics" && (
           <div className="space-y-8">
             {/* Add form with live preview */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <p className="font-bold text-slate-900 mb-3">Agregar métrica</p>
 
               {/* Live preview */}
@@ -368,7 +368,7 @@ export default function EditBuilding() {
         {activeTab === "reports" && (
           <div className="space-y-8">
             {/* Add form with live preview */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-2xl mx-auto">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <p className="font-bold text-slate-900 mb-3">Agregar reporte</p>
 
               {/* Live preview */}
