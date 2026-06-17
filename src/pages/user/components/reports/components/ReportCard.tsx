@@ -22,20 +22,20 @@ const ReportCard: React.FC<ReportCardProps> = ({
       className="rounded-2xl p-6 shadow-sm transition-all group flex flex-col justify-between bg-white border border-slate-200"
     >
       <div>
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider px-3 py-1 rounded-lg text-slate-500 bg-slate-100">
-            <CalendarDays className="w-4 h-4" />
-            {report.month}
+        <div className="flex justify-between items-start mb-4 gap-2">
+          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider px-3 py-1 rounded-lg text-slate-500 bg-slate-100 shrink-0">
+            <CalendarDays className="w-4 h-4 shrink-0" />
+            <span className="truncate max-w-28" title={report.month}>{report.month}</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-50 border border-primary-200 text-primary-dark">
-            <ShieldCheck className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-50 border border-primary-200 text-primary-dark shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
             {report.status}
           </span>
         </div>
-        <h3 className="font-bold text-xl mb-3 leading-snug transition-colors text-slate-900">
+        <h3 className="font-bold text-xl mb-3 leading-snug text-slate-900 line-clamp-2" title={report.title}>
           {report.title}
         </h3>
-        <p className="text-sm leading-relaxed mb-6 text-slate-600">
+        <p className="text-sm leading-relaxed mb-6 text-slate-600 line-clamp-2" title={report.topics}>
           <strong className="text-slate-900">Enfoque de auditoría:</strong>{" "}
           {report.topics}.
         </p>
@@ -46,9 +46,9 @@ const ReportCard: React.FC<ReportCardProps> = ({
           if (onDownload) onDownload(report);
           else downloadPdf("", `${report.month}-${report.title}.pdf`);
         }}
-        className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-5 rounded-xl transition-colors mt-4 bg-slate-900 text-white hover:bg-slate-800"
+        className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-5 rounded-xl transition-colors mt-4 bg-slate-900 text-white hover:bg-slate-800 shrink-0"
       >
-        <Download className="w-5 h-5" />
+        <Download className="w-5 h-5 shrink-0" />
         Descargar PDF Oficial
       </button>
     </motion.div>
