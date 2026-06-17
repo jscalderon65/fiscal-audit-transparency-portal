@@ -17,7 +17,7 @@ import { parseUserDocuments, formatCurrency } from "../../../helpers/parseDocume
 import { createBuilding, generateCode } from "../../../db/repositories/building.repository";
 import { importUsers } from "../../../db/repositories/user.repository";
 import { createMetric } from "../../../db/repositories/metric.repository";
-import { createReport, uploadReportPdfWithProgress, updateReport } from "../../../db/repositories/report.repository";
+import { createReport } from "../../../db/repositories/report.repository";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
 import type { LucideIcon } from "lucide-react";
@@ -47,8 +47,8 @@ const emptyMetric = (): BuildingMetric => ({
   title: "", value: "", subtitle: "", icon: "Wallet", order: 0,
 });
 
-const emptyReport = (): BuildingReport & { file?: File } => ({
-  month: "", title: "", status: "Auditado", topics: "", createdAt: new Date(),
+const emptyReport = (): BuildingReport & { pdfUrlInput?: string } => ({
+  month: "", title: "", status: "Auditado", topics: "", pdfUrlInput: "", createdAt: new Date(),
 });
 
 export default function CreateBuilding() {
@@ -93,7 +93,7 @@ export default function CreateBuilding() {
   function removeMetric(index: number) { setPendingMetrics((prev) => prev.filter((_, i) => i !== index)); }
 
   function addReport() { setPendingReports((prev) => [...prev, emptyReport()]); }
-  function updateReport(index: number, field: keyof (BuildingReport & { file?: File }), value: any) {
+  function updateReport(index: number, field: keyof (BuildingReport & { pdfUrlInput?: string }), value: any) {
     setPendingReports((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)));
   }
   function removeReport(index: number) { setPendingReports((prev) => prev.filter((_, i) => i !== index)); }
@@ -108,11 +108,11 @@ export default function CreateBuilding() {
       for (const metric of pendingMetrics) { if (metric.title && metric.value) await createMetric({ ...metric, buildingCode: code }); }
       for (const report of pendingReports) {
         if (report.month && report.title) {
-          const reportId = await createReport({ month: report.month, title: report.title, status: report.status, topics: report.topics, createdAt: new Date(), buildingCode: code });
-          if (report.file) {
-            const pdfUrl = await uploadReportPdfWithProgress(code, reportId, report.file, () => {});
-            await updateReport(reportId, { pdfUrl });
-          }
+          await createReport({
+            month: report.month, title: report.title, status: report.status,
+            topics: report.topics, pdfUrl: report.pdfUrlInput?.trim() || undefined,
+            createdAt: new Date(), buildingCode: code,
+          });
         }
       }
       navigate(ROUTES.PANEL_BUILDINGS, { state: { toast: "Edificio creado correctamente" } });
@@ -302,7 +302,7 @@ export default function CreateBuilding() {
                   <input type="text" value={report.title} onChange={(e) => updateReport(index, "title", e.target.value.toUpperCase())} placeholder="TÍTULO *" maxLength={80} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   <input type="text" value={report.topics} onChange={(e) => updateReport(index, "topics", e.target.value.toUpperCase())} placeholder="DESCRIPCIÓN *" maxLength={120} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   <div>
-                    <input type="file" accept=".pdf" onChange={(e) => updateReport(index, "file", e.target.files?.[0])} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
+                    <input type="url" value={report.pdfUrlInput || ""} onChange={(e) => updateReport(index, "pdfUrlInput", e.target.value)} placeholder="Link del PDF (Google Drive, Dropbox, etc.)" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   </div>
                 </div>
               </div>

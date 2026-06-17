@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   AlertCircle, ArrowLeft, Users, Building2, Trash2, Plus, Upload,
   Wallet, PiggyBank, HardHat, DollarSign, TrendingUp, TrendingDown,
@@ -19,7 +19,7 @@ import { getMetricsByBuildingCode, createMetric, deleteMetric } from "../../../d
 import {
   getReportsByBuildingCode, createReport as createReportRepo,
   updateReport as updateReportRepo, deleteReport,
-  uploadReportPdfWithProgress, downloadPdf,
+  downloadPdf,
 } from "../../../db/repositories/report.repository";
 import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
@@ -71,12 +71,11 @@ export default function EditBuilding() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [newMetric, setNewMetric] = useState<BuildingMetric>({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
-  const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+  const [newReport, setNewReport] = useState<BuildingReport & { pdfUrlInput?: string }>({ month: "", title: "", status: "Auditado", topics: "", pdfUrlInput: "", createdAt: new Date() });
   const [addingMetric, setAddingMetric] = useState(false);
   const [deletingMetricId, setDeletingMetricId] = useState<string | null>(null);
   const [addingReport, setAddingReport] = useState(false);
   const [deletingReportId, setDeletingReportId] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [metricError, setMetricError] = useState("");
   const [reportError, setReportError] = useState("");
   const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
@@ -168,7 +167,7 @@ export default function EditBuilding() {
     if (!newReport.month) return "Debes seleccionar un mes y año";
     if (!newReport.title.trim() || newReport.title.trim().length < 5) return "El título debe tener al menos 5 caracteres";
     if (!newReport.topics.trim() || newReport.topics.trim().length < 5) return "Los temas deben tener al menos 5 caracteres";
-    if (newReport.file && newReport.file.size > MAX_PDF_SIZE) return "El PDF no puede superar los 10MB";
+    if (newReport.pdfUrlInput && !/^https?:\/\//.test(newReport.pdfUrlInput.trim())) return "La URL del PDF debe empezar con https://";
     return null;
   }
 
@@ -177,25 +176,15 @@ export default function EditBuilding() {
     if (validationError) { setReportError(validationError); return; }
     setReportError("");
     setAddingReport(true);
-    setUploadProgress(0);
     try {
       const reportId = await createReportRepo({
         month: newReport.month.trim(), title: newReport.title.trim(),
         status: "Auditado", topics: newReport.topics.trim(),
+        pdfUrl: newReport.pdfUrlInput?.trim() || undefined,
         createdAt: new Date(), buildingCode: building.code!,
       });
-      let pdfUrl: string | undefined;
-      if (newReport.file) {
-        try {
-          pdfUrl = await uploadReportPdfWithProgress(building.code!, reportId, newReport.file, setUploadProgress);
-          await updateReportRepo(reportId, { pdfUrl });
-        } catch {
-          setToast({ message: "Error al subir el PDF. Firebase Storage requiere configuracion CORS.", type: "error" });
-        }
-      }
-      setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl, createdAt: new Date() }]);
-      setNewReport({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
-      setUploadProgress(null);
+      setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl: newReport.pdfUrlInput?.trim() || undefined, createdAt: new Date() }]);
+      setNewReport({ month: "", title: "", status: "Auditado", topics: "", pdfUrlInput: "", createdAt: new Date() });
       setToast({ message: "Reporte agregado correctamente" });
     } catch { setToast({ message: "Error al agregar el reporte", type: "error" }); }
     setAddingReport(false);
@@ -268,14 +257,12 @@ export default function EditBuilding() {
       </div>
 
       <div className="mt-6 max-w-4xl mx-auto">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.15 }}
-          >
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.15 }}
+        >
         {activeTab === "info" && (
           <div className="space-y-6 max-w-2xl mx-auto">
             <div>
@@ -436,30 +423,11 @@ export default function EditBuilding() {
                 <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" maxLength={80} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="DESCRIPCIÓN *" maxLength={120} className="w-full uppercase px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <div>
-                  <input type="file" accept=".pdf" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file && file.size > MAX_PDF_SIZE) { setReportError("El PDF no puede superar los 10MB"); e.target.value = ""; return; }
-                    setNewReport((prev) => ({ ...prev, file }));
-                    setReportError("");
-                  }} className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark" />
-                  <p className="text-xs text-slate-400 mt-1">Máximo 10MB. Opcional.</p>
+                  <input type="url" value={newReport.pdfUrlInput || ""} onChange={(e) => { setNewReport((prev) => ({ ...prev, pdfUrlInput: e.target.value })); setReportError(""); }} placeholder="Link del PDF (Google Drive, Dropbox, etc.)" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 </div>
-              </div>
-
-              {uploadProgress !== null && (
-                <div className="mb-3">
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                    <span>Subiendo PDF...</span>
-                    <span>{uploadProgress}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
-                  </div>
+                <div className="flex justify-center">
+                  <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
                 </div>
-              )}
-
-              <div className="flex justify-center">
-                <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
               </div>
             </div>
 
@@ -485,7 +453,6 @@ export default function EditBuilding() {
           </div>
         )}
           </motion.div>
-        </AnimatePresence>
       </div>
 
       <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Eliminar edificio" message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán." confirmLabel="Sí, eliminar" variant="danger" loading={deleting} onConfirm={handleDeleteBuilding} />
