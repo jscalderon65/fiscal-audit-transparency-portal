@@ -40,13 +40,13 @@ const MetricCard: React.FC<IMetricCardProps> = ({ metric, index = 0 }) => {
       </div>
 
       <div className="mt-auto">
-        <div className="h-[2.5rem] sm:h-[3.5rem] overflow-hidden flex flex-col justify-center">
-          <div className="text-lg sm:text-2xl font-extrabold tracking-tight text-slate-900 truncate" title={`${value}`}>
+        <div className="flex flex-col justify-center min-h-0">
+          <div className="text-sm sm:text-lg md:text-2xl font-extrabold tracking-tight text-slate-900" title={`${value}`}>
             {value}
           </div>
         </div>
-        <div className="h-[2rem] sm:h-[2.5rem] overflow-hidden flex flex-col justify-center">
-          <div className="text-[11px] sm:text-sm font-medium text-slate-500 truncate" title={subtitle}>
+        <div className="flex flex-col justify-center min-h-0 mt-0.5 sm:mt-1">
+          <div className="text-[10px] sm:text-xs md:text-sm font-medium text-slate-500 truncate" title={subtitle}>
             {subtitle}
           </div>
         </div>

@@ -2,11 +2,27 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import {
-  Building2, Wallet, PiggyBank, HardHat, ShieldCheck,
-  DollarSign, TrendingUp, TrendingDown, BarChart3,
-  PieChart, CreditCard, Landmark, Calculator,
-  Percent, ArrowUpRight, ArrowDownRight, Scale,
-  ClipboardList, FileText, Receipt, Banknote,
+  Building2,
+  Wallet,
+  PiggyBank,
+  HardHat,
+  ShieldCheck,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  CreditCard,
+  Landmark,
+  Calculator,
+  Percent,
+  ArrowUpRight,
+  ArrowDownRight,
+  Scale,
+  ClipboardList,
+  FileText,
+  Receipt,
+  Banknote,
 } from "lucide-react";
 import Footer from "../../../ui/Footer";
 import Toast from "../../../ui/Toast";
@@ -18,14 +34,32 @@ import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
 import { getMetricsByBuildingCode } from "../../../db/repositories/metric.repository";
-import { getReportsByBuildingCode, downloadPdf } from "../../../db/repositories/report.repository";
+import {
+  getReportsByBuildingCode,
+  downloadPdf,
+} from "../../../db/repositories/report.repository";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Wallet, PiggyBank, HardHat, Building2,
-  DollarSign, TrendingUp, TrendingDown, BarChart3,
-  PieChart, CreditCard, Landmark, Calculator,
-  Percent, ArrowUpRight, ArrowDownRight, Scale,
-  ClipboardList, FileText, Receipt, Banknote,
+  Wallet,
+  PiggyBank,
+  HardHat,
+  Building2,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  CreditCard,
+  Landmark,
+  Calculator,
+  Percent,
+  ArrowUpRight,
+  ArrowDownRight,
+  Scale,
+  ClipboardList,
+  FileText,
+  Receipt,
+  Banknote,
 };
 
 interface Session {
@@ -41,7 +75,10 @@ export const UserDashboard = () => {
   const [metrics, setMetrics] = useState<BuildingMetric[]>([]);
   const [reports, setReports] = useState<BuildingReport[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
-  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type?: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem("session");
@@ -67,12 +104,18 @@ export const UserDashboard = () => {
     Promise.all([
       getMetricsByBuildingCode(buildingCode),
       getReportsByBuildingCode(buildingCode),
-    ]).then(([fetchedMetrics, fetchedReports]) => {
-      setMetrics(fetchedMetrics);
-      setReports(fetchedReports);
-    }).catch(() => {
-      setToast?.({ message: "Error al cargar los datos del dashboard", type: "error" });
-    }).finally(() => setDashboardLoading(false));
+    ])
+      .then(([fetchedMetrics, fetchedReports]) => {
+        setMetrics(fetchedMetrics);
+        setReports(fetchedReports);
+      })
+      .catch(() => {
+        setToast?.({
+          message: "Error al cargar los datos del dashboard",
+          type: "error",
+        });
+      })
+      .finally(() => setDashboardLoading(false));
   }, [buildingCode]);
 
   if (!session) {
@@ -90,7 +133,9 @@ export const UserDashboard = () => {
           <div className="animate-pulse space-y-6">
             <div className="h-40 bg-slate-200 rounded-2xl" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-32 bg-slate-200 rounded-2xl" />)}
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-32 bg-slate-200 rounded-2xl" />
+              ))}
             </div>
           </div>
         </div>
@@ -116,11 +161,18 @@ export const UserDashboard = () => {
     pdfUrl: report.pdfUrl,
   }));
 
-  const handleDownloadReport = (report: { month: string; title: string; pdfUrl?: string }) => {
+  const handleDownloadReport = (report: {
+    month: string;
+    title: string;
+    pdfUrl?: string;
+  }) => {
     if (report.pdfUrl) {
       downloadPdf(report.pdfUrl, `${report.month}-${report.title}.pdf`);
     } else {
-      setToast({ message: "No hay PDF disponible para este reporte.", type: "error" });
+      setToast({
+        message: "No hay PDF disponible para este reporte.",
+        type: "error",
+      });
     }
   };
 
@@ -132,7 +184,7 @@ export const UserDashboard = () => {
   const bannerInfo = {
     title: building.name,
     subtitle: "Transparencia, Orden y Confianza.",
-    badge: "Portal Oficial Validado",
+    badge: "Portal Oficial",
     badgeIcon: ShieldCheck,
   };
 
@@ -140,7 +192,8 @@ export const UserDashboard = () => {
     initials: "BB",
     name: "Bertha Zaray Bravo",
     role: "Revisora Fiscal Senior",
-    description: "Supervisando rigurosamente la gestión financiera de la copropiedad.",
+    description:
+      "Supervisando rigurosamente la gestión financiera de la copropiedad.",
   };
 
   return (
@@ -157,7 +210,6 @@ export const UserDashboard = () => {
       </div>
 
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-8 md:space-y-16">
-
         {mappedMetrics.length > 0 && (
           <MetricsSection
             title="Métricas Financieras"
@@ -180,8 +232,18 @@ export const UserDashboard = () => {
         </section>
       </main>
 
-      <Footer year={new Date().getFullYear()} portalName="Portal de Transparencia" residentialName={building.name} />
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <Footer
+        year={new Date().getFullYear()}
+        portalName="Portal de Transparencia"
+        residentialName={building.name}
+      />
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
