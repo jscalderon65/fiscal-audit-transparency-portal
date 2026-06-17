@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Building2, Plus, Copy, Check } from "lucide-react";
 import Button from "../../../ui/Button";
 import Toast from "../../../ui/Toast";
@@ -105,11 +106,12 @@ export default function BuildingsList() {
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           {buildings.map((building, index) => (
-            <div
+            <motion.div
               key={building.id}
-              className={`flex items-center justify-between p-5 ${
-                index < buildings.length - 1 ? "border-b border-slate-100" : ""
-              }`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: index * 0.04 }}
+              className={`flex items-center justify-between p-5 ${index < buildings.length - 1 ? "border-b border-slate-100" : ""}`}
             >
               <div className="flex items-center gap-4">
                 <Building2 className="w-5 h-5 shrink-0 text-primary" />
@@ -157,7 +159,7 @@ export default function BuildingsList() {
                   Editar edificio
                 </Button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

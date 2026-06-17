@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle, ArrowLeft, Upload, FileText, Check, Plus, X,
   Wallet, PiggyBank, HardHat, Building2,
@@ -146,6 +147,15 @@ export default function CreateBuilding() {
         {stepLine(step >= 4)}
         {stepCircle(4, "Reportes", step === 4, step > 4)}
       </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.15 }}
+        >
 
       {/* Step 1: Información */}
       {step === 1 && (
@@ -300,6 +310,8 @@ export default function CreateBuilding() {
           </div>
         </div>
       )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

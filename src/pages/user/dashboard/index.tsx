@@ -131,7 +131,7 @@ export const UserDashboard = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <Banner info={bannerInfo} profile={bannerProfile} />
 
-      <main className="max-w-6xl mx-auto px-4 md:px-8 py-16 space-y-24">
+      <main className="max-w-4xl mx-auto px-4 md:px-8 py-16 space-y-24">
         <MetricsSection
           title="Métricas Financieras"
           subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."

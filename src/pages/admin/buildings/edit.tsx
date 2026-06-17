@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle, ArrowLeft, Users, Building2, Trash2, Plus, Upload,
   Wallet, PiggyBank, HardHat, DollarSign, TrendingUp, TrendingDown,
@@ -266,6 +267,14 @@ export default function EditBuilding() {
       </div>
 
       <div className="mt-6 max-w-4xl mx-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.15 }}
+          >
         {activeTab === "info" && (
           <div className="space-y-6 max-w-2xl mx-auto">
             <div>
@@ -449,6 +458,8 @@ export default function EditBuilding() {
             </div>
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Eliminar edificio" message="¿Estás seguro de eliminar este edificio? Esta acción no se puede deshacer. Todos los usuarios y datos asociados se perderán." confirmLabel="Sí, eliminar" variant="danger" loading={deleting} onConfirm={handleDeleteBuilding} />
