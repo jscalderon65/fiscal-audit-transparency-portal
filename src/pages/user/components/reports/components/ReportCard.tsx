@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { CalendarDays, ShieldCheck, Download } from "lucide-react";
 import type { IReportData } from "../interfaces/reports-section.interface";
-import { downloadPdf } from "../../../../../db/repositories/report.repository";
 
 export interface ReportCardProps {
   report: IReportData;
@@ -48,7 +47,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
         type="button"
         onClick={() => {
           if (onDownload) onDownload(report);
-          else downloadPdf("", `${report.month}-${report.title}.pdf`);
+          else if (report.pdfUrl) window.open(report.pdfUrl, "_blank");
         }}
         className="w-full flex items-center justify-center gap-2 font-semibold py-3 px-5 rounded-xl transition-colors mt-4 bg-slate-900 text-white hover:bg-slate-800 shrink-0"
       >

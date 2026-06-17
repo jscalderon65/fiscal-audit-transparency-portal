@@ -17,10 +17,7 @@ import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
 import type { BuildingReport } from "../../../db/types/report";
 import { getMetricsByBuildingCode } from "../../../db/repositories/metric.repository";
-import {
-  getReportsByBuildingCode,
-  downloadPdf,
-} from "../../../db/repositories/report.repository";
+import { getReportsByBuildingCode } from "../../../db/repositories/report.repository";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wallet,
@@ -150,7 +147,7 @@ export const UserDashboard = () => {
     pdfUrl?: string;
   }) => {
     if (report.pdfUrl) {
-      downloadPdf(report.pdfUrl, `${report.month}-${report.title}.pdf`);
+      window.open(report.pdfUrl, "_blank");
     } else {
       setToast({
         message: "No hay PDF disponible para este reporte.",

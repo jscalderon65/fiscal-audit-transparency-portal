@@ -6,7 +6,7 @@ import {
   Wallet, PiggyBank, HardHat, DollarSign, TrendingUp, TrendingDown,
   BarChart3, PieChart, CreditCard, Landmark, Calculator, Percent,
   ArrowUpRight, ArrowDownRight, Scale, ClipboardList, FileText,
-  Receipt, Banknote, Loader2,
+  Receipt, Banknote, Loader2, Edit3,
 } from "lucide-react";
 import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
@@ -15,11 +15,10 @@ import { ROUTES } from "../../../constants/routes";
 import { formatCurrency } from "../../../helpers/parseDocuments";
 import { getBuildingById, updateBuilding, deleteBuilding } from "../../../db/repositories/building.repository";
 import { getUsersByBuildingCode, createUser, deleteUser, importUsers } from "../../../db/repositories/user.repository";
-import { getMetricsByBuildingCode, createMetric, deleteMetric } from "../../../db/repositories/metric.repository";
+import { getMetricsByBuildingCode, createMetric, updateMetric as updateMetricRepo, deleteMetric } from "../../../db/repositories/metric.repository";
 import {
   getReportsByBuildingCode, createReport as createReportRepo,
   updateReport as updateReportRepo, deleteReport,
-  downloadPdf,
 } from "../../../db/repositories/report.repository";
 import type { Building } from "../../../db/types/building";
 import type { BuildingMetric } from "../../../db/types/metric";
@@ -79,6 +78,8 @@ export default function EditBuilding() {
   const [metricError, setMetricError] = useState("");
   const [reportError, setReportError] = useState("");
   const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+  const [editingMetricId, setEditingMetricId] = useState<string | null>(null);
+  const [editingReportId, setEditingReportId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -148,11 +149,18 @@ export default function EditBuilding() {
     setMetricError("");
     setAddingMetric(true);
     try {
-      const metricId = await createMetric({ ...newMetric, buildingCode: building.code! });
-      setMetrics((prev) => [...prev, { ...newMetric, id: metricId }]);
+      if (editingMetricId) {
+        await updateMetricRepo(editingMetricId, { title: newMetric.title, value: newMetric.value, subtitle: newMetric.subtitle, icon: newMetric.icon });
+        setMetrics((prev) => prev.map((m) => m.id === editingMetricId ? { ...m, title: newMetric.title, value: newMetric.value, subtitle: newMetric.subtitle, icon: newMetric.icon } : m));
+        setEditingMetricId(null);
+        setToast({ message: "Métrica actualizada correctamente" });
+      } else {
+        const metricId = await createMetric({ ...newMetric, buildingCode: building.code! });
+        setMetrics((prev) => [...prev, { ...newMetric, id: metricId }]);
+        setToast({ message: "Métrica agregada correctamente" });
+      }
       setNewMetric({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
-      setToast({ message: "Métrica agregada correctamente" });
-    } catch { setToast({ message: "Error al agregar la métrica", type: "error" }); }
+    } catch { setToast({ message: "Error al guardar la métrica", type: "error" }); }
     setAddingMetric(false);
   }
 
@@ -161,6 +169,18 @@ export default function EditBuilding() {
     try { await deleteMetric(metricId); setMetrics((prev) => prev.filter((m) => m.id !== metricId)); setToast({ message: "Métrica eliminada correctamente" }); }
     catch { setToast({ message: "Error al eliminar la métrica", type: "error" }); }
     setDeletingMetricId(null);
+  }
+
+  function handleEditMetric(metric: BuildingMetric) {
+    setEditingMetricId(metric.id || null);
+    setNewMetric({ title: metric.title, value: metric.value, subtitle: metric.subtitle, icon: metric.icon, order: metric.order });
+    setMetricError("");
+  }
+
+  function cancelEditMetric() {
+    setEditingMetricId(null);
+    setNewMetric({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
+    setMetricError("");
   }
 
   function validateReport(): string | null {
@@ -177,16 +197,26 @@ export default function EditBuilding() {
     setReportError("");
     setAddingReport(true);
     try {
-      const reportId = await createReportRepo({
-        month: newReport.month.trim(), title: newReport.title.trim(),
-        status: "Auditado", topics: newReport.topics.trim(),
-        pdfUrl: newReport.pdfUrlInput?.trim() || undefined,
-        createdAt: new Date(), buildingCode: building.code!,
-      });
-      setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl: newReport.pdfUrlInput?.trim() || undefined, createdAt: new Date() }]);
+      if (editingReportId) {
+        await updateReportRepo(editingReportId, {
+          month: newReport.month.trim(), title: newReport.title.trim(), topics: newReport.topics.trim(),
+          pdfUrl: newReport.pdfUrlInput?.trim() || undefined,
+        });
+        setReports((prev) => prev.map((r) => r.id === editingReportId ? { ...r, month: newReport.month.trim(), title: newReport.title.trim(), topics: newReport.topics.trim(), pdfUrl: newReport.pdfUrlInput?.trim() || undefined } : r));
+        setEditingReportId(null);
+        setToast({ message: "Reporte actualizado correctamente" });
+      } else {
+        const reportId = await createReportRepo({
+          month: newReport.month.trim(), title: newReport.title.trim(),
+          status: "Auditado", topics: newReport.topics.trim(),
+          pdfUrl: newReport.pdfUrlInput?.trim() || undefined,
+          createdAt: new Date(), buildingCode: building.code!,
+        });
+        setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl: newReport.pdfUrlInput?.trim() || undefined, createdAt: new Date() }]);
+        setToast({ message: "Reporte agregado correctamente" });
+      }
       setNewReport({ month: "", title: "", status: "Auditado", topics: "", pdfUrlInput: "", createdAt: new Date() });
-      setToast({ message: "Reporte agregado correctamente" });
-    } catch { setToast({ message: "Error al agregar el reporte", type: "error" }); }
+    } catch { setToast({ message: "Error al guardar el reporte", type: "error" }); }
     setAddingReport(false);
   }
 
@@ -195,6 +225,21 @@ export default function EditBuilding() {
     try { await deleteReport(reportId); setReports((prev) => prev.filter((r) => r.id !== reportId)); setToast({ message: "Reporte eliminado correctamente" }); }
     catch { setToast({ message: "Error al eliminar el reporte", type: "error" }); }
     setDeletingReportId(null);
+  }
+
+  function handleEditReport(report: BuildingReport) {
+    setEditingReportId(report.id || null);
+    setNewReport({
+      month: report.month, title: report.title, status: report.status, topics: report.topics,
+      pdfUrlInput: report.pdfUrl || "", createdAt: new Date(),
+    });
+    setReportError("");
+  }
+
+  function cancelEditReport() {
+    setEditingReportId(null);
+    setNewReport({ month: "", title: "", status: "Auditado", topics: "", pdfUrlInput: "", createdAt: new Date() });
+    setReportError("");
   }
 
   async function handleDeleteBuilding() {
@@ -294,7 +339,7 @@ export default function EditBuilding() {
           <div className="space-y-8">
             {/* Add form with live preview */}
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <p className="font-bold text-slate-900 mb-3">Agregar métrica</p>
+              <p className="font-bold text-slate-900 mb-3">{editingMetricId ? "Editar métrica" : "Agregar métrica"}</p>
 
               {/* Live preview */}
               <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
@@ -335,8 +380,9 @@ export default function EditBuilding() {
                   );
                 })}
               </div>
-              <div className="flex justify-center">
-                <Button variant="primary" leftIcon={Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>Agregar</Button>
+              <div className="flex justify-center gap-3">
+                <Button variant="primary" leftIcon={editingMetricId ? undefined : Plus} onClick={handleAddMetric} loading={addingMetric} disabled={!newMetric.title || !newMetric.value}>{editingMetricId ? "Guardar cambios" : "Agregar"}</Button>
+                {editingMetricId && <Button variant="ghost" onClick={cancelEditMetric}>Cancelar</Button>}
               </div>
             </div>
 
@@ -344,16 +390,23 @@ export default function EditBuilding() {
             <div className="max-w-2xl mx-auto">
               <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Métricas creadas ({previewMetrics.length})</p>
               {previewMetrics.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {previewMetrics.map((metric, index) => (
-                    <div key={index} className="relative group">
-                      <MetricCard metric={metric} index={index} />
-                      <button onClick={() => metrics[index]?.id && handleDeleteMetric(metrics[index].id!)}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                  {metrics.map((metric) => {
+                    const IconComponent = iconMap[metric.icon];
+                    return (
+                      <div key={metric.id} className="flex items-center gap-3 px-4 py-3">
+                        {IconComponent && <IconComponent className="w-5 h-5 text-primary shrink-0" />}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm text-slate-900 truncate">{metric.title}</div>
+                          <div className="text-xs text-slate-500 truncate">{metric.value} — {metric.subtitle}</div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button onClick={() => handleEditMetric(metric)} className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"><Edit3 className="w-4 h-4" /></button>
+                          <button onClick={() => metric.id && handleDeleteMetric(metric.id)} disabled={deletingMetricId === metric.id} className="p-1.5 rounded-lg text-slate-400 hover:text-danger hover:bg-danger/5 transition-colors disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-slate-400 text-center py-8">No hay métricas registradas.</p>
@@ -366,7 +419,7 @@ export default function EditBuilding() {
           <div className="space-y-8">
             {/* Add form with live preview */}
             <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <p className="font-bold text-slate-900 mb-3">Agregar reporte</p>
+              <p className="font-bold text-slate-900 mb-3">{editingReportId ? "Editar reporte" : "Agregar reporte"}</p>
 
               {/* Live preview */}
               <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
@@ -425,8 +478,9 @@ export default function EditBuilding() {
                 <div>
                   <input type="url" value={newReport.pdfUrlInput || ""} onChange={(e) => { setNewReport((prev) => ({ ...prev, pdfUrlInput: e.target.value })); setReportError(""); }} placeholder="Link del PDF (Google Drive, Dropbox, etc.)" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 </div>
-                <div className="flex justify-center">
-                  <Button variant="primary" leftIcon={Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>Agregar</Button>
+                <div className="flex justify-center gap-3">
+                  <Button variant="primary" leftIcon={editingReportId ? undefined : Plus} onClick={handleAddReport} loading={addingReport} disabled={!newReport.month || !newReport.title || !newReport.topics}>{editingReportId ? "Guardar cambios" : "Agregar"}</Button>
+                  {editingReportId && <Button variant="ghost" onClick={cancelEditReport}>Cancelar</Button>}
                 </div>
               </div>
             </div>
@@ -435,14 +489,21 @@ export default function EditBuilding() {
             <div className="max-w-2xl mx-auto">
               <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Reportes creados ({previewReports.length})</p>
               {previewReports.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {previewReports.map((report, index) => (
-                    <div key={index} className="relative group">
-                      <ReportCard report={report} index={index} onDownload={(r) => reports[index]?.pdfUrl ? downloadPdf(reports[index].pdfUrl!, `${r.month}-${r.title}.pdf`) : setToast({ message: "No hay PDF disponible para este reporte", type: "error" })} />
-                      <button onClick={() => reports[index]?.id && handleDeleteReport(reports[index].id!)}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger z-10">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                  {reports.map((report) => (
+                    <div key={report.id} className="flex items-center gap-3 px-4 py-3">
+                      <FileText className="w-5 h-5 text-slate-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-slate-900 truncate">{report.month} — {report.title}</div>
+                        <div className="text-xs text-slate-500 truncate">{report.topics}</div>
+                      </div>
+                      {report.pdfUrl && (
+                        <a href={report.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-primary hover:underline shrink-0">PDF</a>
+                      )}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => handleEditReport(report)} className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"><Edit3 className="w-4 h-4" /></button>
+                        <button onClick={() => report.id && handleDeleteReport(report.id)} disabled={deletingReportId === report.id} className="p-1.5 rounded-lg text-slate-400 hover:text-danger hover:bg-danger/5 transition-colors disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
+                      </div>
                     </div>
                   ))}
                 </div>
