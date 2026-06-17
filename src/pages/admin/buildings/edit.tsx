@@ -344,7 +344,7 @@ export default function EditBuilding() {
             </div>
 
             {/* Created metrics */}
-            <div>
+            <div className="max-w-2xl mx-auto">
               <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Métricas creadas ({previewMetrics.length})</p>
               {previewMetrics.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -429,7 +429,7 @@ export default function EditBuilding() {
             </div>
 
             {/* Created reports */}
-            <div>
+            <div className="max-w-2xl mx-auto">
               <p className="text-sm font-semibold text-slate-500 mb-3 uppercase tracking-wider">Reportes creados ({previewReports.length})</p>
               {previewReports.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
