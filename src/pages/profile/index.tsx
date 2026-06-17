@@ -22,13 +22,13 @@ const Profile: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="text-white">
+            <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+              <div className="text-center md:text-left text-white order-2 md:order-1">
                 <H1>Bertha Zaray Bravo Ruiz</H1>
-                <H2 className="mt-4">
+                <H2 className="mt-3 md:mt-4">
                   Contadora Pública y Especialista en Alta Gerencia.
                 </H2>
-                <div className="mt-6">
+                <div className="mt-4 md:mt-6">
                   <Text>
                     Profesional enfocada en la transparencia, confidencialidad y
                     el liderazgo financiero y administrativo.
@@ -36,25 +36,25 @@ const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <div className="relative">
+              <div className="order-1 md:order-2 flex justify-center md:block">
+                <div className="relative max-w-xs w-full">
                   <Card>
-                    <div className="flex items-center gap-3">
-                      <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold bg-gradient-to-br from-primary-light to-primary-dark">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl font-bold bg-gradient-to-br from-primary-light to-primary-dark shrink-0">
                         BZ
                       </div>
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <GraduationCap className="w-4 h-4" />
-                          <div>
-                            <div className="font-bold">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <GraduationCap className="w-4 h-4 shrink-0" />
+                          <div className="min-w-0">
+                            <div className="font-bold text-sm sm:text-base">
                               Bertha Zaray Bravo Ruiz
                             </div>
                             <Small>Revisora Fiscal · Contadora Pública</Small>
                           </div>
                         </div>
 
-                        <div className="mt-4 flex gap-3 flex-wrap">
+                        <div className="mt-3 sm:mt-4 flex gap-2 sm:gap-3 flex-wrap">
                           <Badge variant="success">Transparencia</Badge>
                           <Badge variant="pending">Confidencialidad</Badge>
                           <Badge variant="default">Liderazgo</Badge>
