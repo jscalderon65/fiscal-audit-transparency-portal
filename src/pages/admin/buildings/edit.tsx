@@ -12,7 +12,7 @@ import { Text } from "../../../ui/Typography";
 import Button from "../../../ui/Button";
 import Toast from "../../../ui/Toast";
 import { ROUTES } from "../../../constants/routes";
-import { formatCurrency, validateMonth } from "../../../helpers/parseDocuments";
+import { formatCurrency } from "../../../helpers/parseDocuments";
 import { getBuildingById, updateBuilding, deleteBuilding } from "../../../db/repositories/building.repository";
 import { getUsersByBuildingCode, createUser, deleteUser, importUsers } from "../../../db/repositories/user.repository";
 import { getMetricsByBuildingCode, createMetric, deleteMetric } from "../../../db/repositories/metric.repository";
@@ -52,6 +52,9 @@ const iconMap: Record<string, LucideIcon> = {
 
 const MAX_PDF_SIZE = 10 * 1024 * 1024;
 
+const MONTHS = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"] as const;
+const YEARS = Array.from({ length: 11 }, (_, i) => (2020 + i).toString());
+
 export default function EditBuilding() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -68,7 +71,7 @@ export default function EditBuilding() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [newMetric, setNewMetric] = useState<BuildingMetric>({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
-  const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
+  const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: `ENERO ${new Date().getFullYear()}`, title: "", status: "Auditado", topics: "", createdAt: new Date() });
   const [addingMetric, setAddingMetric] = useState(false);
   const [deletingMetricId, setDeletingMetricId] = useState<string | null>(null);
   const [addingReport, setAddingReport] = useState(false);
@@ -162,7 +165,6 @@ export default function EditBuilding() {
   }
 
   function validateReport(): string | null {
-    if (!newReport.month.trim() || newReport.month.trim().length < 3) return "El mes debe tener al menos 3 caracteres";
     if (!newReport.title.trim() || newReport.title.trim().length < 5) return "El título debe tener al menos 5 caracteres";
     if (!newReport.topics.trim() || newReport.topics.trim().length < 5) return "Los temas deben tener al menos 5 caracteres";
     if (newReport.file && newReport.file.size > MAX_PDF_SIZE) return "El PDF no puede superar los 10MB";
@@ -170,8 +172,6 @@ export default function EditBuilding() {
   }
 
   async function handleAddReport() {
-    const monthValidation = validateMonth(newReport.month);
-    if (monthValidation) { setReportError(monthValidation); return; }
     const validationError = validateReport();
     if (validationError) { setReportError(validationError); return; }
     setReportError("");
@@ -404,7 +404,22 @@ export default function EditBuilding() {
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <input type="text" value={newReport.month} onChange={(e) => { setNewReport((prev) => ({ ...prev, month: e.target.value })); setReportError(""); }} placeholder="MES (Ej: MARZO 2026)" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <div className="flex gap-2">
+                  <select
+                    value={newReport.month.split(" ")[0] || "ENERO"}
+                    onChange={(e) => { setNewReport((prev) => ({ ...prev, month: `${e.target.value} ${(prev.month.split(" ")[1] || new Date().getFullYear().toString())}` })); setReportError(""); }}
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900 uppercase font-semibold"
+                  >
+                    {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  <select
+                    value={newReport.month.split(" ")[1] || new Date().getFullYear().toString()}
+                    onChange={(e) => { setNewReport((prev) => ({ ...prev, month: `${prev.month.split(" ")[0] || "ENERO"} ${e.target.value}` })); setReportError(""); }}
+                    className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900 font-semibold"
+                  >
+                    {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
                 <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <div className="sm:col-span-2">
                   <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TEMAS ABORDADOS *" className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
@@ -444,7 +459,7 @@ export default function EditBuilding() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {previewReports.map((report, index) => (
                     <div key={index} className="relative group">
-                      <ReportCard report={report} index={index} onDownload={(r) => reports[index]?.pdfUrl ? downloadPdf(reports[index].pdfUrl!, `${r.month}-${r.title}.pdf`) : alert("No hay PDF disponible")} />
+                      <ReportCard report={report} index={index} onDownload={(r) => reports[index]?.pdfUrl ? downloadPdf(reports[index].pdfUrl!, `${r.month}-${r.title}.pdf`) : setToast({ message: "No hay PDF disponible para este reporte", type: "error" })} />
                       <button onClick={() => reports[index]?.id && handleDeleteReport(reports[index].id!)}
                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-1.5 shadow border border-slate-200 text-slate-400 hover:text-danger z-10">
                         <Trash2 className="w-4 h-4" />

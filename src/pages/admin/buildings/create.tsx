@@ -40,12 +40,15 @@ const iconMap: Record<string, LucideIcon> = {
   ClipboardList, FileText: FileTextIcon, Receipt, Banknote,
 };
 
+const MONTHS = ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"] as const;
+const YEARS = Array.from({ length: 11 }, (_, i) => (2020 + i).toString());
+
 const emptyMetric = (): BuildingMetric => ({
   title: "", value: "", subtitle: "", icon: "Wallet", order: 0,
 });
 
 const emptyReport = (): BuildingReport & { file?: File } => ({
-  month: "", title: "", status: "Auditado", topics: "", createdAt: new Date(),
+  month: `ENERO ${new Date().getFullYear()}`, title: "", status: "Auditado", topics: "", createdAt: new Date(),
 });
 
 export default function CreateBuilding() {
@@ -286,7 +289,14 @@ export default function CreateBuilding() {
               <div key={index} className="mb-4 p-4 rounded-xl bg-slate-50 border border-slate-200 relative">
                 <button onClick={() => removeReport(index)} className="absolute top-3 right-3 text-slate-400 hover:text-danger transition-colors"><X className="w-4 h-4" /></button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
-                  <input type="text" value={report.month} onChange={(e) => updateReport(index, "month", e.target.value)} placeholder="MES (Ej: MARZO 2026)" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <div className="flex gap-2">
+                    <select value={report.month.split(" ")[0] || "ENERO"} onChange={(e) => updateReport(index, "month", `${e.target.value} ${(report.month.split(" ")[1] || new Date().getFullYear().toString())}`)} className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900 uppercase font-semibold">
+                      {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <select value={report.month.split(" ")[1] || new Date().getFullYear().toString()} onChange={(e) => updateReport(index, "month", `${report.month.split(" ")[0] || "ENERO"} ${e.target.value}`)} className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900 font-semibold">
+                      {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
                   <input type="text" value={report.title} onChange={(e) => updateReport(index, "title", e.target.value.toUpperCase())} placeholder="TÍTULO" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                   <div className="sm:col-span-2">
                     <input type="text" value={report.topics} onChange={(e) => updateReport(index, "topics", e.target.value.toUpperCase())} placeholder="TEMAS ABORDADOS" className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />

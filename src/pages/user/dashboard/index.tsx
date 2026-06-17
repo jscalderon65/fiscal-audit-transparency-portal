@@ -119,7 +119,7 @@ export const UserDashboard = () => {
     if (report.pdfUrl) {
       downloadPdf(report.pdfUrl, `${report.month}-${report.title}.pdf`);
     } else {
-      alert("No hay PDF disponible para este reporte.");
+      setToast({ message: "No hay PDF disponible para este reporte.", type: "error" });
     }
   };
 
