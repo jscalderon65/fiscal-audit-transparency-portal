@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, Mail } from "lucide-react";
 import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../contexts/AuthContext";
 import Navbar from "../../ui/Navbar";
@@ -15,6 +15,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <Navbar
         rightContent={
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(ROUTES.PANEL_CONTACT_MESSAGES)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 transition-colors hover:bg-slate-800"
+            >
+              <Mail className="w-4 h-4" />
+              Mensajes
+            </button>
             <span className="text-sm text-slate-400">{user?.email}</span>
             <button
               onClick={async () => {

@@ -1,8 +1,9 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ROUTES } from "./constants/routes";
 import Layout from "./ui/Layout";
+import Splash from "./ui/Splash";
 import AdminGuard from "./pages/admin/AdminGuard";
 
 const UserLoginPage = lazy(() => import("./pages/user/login"));
@@ -15,14 +16,7 @@ const BuildingsList = lazy(() => import("./pages/admin/buildings"));
 const CreateBuilding = lazy(() => import("./pages/admin/buildings/create"));
 const EditBuilding = lazy(() => import("./pages/admin/buildings/edit"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
-
-function Loader() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="animate-spin w-8 h-8 rounded-full border-2 border-primary border-t-transparent" />
-    </div>
-  );
-}
+const ContactMessages = lazy(() => import("./pages/admin/contact-messages"));
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   return (
@@ -38,7 +32,7 @@ const App = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<Splash />}>
           <Routes>
             {/* Public routes with global navbar + footer */}
             <Route element={<Layout />}>
@@ -55,6 +49,7 @@ const App = () => {
             <Route path={ROUTES.PANEL_BUILDINGS} element={<AdminRoute><BuildingsList /></AdminRoute>} />
             <Route path={ROUTES.PANEL_BUILDINGS_CREATE} element={<AdminRoute><CreateBuilding /></AdminRoute>} />
             <Route path={ROUTES.PANEL_BUILDINGS_EDIT} element={<AdminRoute><EditBuilding /></AdminRoute>} />
+            <Route path={ROUTES.PANEL_CONTACT_MESSAGES} element={<AdminRoute><ContactMessages /></AdminRoute>} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

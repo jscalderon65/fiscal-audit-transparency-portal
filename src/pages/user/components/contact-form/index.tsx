@@ -9,12 +9,20 @@ export interface ContactFormProps {
 
 export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) => {
   const [formData, setFormData] = useState({ name: "", unit: "", message: "" });
+  const [errors, setErrors] = useState<{ unit?: string }>({});
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "error"; message: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
+    setErrors({});
+
+    if (!formData.unit.trim() || formData.unit.trim().length < 3) {
+      setErrors({ unit: "Debes ingresar tu torre y apto (mín. 3 caracteres)" });
+      return;
+    }
+
     setSending(true);
     try {
       await saveContactMessage({
@@ -62,7 +70,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) =
           </div>
         </div>
 
-        <div className="p-8 md:p-12 md:col-span-3 bg-white">
+        <div className="p-8 md:p-12 md:col-span-3 bg-white flex flex-col justify-center">
           <form onSubmit={handleSubmit} className="space-y-6">
             {feedback && (
               <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${feedback.type === "ok" ? "bg-primary/10 text-primary-dark" : "bg-danger/10 text-danger"}`}>
@@ -78,7 +86,8 @@ export const ContactForm: React.FC<ContactFormProps> = ({ buildingCode = "" }) =
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold flex items-center gap-2 text-slate-700"><Home className="w-4 h-4 text-slate-400" /> Interior / Apto</label>
-                <input type="text" required value={formData.unit} onChange={(e) => setFormData({ ...formData, unit: e.target.value })} placeholder="Ej. Torre 3, Apto 502" className="w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border border-slate-200 text-slate-900" />
+                <input type="text" required value={formData.unit} onChange={(e) => { setFormData({ ...formData, unit: e.target.value }); if (errors.unit) setErrors({}); }} placeholder="Ej. Torre 3, Apto 502" className={`w-full px-4 py-3.5 rounded-xl outline-none transition-all font-medium bg-slate-50 border text-slate-900 ${errors.unit ? "border-danger" : "border-slate-200"}`} />
+                {errors.unit && <p className="text-xs text-danger mt-1">{errors.unit}</p>}
               </div>
             </div>
 

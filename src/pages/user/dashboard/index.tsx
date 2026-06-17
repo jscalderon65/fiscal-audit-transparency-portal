@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import {
   Building2, Wallet, PiggyBank, HardHat, ShieldCheck,
   DollarSign, TrendingUp, TrendingDown, BarChart3,
@@ -123,6 +124,11 @@ export const UserDashboard = () => {
     }
   };
 
+  function handleLogout() {
+    localStorage.removeItem("session");
+    navigate(`/user/${buildingCode}/login`, { replace: true });
+  }
+
   const bannerInfo = {
     title: building.name,
     subtitle: "Transparencia, Orden y Confianza.",
@@ -142,18 +148,29 @@ export const UserDashboard = () => {
       <Banner info={bannerInfo} profile={bannerProfile} />
 
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-16 space-y-24">
-        <MetricsSection
-          title="Métricas Financieras"
-          subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
-          metrics={mappedMetrics}
-        />
+        <div className="flex justify-end -mt-8 mb-4">
+          <button onClick={handleLogout} className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-600 transition-colors">
+            <LogOut className="w-4 h-4" />
+            Cerrar sesión
+          </button>
+        </div>
 
-        <ReportsSection
-          title="Reportes"
-          subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
-          reports={mappedReports}
-          onDownload={handleDownloadReport}
-        />
+        {mappedMetrics.length > 0 && (
+          <MetricsSection
+            title="Métricas Financieras"
+            subtitle="Saldos reales de las cuentas del conjunto (Expresados en COP)."
+            metrics={mappedMetrics}
+          />
+        )}
+
+        {mappedReports.length > 0 && (
+          <ReportsSection
+            title="Reportes"
+            subtitle="Acceso directo a las auditorías mensuales presentadas al Consejo."
+            reports={mappedReports}
+            onDownload={handleDownloadReport}
+          />
+        )}
 
         <section className="pb-16">
           <ContactForm buildingCode={buildingCode} />
