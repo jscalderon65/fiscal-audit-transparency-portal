@@ -147,8 +147,8 @@ export const UserDashboard = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <Banner info={bannerInfo} profile={bannerProfile} />
 
-      <main className="max-w-4xl mx-auto px-4 md:px-8 py-16 space-y-24">
-        <div className="flex justify-end -mt-8 mb-4">
+      <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 space-y-8 md:space-y-16">
+        <div className="flex justify-end mb-4">
           <button onClick={handleLogout} className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-600 transition-colors">
             <LogOut className="w-4 h-4" />
             Cerrar sesión
@@ -172,7 +172,7 @@ export const UserDashboard = () => {
           />
         )}
 
-        <section className="pb-16">
+        <section>
           <ContactForm buildingCode={buildingCode} />
         </section>
       </main>
