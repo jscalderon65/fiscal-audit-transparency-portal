@@ -112,11 +112,13 @@ export default function EditBuilding() {
     if (!building?.code) return;
     await createUser({ userDocumentNumber, buildingCode: building.code });
     setUsers((prev) => [...prev, { userDocumentNumber }]);
+    setToast({ message: "Usuario agregado correctamente" });
   }
 
   async function handleDeleteUser(userDocumentNumber: string) {
     await deleteUser(userDocumentNumber);
     setUsers((prev) => prev.filter((u) => u.userDocumentNumber !== userDocumentNumber));
+    setToast({ message: "Usuario eliminado correctamente" });
   }
 
   async function handleImportCsv(documents: string[]) {
@@ -127,6 +129,7 @@ export default function EditBuilding() {
       const existing = new Set(prev.map((u) => u.userDocumentNumber));
       return [...prev, ...newUsers.filter((u) => !existing.has(u.userDocumentNumber))];
     });
+    setToast({ message: `${documents.length} usuarios importados correctamente` });
   }
 
   function validateMetric(): string | null {
@@ -152,7 +155,7 @@ export default function EditBuilding() {
 
   async function handleDeleteMetric(metricId: string) {
     setDeletingMetricId(metricId);
-    try { await deleteMetric(metricId); setMetrics((prev) => prev.filter((m) => m.id !== metricId)); }
+    try { await deleteMetric(metricId); setMetrics((prev) => prev.filter((m) => m.id !== metricId)); setToast({ message: "Métrica eliminada correctamente" }); }
     catch { setToast({ message: "Error al eliminar la métrica", type: "error" }); }
     setDeletingMetricId(null);
   }
@@ -185,7 +188,7 @@ export default function EditBuilding() {
           pdfUrl = await uploadReportPdfWithProgress(building.code!, reportId, newReport.file, setUploadProgress);
           await updateReportRepo(reportId, { pdfUrl });
         } catch {
-          setToast({ message: "Error al subir el PDF. Verifica la configuración de Storage.", type: "error" });
+          setToast({ message: "Error al subir el PDF. Firebase Storage requiere configuracion CORS.", type: "error" });
         }
       }
       setReports((prev) => [...prev, { id: reportId, month: newReport.month.trim(), title: newReport.title.trim(), status: "Auditado", topics: newReport.topics.trim(), pdfUrl, createdAt: new Date() }]);
@@ -198,7 +201,7 @@ export default function EditBuilding() {
 
   async function handleDeleteReport(reportId: string) {
     setDeletingReportId(reportId);
-    try { await deleteReport(reportId); setReports((prev) => prev.filter((r) => r.id !== reportId)); }
+    try { await deleteReport(reportId); setReports((prev) => prev.filter((r) => r.id !== reportId)); setToast({ message: "Reporte eliminado correctamente" }); }
     catch { setToast({ message: "Error al eliminar el reporte", type: "error" }); }
     setDeletingReportId(null);
   }
@@ -322,7 +325,7 @@ export default function EditBuilding() {
                 <input type="text" value={newMetric.value} onChange={(e) => { setNewMetric((prev) => ({ ...prev, value: formatCurrency(e.target.value) })); setMetricError(""); }} placeholder="$ *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="SUBTÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
               </div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ICONO</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Icono</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 {METRIC_ICONS.map((iconName) => {
                   const IconComponent = iconMap[iconName];
