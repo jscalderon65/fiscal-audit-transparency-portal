@@ -71,7 +71,7 @@ export default function EditBuilding() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [newMetric, setNewMetric] = useState<BuildingMetric>({ title: "", value: "", subtitle: "", icon: "Wallet", order: 0 });
-  const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: `ENERO ${new Date().getFullYear()}`, title: "", status: "Auditado", topics: "", createdAt: new Date() });
+  const [newReport, setNewReport] = useState<BuildingReport & { file?: File }>({ month: "", title: "", status: "Auditado", topics: "", createdAt: new Date() });
   const [addingMetric, setAddingMetric] = useState(false);
   const [deletingMetricId, setDeletingMetricId] = useState<string | null>(null);
   const [addingReport, setAddingReport] = useState(false);
@@ -165,6 +165,7 @@ export default function EditBuilding() {
   }
 
   function validateReport(): string | null {
+    if (!newReport.month) return "Debes seleccionar un mes y año";
     if (!newReport.title.trim() || newReport.title.trim().length < 5) return "El título debe tener al menos 5 caracteres";
     if (!newReport.topics.trim() || newReport.topics.trim().length < 5) return "Los temas deben tener al menos 5 caracteres";
     if (newReport.file && newReport.file.size > MAX_PDF_SIZE) return "El PDF no puede superar los 10MB";
@@ -330,9 +331,9 @@ export default function EditBuilding() {
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                <input type="text" value={newMetric.title} onChange={(e) => { setNewMetric((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="TÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.title} onChange={(e) => { setNewMetric((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="TÍTULO *" maxLength={50} className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <input type="text" value={newMetric.value} onChange={(e) => { setNewMetric((prev) => ({ ...prev, value: formatCurrency(e.target.value) })); setMetricError(""); }} placeholder="$ *" className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
-                <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="SUBTÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newMetric.subtitle} onChange={(e) => { setNewMetric((prev) => ({ ...prev, subtitle: e.target.value.toUpperCase() })); setMetricError(""); }} placeholder="SUBTÍTULO *" maxLength={60} className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
               </div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Icono</p>
               <div className="flex flex-wrap gap-2 mb-4">
@@ -384,7 +385,7 @@ export default function EditBuilding() {
               <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Vista previa en vivo</p>
                 <div className="max-w-sm mx-auto">
-                  <ReportCard
+                    <ReportCard
                     report={{
                       id: "preview",
                       month: newReport.month || "MES AÑO",
@@ -406,23 +407,35 @@ export default function EditBuilding() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                 <div className="flex gap-2">
                   <select
-                    value={newReport.month.split(" ")[0] || "ENERO"}
-                    onChange={(e) => { setNewReport((prev) => ({ ...prev, month: `${e.target.value} ${(prev.month.split(" ")[1] || new Date().getFullYear().toString())}` })); setReportError(""); }}
-                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900 uppercase font-semibold"
+                    value={newReport.month ? newReport.month.split(" ")[0] : ""}
+                    onChange={(e) => {
+                      const month = e.target.value;
+                      const year = newReport.month?.split(" ")[1] || "";
+                      setNewReport((prev) => ({ ...prev, month: month ? `${month} ${year}` : "" }));
+                      setReportError("");
+                    }}
+                    className={`flex-1 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold uppercase ${newReport.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}
                   >
+                    <option value="">Selecciona un mes</option>
                     {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                   <select
-                    value={newReport.month.split(" ")[1] || new Date().getFullYear().toString()}
-                    onChange={(e) => { setNewReport((prev) => ({ ...prev, month: `${prev.month.split(" ")[0] || "ENERO"} ${e.target.value}` })); setReportError(""); }}
-                    className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900 font-semibold"
+                    value={newReport.month ? newReport.month.split(" ")[1] || "" : ""}
+                    onChange={(e) => {
+                      const year = e.target.value;
+                      const month = newReport.month?.split(" ")[0] || "";
+                      setNewReport((prev) => ({ ...prev, month: year ? `${month} ${year}` : "" }));
+                      setReportError("");
+                    }}
+                    className={`w-24 px-3 py-2 rounded-lg border text-sm outline-none focus:border-primary bg-white font-semibold ${newReport.month ? "text-slate-900 border-slate-200" : "text-slate-400 border-slate-200"}`}
                   >
+                    <option value="">Selecciona año</option>
                     {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
-                <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                <input type="text" value={newReport.title} onChange={(e) => { setNewReport((prev) => ({ ...prev, title: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TÍTULO *" maxLength={80} className="uppercase px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 <div className="sm:col-span-2">
-                  <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TEMAS ABORDADOS *" className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
+                  <input type="text" value={newReport.topics} onChange={(e) => { setNewReport((prev) => ({ ...prev, topics: e.target.value.toUpperCase() })); setReportError(""); }} placeholder="TEMAS ABORDADOS *" maxLength={120} className="uppercase w-full px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:border-primary bg-white text-slate-900" />
                 </div>
                 <div>
                   <input type="file" accept=".pdf" onChange={(e) => {
