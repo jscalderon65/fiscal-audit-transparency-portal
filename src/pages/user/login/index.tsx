@@ -77,7 +77,7 @@ export default function UserLoginPage() {
 
   if (buildingLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
         <div className="text-center">
           <div className="mx-auto w-8 h-8 rounded-full border-2 border-transparent animate-spin border-t-primary border-r-primary/25 border-b-primary/10 border-l-primary/5" />
         </div>
@@ -102,20 +102,20 @@ export default function UserLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-      {/* Fondo decorativo */}
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-slate-50">
+      {/* Fondo decorativo suave */}
       <div
-        className="absolute inset-0 opacity-5 pointer-events-none"
+        className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
           backgroundImage: "radial-gradient(var(--color-primary) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }}
       />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none bg-primary/10 blur-[80px]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none bg-primary/5 blur-[80px]" />
 
       <Card className="max-w-md w-full relative z-10">
         <div className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-md bg-slate-900 border border-primary/30">
+          <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-md bg-primary/10 border border-primary/20">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
 
